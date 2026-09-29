@@ -1,0 +1,161 @@
+/* ==========================================================================
+   ACADEMIC PROFILE PAGE STYLES
+   ========================================================================== */
+
+.profile-container {
+  max-width: 860px;
+  margin: 32px auto;
+  padding: 0 16px;
+  color: var(--text-main);
+  font-family: inherit;
+}
+
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border: 1px solid var(--border-subtle);
+  background: var(--bg-surface);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-sm);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.profile-avatar-large {
+  width: 72px;
+  height: 72px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, var(--primary) 0%, #4338ca 100%);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
+}
+
+.profile-titles h2 {
+  margin: 0;
+  font-size: 1.4rem;
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+.profile-email {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin-top: 4px;
+}
+
+.profile-info-card, 
+.profile-badges-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  padding: 22px;
+  border-radius: var(--radius-md);
+  margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+  color: var(--text-main);
+  transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.profile-info-card h3, 
+.profile-badges-card h3 {
+  margin-top: 0;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.badges-list {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.badge-pill {
+  background: var(--bg-subtle);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 0.8125rem;
+  font-weight: 600;
+}
+
+.profile-edit-btn, 
+.save-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: background 0.18s ease;
+}
+
+.profile-edit-btn:hover, 
+.save-btn:hover {
+  background: var(--primary-hover);
+}
+
+.profile-edit-form {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow-md);
+  color: var(--text-main);
+}
+
+.profile-edit-form .form-group {
+  margin-bottom: 16px;
+}
+
+.profile-edit-form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 6px;
+  font-size: 0.875rem;
+  color: var(--text-main);
+}
+
+.profile-edit-form input, 
+.profile-edit-form select, 
+.profile-edit-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  font-family: inherit;
+  font-size: 0.9375rem;
+  background: var(--bg-subtle);
+  color: var(--text-main);
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.cancel-btn {
+  background: var(--bg-subtle);
+  color: var(--text-main);
+  border: 1px solid var(--border-subtle);
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.cancel-btn:hover {
+  background: var(--bg-muted);
+}

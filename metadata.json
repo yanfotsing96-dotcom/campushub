@@ -1,0 +1,8 @@
+{
+  "name": "Academic Portal & Notebook",
+  "description": "Student academic management portal with private notebook, course resource management, advanced search and filters, favorites, and history tracking.",
+  "permissions": [],
+  "capabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}
