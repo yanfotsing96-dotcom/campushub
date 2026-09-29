@@ -4,6 +4,12 @@ import {
   Search,
   Library,
   Star,
+  Sparkles,
+  Clock,
+  Award,
+  Briefcase,
+  ShieldCheck,
+  Crown,
 } from 'lucide-react';
 
 export const NAVIGATION_ITEMS = [
@@ -18,6 +24,42 @@ export const NAVIGATION_ITEMS = [
     label: 'Recherche',
     icon: Search,
     description: 'Filtres avancés par filière et niveau',
+  },
+  {
+    path: '/learning',
+    label: 'Apprentissage',
+    icon: Sparkles,
+    description: 'Flashcards, Playground C/Py, IA Résumés & Dico Tech',
+  },
+  {
+    path: '/productivity',
+    label: 'Productivité',
+    icon: Clock,
+    description: 'Pomodoro de groupe, Tableau blanc, iCal & Hors-ligne',
+  },
+  {
+    path: '/evaluation',
+    label: 'Évaluation',
+    icon: Award,
+    description: 'Notes, avis, badges de mérite & anti-plagiat',
+  },
+  {
+    path: '/services',
+    label: 'Services & Campus',
+    icon: Briefcase,
+    description: 'Petites annonces, stages, covoiturage & bibliographie',
+  },
+  {
+    path: '/pricing',
+    label: 'CampusHub Pro',
+    icon: Crown,
+    description: 'Offres Pro, paiements sécurisés & Mobile Money',
+  },
+  {
+    path: '/admin',
+    label: 'Administration',
+    icon: ShieldCheck,
+    description: 'Gestion des comptes, modération & statistiques UY1',
   },
   {
     path: '/favs-history',
