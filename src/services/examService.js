@@ -300,6 +300,50 @@ export const INITIAL_EXAMS = [
       },
     ],
   },
+  {
+    id: 'exam-bio101-cc',
+    codeUe: 'BIO101',
+    filiereId: 'Biologie',
+    niveau: 'L1',
+    titre: 'Contrôle Continu : Biologie Moléculaire & Synthèse Protéique',
+    description: 'Épreuve semestrielle de biologie cellulaire et moléculaire : réplication, transcription et code génétique.',
+    durationMinutes: 20,
+    totalPoints: 20,
+    passPercentage: 50,
+    academicYear: '2025-2026',
+    professor: 'Dr. S. Kuate',
+    university: 'Université de Yaoundé I (UY1)',
+    status: 'actif',
+    dateDebut: '2026-03-25T08:00',
+    dateFin: '2026-04-30T18:00',
+    instructions: [
+      'Chronomètre synchronisé en temps réel avec autosave.',
+      'Validation obligatoire à 00:00 avec enregistrement sécurisé sous votre matricule.',
+    ],
+    questions: [
+      {
+        id: 'q1',
+        text: 'Quelle enzyme assure l\'ouverture de la double hélice d\'ADN lors de la réplication ?',
+        type: 'single',
+        points: 10,
+        options: [
+          { id: 'opt_a', label: 'L\'ADN Ligase' },
+          { id: 'opt_b', label: 'L\'Hélicase' },
+          { id: 'opt_c', label: 'La Topoisomérase uniquement' },
+          { id: 'opt_d', label: 'L\'ARN Polymérase I' },
+        ],
+        correctOptionId: 'opt_b',
+        explanation: 'L\'hélicase rompt les liaisons hydrogène reliant les bases azotées complémentaires pour séparer les deux brins parentaux.',
+      },
+      {
+        id: 'q2',
+        text: 'Expliquez brièvement le principe de la dégénérescence (ou redondance) du code génétique.',
+        type: 'development',
+        points: 10,
+        explanation: 'Plusieurs codons différents (triplets de nucléotides) peuvent spécifier un même acide aminé (61 codons pour 20 acides aminés standards).',
+      },
+    ],
+  },
 ];
 
 class ExamService {
@@ -314,6 +358,13 @@ class ExamService {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          const existingIds = new Set(parsed.map((e) => e.id));
+          const missing = INITIAL_EXAMS.filter((e) => !existingIds.has(e.id));
+          if (missing.length > 0) {
+            const merged = [...parsed, ...missing];
+            this.saveExams(merged);
+            return merged;
+          }
           return parsed;
         }
       }
@@ -654,8 +705,8 @@ class ExamService {
       examTitle: exam.titre,
       filiereId: exam.filiereId,
       niveau: exam.niveau,
-      studentMatricule: user.matricule || '23S40192',
-      studentNom: user.fullName || user.nom || 'Étudiant UY1',
+      studentMatricule: user.matricule || 'N/A',
+      studentNom: user.fullName || user.nom || 'Étudiant',
       studentEmail: user.email,
       score: totalEarned,
       totalPoints: exam.totalPoints,

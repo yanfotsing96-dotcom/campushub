@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   GraduationCap,
@@ -127,8 +127,8 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch
   }, []);
 
   // Dynamic user data from authentication state
-  const fullName = user?.fullName || user?.nom || student?.fullName || student?.name || 'Yan Fotsing';
-  const matricule = user?.matricule || student?.matricule || '23S40192';
+  const fullName = user?.fullName || user?.nom || student?.fullName || student?.name || 'Étudiant';
+  const matricule = user?.matricule || student?.matricule || '';
   const role = user?.role || student?.role || 'Étudiant';
   const isPro = user?.isPro !== undefined ? user.isPro : student?.isPro;
   const status = user?.status || (isPro ? 'Étudiant Pro' : (user?.roleLabel || student?.role)) || 'Étudiant';
@@ -145,7 +145,7 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch
 
   // Dynamic initials helper
   const getInitials = (name) => {
-    if (!name) return 'YF';
+    if (!name || name === 'Étudiant') return 'ET';
     const parts = name.trim().split(/\s+/);
     if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
@@ -229,7 +229,7 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch
 
   return (
     <aside
-      className={`h-screen sticky top-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between transition-all duration-300 z-40 ${
+      className={`h-screen sticky top-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between transition-all duration-300 z-40 smooth-gpu ${
         isCollapsed ? 'w-20' : 'w-72'
       }`}
     >
@@ -478,6 +478,12 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch
                   {!isCollapsed && item.hasBadge && favoritesCount > 0 && (
                     <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
                       {favoritesCount}
+                    </span>
+                  )}
+
+                  {!isCollapsed && item.hasExamBadge && activeExamsCount > 0 && (
+                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300">
+                      {activeExamsCount}
                     </span>
                   )}
 

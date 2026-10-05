@@ -1,4 +1,4 @@
-import { Navigate, useLocation, Link } from 'react-router-dom';
+import { Navigate, useLocation, Link, Outlet } from 'react-router-dom';
 import {
   ShieldAlert,
   ArrowLeft,
@@ -141,5 +141,5 @@ export default function ProtectedRoute({
   }
 
   // 5. Authorized -> Render children or Outlet
-  return children;
+  return children ? children : <Outlet />;
 }

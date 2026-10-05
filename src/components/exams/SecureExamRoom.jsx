@@ -21,7 +21,7 @@ import ExamFinalSubmitModal from './ExamFinalSubmitModal';
 
 export default function SecureExamRoom({ exam, onExit }) {
   const { user } = useAuth();
-  const studentMatricule = user?.matricule || '23S40192';
+  const studentMatricule = user?.matricule || '';
   const studentUsername = user?.username || user?.email?.split('@')[0] || 'etudiant';
 
   const [isIdentityVerified, setIsIdentityVerified] = useState(false);

@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo, useCallback } from 'react';
 import { CAMEROON_UNIVERSITIES } from '../constants/academicConstants';
 import { normalizeRole, ROLE_LABELS } from '../constants/rbacConstants';
 import { useAuth } from './AuthContext';
@@ -26,9 +26,8 @@ export function CampusHubProvider({ children }) {
   });
 
   // Pro Status State
-  const [isPro, setIsPro] = useState(() => {
+  const [localIsPro, setLocalIsPro] = useState(() => {
     try {
-      if (authUser?.isPro !== undefined) return authUser.isPro;
       return localStorage.getItem(STORAGE_KEY_PRO) === 'true';
     } catch {
       return true;
@@ -45,16 +44,19 @@ export function CampusHubProvider({ children }) {
     }
   });
 
-  // Academic Role: 'Étudiant' | 'Délégué' | 'Modérateur' | 'Administrateur'
-  const [userRole, setUserRole] = useState(() => {
+  // Academic Role
+  const [localUserRole, setLocalUserRole] = useState(() => {
     try {
-      if (authUser?.roleLabel) return authUser.roleLabel;
       const saved = localStorage.getItem(STORAGE_KEY_ROLE) || 'Étudiant';
       return ROLE_LABELS[normalizeRole(saved)] || 'Étudiant';
     } catch {
       return 'Étudiant';
     }
   });
+
+  // Derived effective values directly from AuthContext
+  const isPro = authUser?.isPro !== undefined ? authUser.isPro : localIsPro;
+  const userRole = authUser?.roleLabel || localUserRole;
 
   // Student Gamification XP
   const [xp, setXp] = useState(() => {
@@ -107,8 +109,16 @@ export function CampusHubProvider({ children }) {
     );
   }, [selectedUniversityId]);
 
+  // Trigger Toast
+  const triggerToast = useCallback(({ title, message, type = 'info' }) => {
+    setToastNotification({ id: Date.now(), title, message, type });
+    setTimeout(() => {
+      setToastNotification(null);
+    }, 4500);
+  }, []);
+
   // Switch University
-  const setUniversity = (uniId) => {
+  const setUniversity = useCallback((uniId) => {
     setSelectedUniversityId(uniId);
     const targetUni =
       uniId === 'ALL'
@@ -122,10 +132,10 @@ export function CampusHubProvider({ children }) {
       }.`,
       type: 'info',
     });
-  };
+  }, [triggerToast]);
 
   // Activate Pro Membership
-  const activatePro = (planDetails) => {
+  const activatePro = useCallback((planDetails) => {
     const sub = {
       plan: planDetails?.name || 'Plan Étudiant Pro',
       planId: planDetails?.id || 'pro',
@@ -133,30 +143,36 @@ export function CampusHubProvider({ children }) {
       activatedAt: new Date().toISOString(),
       badge: 'Membre Pro Certifié UY1',
     };
-    setIsPro(true);
+    setLocalIsPro(true);
     setSubscription(sub);
+    if (auth?.updateProfile) {
+      auth.updateProfile({ isPro: true });
+    }
     triggerToast({
       title: 'Abonnement CampusHub Pro Activé !',
       message: 'Félicitations ! Vous bénéficiez désormais de l\'accès illimité au Playground et à l\'IA.',
       type: 'success',
     });
-  };
+  }, [auth, triggerToast]);
 
   // Cancel / Reset Pro
-  const cancelPro = () => {
-    setIsPro(false);
+  const cancelPro = useCallback(() => {
+    setLocalIsPro(false);
     setSubscription(null);
+    if (auth?.updateProfile) {
+      auth.updateProfile({ isPro: false });
+    }
     triggerToast({
       title: 'Abonnement Pro Réinitialisé',
       message: 'Votre compte est revenu au forfait Standard.',
       type: 'info',
     });
-  };
+  }, [auth, triggerToast]);
 
   // Switch Role
-  const switchRole = (newRole) => {
+  const switchRole = useCallback((newRole) => {
     const label = ROLE_LABELS[normalizeRole(newRole)] || newRole;
-    setUserRole(label);
+    setLocalUserRole(label);
     if (auth?.switchRole) {
       auth.switchRole(newRole);
     }
@@ -165,25 +181,17 @@ export function CampusHubProvider({ children }) {
       message: `Vos privilèges sur CampusHub ont été ajustés en mode ${label}.`,
       type: 'info',
     });
-  };
+  }, [auth, triggerToast]);
 
   // Award XP
-  const earnXp = (amount, reason) => {
+  const earnXp = useCallback((amount, reason) => {
     setXp((prev) => prev + amount);
     triggerToast({
       title: `+${amount} XP Gagnés !`,
       message: reason || 'Action méritoire validée sur la plateforme.',
       type: 'xp',
     });
-  };
-
-  // Trigger Toast
-  const triggerToast = ({ title, message, type = 'info' }) => {
-    setToastNotification({ id: Date.now(), title, message, type });
-    setTimeout(() => {
-      setToastNotification(null);
-    }, 4500);
-  };
+  }, [triggerToast]);
 
   // Calculated Level from XP
   const currentLevel = Math.floor(xp / 500) + 1;
@@ -192,63 +200,97 @@ export function CampusHubProvider({ children }) {
 
   // Feature Permissions & Quotas
   const effectiveRole = authUser?.roleLabel || userRole;
-  const permissions = {
-    isPro,
-    canAccessAdmin: effectiveRole === 'Administrateur' || effectiveRole === 'Modérateur',
-    isDelegate: effectiveRole === 'Délégué',
-    isTeacher: effectiveRole === 'Enseignant',
-    playgroundRunsLimit: isPro ? Infinity : 10,
-    aiSummariesLimit: isPro ? Infinity : 3,
-    storageLimitGB: isPro ? 15 : 0.05,
-    hasAntiPlagiarismFullAudit: isPro,
-  };
+  const permissions = useMemo(() => {
+    return {
+      isPro,
+      canAccessAdmin: effectiveRole === 'Administrateur' || effectiveRole === 'Modérateur',
+      isDelegate: effectiveRole === 'Délégué',
+      isTeacher: effectiveRole === 'Enseignant',
+      playgroundRunsLimit: isPro ? Infinity : 10,
+      aiSummariesLimit: isPro ? Infinity : 3,
+      storageLimitGB: isPro ? 15 : 0.05,
+      hasAntiPlagiarismFullAudit: isPro,
+    };
+  }, [isPro, effectiveRole]);
 
-  const studentName = authUser?.fullName || authUser?.nom || authUser?.name || 'Yan Fotsing';
-  const studentMatricule = authUser?.matricule || '23S40192';
+  const studentName = authUser?.fullName || authUser?.nom || authUser?.name || 'Étudiant';
+  const studentMatricule = authUser?.matricule || '';
   const studentStatus = authUser?.status || (isPro ? 'Étudiant Pro' : effectiveRole);
+  const userFiliere = authUser?.filiere || authUser?.filiereId || 'Informatique';
 
-  const student = {
-    fullName: studentName,
-    name: studentName,
-    matricule: studentMatricule,
-    status: studentStatus,
-    nationalId: authUser?.nationalId || 'CM-UY1-2026-0492',
-    filiere: authUser?.filiere || 'Informatique & Génie Logiciel',
-    niveau: authUser?.niveau || 'Licence 2',
-    universityId: selectedUniversity.id,
-    universityName: selectedUniversity.name,
-    universityShortName: selectedUniversity.shortName,
-    universityCity: selectedUniversity.city,
-    department: `${selectedUniversity.shortName} · Département Informatique`,
-    email: authUser?.email || 'yanfotsing96@gmail.com',
-    role: effectiveRole,
+  const student = useMemo(() => {
+    return {
+      fullName: studentName,
+      name: studentName,
+      matricule: studentMatricule,
+      status: studentStatus,
+      nationalId: authUser?.nationalId || `CM-${selectedUniversity.id}-${studentMatricule || '0000'}`,
+      filiere: userFiliere,
+      niveau: authUser?.niveau || 'L2',
+      universityId: selectedUniversity.id,
+      universityName: selectedUniversity.name,
+      universityShortName: selectedUniversity.shortName,
+      universityCity: selectedUniversity.city,
+      department: `${selectedUniversity.shortName} · Département ${userFiliere}`,
+      email: authUser?.email || '',
+      role: effectiveRole,
+      isPro,
+      xp,
+      currentLevel,
+      nextLevelXp,
+      progressPercent,
+      subscription,
+    };
+  }, [
+    studentName,
+    studentMatricule,
+    studentStatus,
+    authUser?.nationalId,
+    authUser?.niveau,
+    authUser?.email,
+    selectedUniversity,
+    userFiliere,
+    effectiveRole,
     isPro,
     xp,
     currentLevel,
     nextLevelXp,
     progressPercent,
     subscription,
-  };
+  ]);
+
+  const contextValue = useMemo(() => {
+    return {
+      student,
+      selectedUniversity,
+      selectedUniversityId,
+      setUniversity,
+      allUniversities: CAMEROON_UNIVERSITIES,
+      permissions,
+      activatePro,
+      cancelPro,
+      switchRole,
+      earnXp,
+      triggerToast,
+      toastNotification,
+      clearToast: () => setToastNotification(null),
+    };
+  }, [
+    student,
+    selectedUniversity,
+    selectedUniversityId,
+    setUniversity,
+    permissions,
+    activatePro,
+    cancelPro,
+    switchRole,
+    earnXp,
+    triggerToast,
+    toastNotification,
+  ]);
 
   return (
-    <CampusHubContext.Provider
-      value={{
-        // Student Info
-        student,
-        selectedUniversity,
-        selectedUniversityId,
-        setUniversity,
-        allUniversities: CAMEROON_UNIVERSITIES,
-        permissions,
-        activatePro,
-        cancelPro,
-        switchRole,
-        earnXp,
-        triggerToast,
-        toastNotification,
-        clearToast: () => setToastNotification(null),
-      }}
-    >
+    <CampusHubContext.Provider value={contextValue}>
       {children}
     </CampusHubContext.Provider>
   );

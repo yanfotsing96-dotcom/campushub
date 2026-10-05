@@ -27,8 +27,8 @@ export default function Navbar() {
   const navigate = useNavigate();
 
   // Dynamic user data
-  const fullName = user?.fullName || user?.nom || 'Yan Fotsing';
-  const matricule = user?.matricule || '23S40192';
+  const fullName = user?.fullName || user?.nom || 'Étudiant';
+  const matricule = user?.matricule || '';
   const role = user?.role || 'Étudiant';
   const isPro = user?.isPro ?? true;
   const status = user?.status || (isPro ? 'Étudiant Pro' : (user?.roleLabel || 'Étudiant'));

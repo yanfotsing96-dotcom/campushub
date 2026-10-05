@@ -118,6 +118,63 @@ const INITIAL_COURSE_MATERIALS = [
     publishedAt: '2026-02-28',
     verified: true,
   },
+  // Document for Physique
+  {
+    id: 'mat-401',
+    courseId: 'course-phy201',
+    codeUe: 'PHY201',
+    filiereId: 'Physique',
+    niveau: 'L2',
+    titre: 'Polycopié : Ondes Électromagnétiques & Cavités Résonnantes',
+    type: 'pdf',
+    format: 'PDF',
+    size: '3.8 Mo',
+    pages: 42,
+    enseignant: 'Dr. E. Nana',
+    url: '#download-pdf-phy',
+    downloads: 140,
+    description: 'Vecteur de Poynting, conditions aux limites et propagation dans les guides d\'ondes.',
+    publishedAt: '2026-03-01',
+    verified: true,
+  },
+  // Document for Chimie
+  {
+    id: 'mat-501',
+    courseId: 'course-chm101',
+    codeUe: 'CHM101',
+    filiereId: 'Chimie',
+    niveau: 'L1',
+    titre: 'Fiche Pratique : Titrages pH-métriques & Solutions Tampons',
+    type: 'pdf',
+    format: 'PDF',
+    size: '2.1 Mo',
+    pages: 20,
+    enseignant: 'Dr. M. Biya',
+    url: '#download-pdf-chm',
+    downloads: 165,
+    description: 'Protocoles de dosage acido-basique, calculs de pKa et courbes d\'équivalence.',
+    publishedAt: '2026-03-04',
+    verified: true,
+  },
+  // Document for Biologie
+  {
+    id: 'mat-601',
+    courseId: 'course-bio101',
+    codeUe: 'BIO101',
+    filiereId: 'Biologie',
+    niveau: 'L1',
+    titre: 'Atlas Illustré : Transcription, Traduction & Code Génétique',
+    type: 'pdf',
+    format: 'PDF',
+    size: '6.4 Mo',
+    pages: 56,
+    enseignant: 'Dr. S. Kuate',
+    url: '#download-pdf-bio',
+    downloads: 195,
+    description: 'Schémas en haute résolution sur les ribosomes, l\'ARN messager et la régulation de l\'opéron lactose.',
+    publishedAt: '2026-03-08',
+    verified: true,
+  },
 ];
 
 class DepartmentScopeService {
@@ -128,10 +185,23 @@ class DepartmentScopeService {
   loadMaterials() {
     try {
       const saved = localStorage.getItem(STORAGE_MATERIALS_KEY);
-      return saved ? JSON.parse(saved) : INITIAL_COURSE_MATERIALS;
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const existingIds = new Set(parsed.map((m) => m.id));
+          const missing = INITIAL_COURSE_MATERIALS.filter((m) => !existingIds.has(m.id));
+          if (missing.length > 0) {
+            const merged = [...parsed, ...missing];
+            this.saveMaterials(merged);
+            return merged;
+          }
+          return parsed;
+        }
+      }
     } catch {
-      return INITIAL_COURSE_MATERIALS;
+      // Fallback
     }
+    return [...INITIAL_COURSE_MATERIALS];
   }
 
   saveMaterials(data) {

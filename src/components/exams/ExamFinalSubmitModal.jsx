@@ -20,8 +20,8 @@ export default function ExamFinalSubmitModal({
   focusLossCount,
   isSubmitting,
 }) {
-  const officialMatricule = user?.matricule || '23S40192';
-  const officialFullName = user?.fullName || user?.nom || 'Yan Fotsing';
+  const officialMatricule = user?.matricule || '';
+  const officialFullName = user?.fullName || user?.nom || user?.name || 'Étudiant';
 
   const [confirmMatricule, setConfirmMatricule] = useState('');
   const [confirmNom, setConfirmNom] = useState('');

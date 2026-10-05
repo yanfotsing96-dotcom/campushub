@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { Outlet, useLocation, Link } from 'react-router-dom';
 import {
   Menu,
@@ -11,6 +11,8 @@ import {
   Award,
   BookOpen,
 } from 'lucide-react';
+import ErrorBoundary from '../components/common/ErrorBoundary';
+import RouteLoadingSkeleton from '../components/common/RouteLoadingSkeleton';
 import AppSidebar from '../components/layout/AppSidebar';
 import GlobalSearchModal from '../components/search/GlobalSearchModal';
 import UniversitySelectorModal from '../components/common/UniversitySelectorModal';
@@ -34,15 +36,15 @@ export default function MainLayout() {
   const location = useLocation();
 
   // Dynamic user data from authentication state
-  const fullName = user?.fullName || user?.nom || student?.fullName || student?.name || 'Yan Fotsing';
-  const matricule = user?.matricule || student?.matricule || '23S40192';
+  const fullName = user?.fullName || user?.nom || student?.fullName || student?.name || 'Étudiant';
+  const matricule = user?.matricule || student?.matricule || '';
   const role = user?.role || student?.role || 'Étudiant';
   const isPro = user?.isPro !== undefined ? user.isPro : student?.isPro;
   const status = user?.status || (isPro ? 'Étudiant Pro' : (user?.roleLabel || student?.role)) || 'Étudiant';
 
   // Dynamic initials helper
   const getInitials = (name) => {
-    if (!name) return 'YF';
+    if (!name || name === 'Étudiant') return 'ET';
     const parts = name.trim().split(/\s+/);
     if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
@@ -292,9 +294,13 @@ export default function MainLayout() {
           </div>
         </header>
 
-        {/* Dynamic Outlet with smooth transition */}
+        {/* Dynamic Outlet with smooth transition, Suspense and Error Boundary */}
         <main className="flex-1 w-full animate-in fade-in duration-150">
-          <Outlet />
+          <ErrorBoundary>
+            <Suspense fallback={<RouteLoadingSkeleton />}>
+              <Outlet />
+            </Suspense>
+          </ErrorBoundary>
         </main>
 
         {/* Global Institutional Footer */}

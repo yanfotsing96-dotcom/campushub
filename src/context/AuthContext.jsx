@@ -22,12 +22,12 @@ export function AuthProvider({ children }) {
     const norm = normalizeRole(saved?.role || ROLES.STUDENT);
     const filiereId = saved?.filiereId || saved?.filiere || 'Informatique';
     const niveau = saved?.niveau || 'L2';
-    const matricule = saved?.matricule || '23S40192';
+    const matricule = saved?.matricule || DEFAULT_USER?.matricule || '26U1001';
     const universityId = saved?.universityId || 'UY1';
     
-    // Clean up any legacy hardcoded "Yanick" in saved storage
-    const rawName = saved?.fullName || saved?.nom || saved?.name || 'Yan Fotsing';
-    const fullName = (rawName && !rawName.includes('Yanick')) ? rawName : 'Yan Fotsing';
+    // Purify dynamic name: clean up any legacy hardcoded strings
+    const rawName = saved?.fullName || saved?.nom || saved?.name || DEFAULT_USER?.fullName || 'Étudiant';
+    const fullName = (rawName && !rawName.includes('Yanick')) ? rawName : (DEFAULT_USER?.fullName || 'Étudiant');
     const isPro = saved?.isPro ?? true;
     
     const roleLabel = ROLE_LABELS[norm] || 'Étudiant';
@@ -40,7 +40,7 @@ export function AuthProvider({ children }) {
       name: fullName,
       status,
       matricule,
-      filiere: saved?.filiere || 'Informatique',
+      filiere: saved?.filiere || filiereId,
       filiereId,
       niveau,
       universityId,
@@ -127,47 +127,80 @@ export function AuthProvider({ children }) {
   }, [switchRole]);
 
   // Quick Login (supports demo role and scope override)
-  const login = (email, requestedRole, requestedFiliere, requestedNiveau) => {
-    const existing = storageService.get(STORAGE_KEYS.AUTH_USER, DEFAULT_USER);
-    const targetRole = requestedRole ? normalizeRole(requestedRole) : normalizeRole(existing.role);
-    const filiereId = requestedFiliere || existing.filiereId || existing.filiere || 'Informatique';
-    const niveau = requestedNiveau || existing.niveau || 'L2';
-    const matricule = existing.matricule || '23S40192';
-    const fullName = existing.fullName || existing.nom || existing.name || 'Yan Fotsing';
-    const roleLabel = ROLE_LABELS[targetRole] || 'Étudiant';
-    const isPro = existing.isPro ?? true;
-    const status = targetRole === ROLES.STUDENT && isPro ? 'Étudiant Pro' : roleLabel;
+  const login = useCallback(
+    (email, requestedRole, requestedFiliere, requestedNiveau, requestedName, requestedMatricule) => {
+      const existing = storageService.get(STORAGE_KEYS.AUTH_USER, DEFAULT_USER);
+      const targetRole = requestedRole ? normalizeRole(requestedRole) : normalizeRole(existing.role);
 
-    const updated = {
-      ...existing,
-      email: email || existing.email,
-      fullName,
-      nom: fullName,
-      name: fullName,
-      status,
-      matricule,
-      filiere: filiereId,
-      filiereId,
-      niveau,
-      role: targetRole,
-      roleNormalized: targetRole,
-      roleLabel,
-      scope: {
+      // Check if email or role corresponds to one of the DEMO_PROFILES
+      const matchedDemo = DEMO_PROFILES.find(
+        (p) =>
+          (email && p.email?.toLowerCase() === email?.toLowerCase()) ||
+          (requestedRole && p.role === targetRole)
+      );
+
+      const filiereId =
+        requestedFiliere ||
+        (matchedDemo ? matchedDemo.filiereId || matchedDemo.filiere : null) ||
+        existing.filiereId ||
+        existing.filiere ||
+        'Informatique';
+
+      const niveau =
+        requestedNiveau ||
+        (matchedDemo ? matchedDemo.niveau : null) ||
+        existing.niveau ||
+        'L2';
+
+      const matricule =
+        requestedMatricule ||
+        (matchedDemo ? matchedDemo.matricule : null) ||
+        existing.matricule ||
+        '26U1001';
+
+      const fullName =
+        requestedName ||
+        (matchedDemo ? matchedDemo.nom : null) ||
+        existing.fullName ||
+        existing.nom ||
+        (email ? email.split('@')[0] : 'Étudiant');
+
+      const roleLabel = ROLE_LABELS[targetRole] || 'Étudiant';
+      const isPro = existing.isPro ?? true;
+      const status = targetRole === ROLES.STUDENT && isPro ? 'Étudiant Pro' : roleLabel;
+
+      const updated = {
+        ...existing,
+        email: email || (matchedDemo ? matchedDemo.email : existing.email),
+        fullName,
+        nom: fullName,
+        name: fullName,
+        status,
+        matricule,
+        filiere: filiereId,
         filiereId,
         niveau,
-        matricule,
-        universityId: existing.universityId || 'UY1',
-        isFullAccess: targetRole === ROLES.ADMIN,
-      },
-    };
-    setUser(updated);
-    setIsAuthenticated(true);
-    storageService.set(STORAGE_KEYS.AUTH_USER, updated);
-    return { user: updated, redirectPath: getDashboardRouteForRole(targetRole) };
-  };
+        role: targetRole,
+        roleNormalized: targetRole,
+        roleLabel,
+        scope: {
+          filiereId,
+          niveau,
+          matricule,
+          universityId: existing.universityId || 'UY1',
+          isFullAccess: targetRole === ROLES.ADMIN,
+        },
+      };
+      setUser(updated);
+      setIsAuthenticated(true);
+      storageService.set(STORAGE_KEYS.AUTH_USER, updated);
+      return { user: updated, redirectPath: getDashboardRouteForRole(targetRole) };
+    },
+    []
+  );
 
   // Register New User with mandatory fields & passcode validation for sensitive roles
-  const register = (formData) => {
+  const register = useCallback((formData) => {
     const targetRole = normalizeRole(formData?.role || ROLES.STUDENT);
 
     // Verify secret passcode if registering as Delegate or Moderator
@@ -226,16 +259,20 @@ export function AuthProvider({ children }) {
     setIsAuthenticated(true);
     storageService.set(STORAGE_KEYS.AUTH_USER, newUser);
     return { user: newUser, redirectPath: getDashboardRouteForRole(targetRole) };
-  };
+  }, []);
 
-  const updateProfile = (partialUpdates) => {
+  const updateProfile = useCallback((partialUpdates) => {
     setUser((prev) => {
       const targetRole = partialUpdates.role ? normalizeRole(partialUpdates.role) : prev.role;
       const roleLabel = ROLE_LABELS[targetRole] || prev.roleLabel;
-      const rawName = partialUpdates.fullName || partialUpdates.nom || partialUpdates.name || prev.fullName || prev.nom || 'Yan Fotsing';
-      const fullName = (rawName && !rawName.includes('Yanick')) ? rawName : 'Yan Fotsing';
+      const rawName = partialUpdates.fullName || partialUpdates.nom || partialUpdates.name || prev.fullName || prev.nom || '';
+      const fullName = (rawName && !rawName.includes('Yanick')) ? rawName : (prev.fullName || 'Étudiant');
       const isPro = partialUpdates.isPro !== undefined ? partialUpdates.isPro : prev.isPro;
       const status = partialUpdates.status || (targetRole === ROLES.STUDENT && isPro ? 'Étudiant Pro' : roleLabel);
+      const matricule = partialUpdates.matricule || prev.matricule;
+      const filiereId = partialUpdates.filiere || partialUpdates.filiereId || prev.filiereId || 'Informatique';
+      const niveau = partialUpdates.niveau || prev.niveau || 'L2';
+      const universityId = partialUpdates.universityId || prev.universityId || 'UY1';
 
       const updated = {
         ...prev,
@@ -244,45 +281,78 @@ export function AuthProvider({ children }) {
         nom: fullName,
         name: fullName,
         status,
+        matricule,
+        filiere: filiereId,
+        filiereId,
+        niveau,
+        universityId,
         isPro,
         role: targetRole,
         roleNormalized: targetRole,
         roleLabel,
+        scope: {
+          ...prev.scope,
+          filiereId,
+          niveau,
+          matricule,
+          universityId,
+          isFullAccess: targetRole === ROLES.ADMIN,
+        },
       };
       storageService.set(STORAGE_KEYS.AUTH_USER, updated);
+      try {
+        localStorage.setItem('campushub_user_role', roleLabel);
+        localStorage.setItem('campushub_user_is_pro', isPro ? 'true' : 'false');
+      } catch (err) {
+        console.warn('Erreur stockage profil :', err);
+      }
       return updated;
     });
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setIsAuthenticated(false);
-  };
+  }, []);
+
+  const authContextValue = useMemo(() => {
+    return {
+      user,
+      isAuthenticated,
+      role: currentRole,
+      roleLabel: ROLE_LABELS[currentRole],
+      isStudent: currentRole === ROLES.STUDENT,
+      isDelegate: currentRole === ROLES.DELEGATE,
+      isModerator: currentRole === ROLES.MODERATOR,
+      isAdmin: currentRole === ROLES.ADMIN,
+      can,
+      hasRole,
+      switchRole,
+      elevateRole,
+      verifyPasscode: verifyRolePasscode,
+      passcodeHints: ROLE_PASSCODE_HINTS,
+      login,
+      register,
+      updateProfile,
+      logout,
+      getDashboardRoute: () => getDashboardRouteForRole(currentRole),
+      demoProfiles: DEMO_PROFILES,
+    };
+  }, [
+    user,
+    isAuthenticated,
+    currentRole,
+    can,
+    hasRole,
+    switchRole,
+    elevateRole,
+    login,
+    register,
+    updateProfile,
+    logout,
+  ]);
 
   return (
-    <AuthContext.Provider
-      value={{
-        user,
-        isAuthenticated,
-        role: currentRole,
-        roleLabel: ROLE_LABELS[currentRole],
-        isStudent: currentRole === ROLES.STUDENT,
-        isDelegate: currentRole === ROLES.DELEGATE,
-        isModerator: currentRole === ROLES.MODERATOR,
-        isAdmin: currentRole === ROLES.ADMIN,
-        can,
-        hasRole,
-        switchRole,
-        elevateRole,
-        verifyPasscode: verifyRolePasscode,
-        passcodeHints: ROLE_PASSCODE_HINTS,
-        login,
-        register,
-        updateProfile,
-        logout,
-        getDashboardRoute: () => getDashboardRouteForRole(currentRole),
-        demoProfiles: DEMO_PROFILES,
-      }}
-    >
+    <AuthContext.Provider value={authContextValue}>
       {children}
     </AuthContext.Provider>
   );

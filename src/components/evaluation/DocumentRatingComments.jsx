@@ -16,8 +16,8 @@ const STORAGE_KEY_DOCS = 'campushub_rated_documents';
 
 export default function DocumentRatingComments() {
   const { user } = useAuth();
-  const currentAuthor = `${user?.fullName || user?.nom || 'Yan Fotsing'} (Moi)`;
-  const currentMatricule = user?.matricule || '23S40192';
+  const currentAuthor = `${user?.fullName || user?.nom || 'Étudiant'} (Moi)`;
+  const currentMatricule = user?.matricule || '';
   const [documents, setDocuments] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_DOCS);

@@ -184,7 +184,7 @@ export default function AILearningAssistant() {
 
   const handleReadAloud = () => {
     if (!('speechSynthesis' in window)) {
-      alert("La synthèse vocale n'est pas supportée sur ce navigateur.");
+      console.warn("La synthèse vocale n'est pas supportée sur ce navigateur.");
       return;
     }
 

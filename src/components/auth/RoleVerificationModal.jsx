@@ -63,8 +63,8 @@ export default function RoleVerificationModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-7 max-w-md w-full shadow-2xl space-y-5 animate-in zoom-in-95">
+    <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in modal-backdrop-gpu">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-7 max-w-md w-full shadow-2xl space-y-5 animate-in zoom-in-95 modal-content-gpu">
         {/* Header with Role Icon */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">

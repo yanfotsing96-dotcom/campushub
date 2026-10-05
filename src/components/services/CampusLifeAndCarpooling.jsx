@@ -25,8 +25,8 @@ const STORAGE_POSTS_KEY = 'campushub_services_motivation_posts';
 
 export default function CampusLifeAndCarpooling() {
   const { user } = useAuth();
-  const userName = user?.fullName || user?.nom || 'Yan Fotsing';
-  const userMatricule = user?.matricule || '23S40192';
+  const userName = user?.fullName || user?.nom || 'Étudiant';
+  const userMatricule = user?.matricule || '';
   const [activeSection, setActiveSection] = useState('carpool'); // 'carpool', 'tips', 'motivation'
 
   // Carpool State

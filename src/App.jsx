@@ -1,4 +1,5 @@
 import { BrowserRouter } from 'react-router-dom';
+import ErrorBoundary from './components/common/ErrorBoundary';
 import { ThemeProvider } from './context/ThemeContext';
 import { LanguageProvider } from './context/LanguageContext';
 import { AuthProvider } from './context/AuthContext';
@@ -8,19 +9,21 @@ import AppRoutes from './routes/AppRoutes';
 
 function App() {
   return (
-    <ThemeProvider>
-      <LanguageProvider>
-        <AuthProvider>
-          <CampusHubProvider>
-            <ResourceProvider>
-              <BrowserRouter>
-                <AppRoutes />
-              </BrowserRouter>
-            </ResourceProvider>
-          </CampusHubProvider>
-        </AuthProvider>
-      </LanguageProvider>
-    </ThemeProvider>
+    <ErrorBoundary>
+      <ThemeProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <CampusHubProvider>
+              <ResourceProvider>
+                <BrowserRouter>
+                  <AppRoutes />
+                </BrowserRouter>
+              </ResourceProvider>
+            </CampusHubProvider>
+          </AuthProvider>
+        </LanguageProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
   );
 }
 

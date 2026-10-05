@@ -25,8 +25,8 @@ const STORAGE_OPPORTUNITIES_KEY = 'campushub_services_opportunities';
 
 export default function LogisticsAndOpportunities() {
   const { user } = useAuth();
-  const currentSeller = `${user?.fullName || user?.nom || 'Yan Fotsing'} (Moi)`;
-  const currentMatricule = user?.matricule || '23S40192';
+  const currentSeller = `${user?.fullName || user?.nom || 'Étudiant'} (Moi)`;
+  const currentMatricule = user?.matricule || '';
   const [activeTab, setActiveTab] = useState('items'); // 'items' or 'opportunities'
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('ALL');

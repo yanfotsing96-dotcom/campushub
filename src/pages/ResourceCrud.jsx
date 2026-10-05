@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useCallback } from 'react';
 import {
   BookOpen,
   Plus,
@@ -21,10 +21,14 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import '../styles/ResourceCrud.css';
+import ResourceItemCard from '../components/resources/ResourceItemCard';
+import Pagination from '../components/common/Pagination';
 
 import { useResources } from '../hooks/useResources';
 import { usePermissions } from '../hooks/usePermissions';
 import { ROLES, ROLE_LABELS } from '../constants/rbacConstants';
+
+const ITEMS_PER_PAGE = 8;
 
 function ResourceCrud() {
   const { resources, addResource, updateResource, deleteResource, recordDownload } = useResources();
@@ -59,6 +63,7 @@ function ResourceCrud() {
   const [sortBy, setSortBy] = useState('recent');
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
   const [feedbackNotice, setFeedbackNotice] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Derive effective editing state securely: if user role no longer permits editing, effectiveEditingId is null
   const activeEditingResource = useMemo(() => {
@@ -152,7 +157,7 @@ function ResourceCrud() {
     });
   };
 
-  const handleEdit = (res) => {
+  const handleEdit = useCallback((res) => {
     if (!canModifyResource(res)) {
       setFeedbackNotice({
         type: 'error',
@@ -173,9 +178,9 @@ function ResourceCrud() {
     if (formElement) {
       formElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
-  };
+  }, [canModifyResource]);
 
-  const handleCancelEdit = () => {
+  const handleCancelEdit = useCallback(() => {
     setEditingId(null);
     setFormData({
       titre: '',
@@ -183,9 +188,9 @@ function ResourceCrud() {
       niveau: 'L1',
       description: '',
     });
-  };
+  }, [isDelegate, userFiliere]);
 
-  const handleDelete = (id) => {
+  const handleDelete = useCallback((id) => {
     const targetResource = resources.find((r) => r.id === id);
     if (!targetResource || !canDeleteResource(targetResource)) {
       setFeedbackNotice({
@@ -205,15 +210,23 @@ function ResourceCrud() {
       type: 'success',
       message: 'Ressource supprimée du catalogue.',
     });
-  };
+  }, [resources, canDeleteResource, deleteResource, editingId, handleCancelEdit]);
 
-  const handleDownload = (res) => {
+  const handleDownload = useCallback((res) => {
     recordDownload(res.id);
     setFeedbackNotice({
       type: 'success',
       message: `Téléchargement lancé pour "${res.titre}" (Format ${res.format || 'PDF'}).`,
     });
-  };
+  }, [recordDownload]);
+
+  const handleConfirmDelete = useCallback((id) => {
+    setConfirmDeleteId(id);
+  }, []);
+
+  const handleCancelDelete = useCallback(() => {
+    setConfirmDeleteId(null);
+  }, []);
 
   // Filtrage et tri mémorisés
   const filteredResources = useMemo(() => {
@@ -234,6 +247,18 @@ function ResourceCrud() {
         return b.id - a.id;
       });
   }, [resources, searchQuery, filterFiliere, filterNiveau, sortBy]);
+
+  // Reset page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, filterFiliere, filterNiveau, sortBy]);
+
+  // Paginated Resources
+  const totalPages = Math.ceil(filteredResources.length / ITEMS_PER_PAGE);
+  const paginatedResources = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredResources.slice(startIndex, startIndex + ITEMS_PER_PAGE);
+  }, [filteredResources, currentPage]);
 
   // Statistiques calculées
   const stats = useMemo(() => {
@@ -313,7 +338,7 @@ function ResourceCrud() {
         </div>
 
         <div className="text-xs font-mono text-slate-500 dark:text-slate-400">
-          Matricule : <strong>{user?.matricule || '23S40192'}</strong>
+          Matricule : <strong>{user?.matricule || 'Actif'}</strong>
         </div>
       </section>
 
@@ -622,141 +647,41 @@ function ResourceCrud() {
             )}
           </div>
         ) : (
-          <ul className="crud-list">
-            {filteredResources.map((res) => {
-              const isBeingEdited = editingId === res.id;
-              const isConfirmingDelete = confirmDeleteId === res.id;
+          <>
+            <ul className="crud-list">
+              {paginatedResources.map((res) => {
+                const isBeingEdited = editingId === res.id;
+                const isConfirmingDelete = confirmDeleteId === res.id;
+                const canEditThis = canModifyResource(res);
+                const canDeleteThis = canDeleteResource(res);
 
-              // RBAC checks for action buttons on each card
-              const canEditThis = canModifyResource(res);
-              const canDeleteThis = canDeleteResource(res);
+                return (
+                  <ResourceItemCard
+                    key={res.id}
+                    res={res}
+                    isBeingEdited={isBeingEdited}
+                    isConfirmingDelete={isConfirmingDelete}
+                    canEditThis={canEditThis}
+                    canDeleteThis={canDeleteThis}
+                    isDelegate={isDelegate}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                    onConfirmDelete={handleConfirmDelete}
+                    onCancelDelete={handleCancelDelete}
+                    onDownload={handleDownload}
+                  />
+                );
+              })}
+            </ul>
 
-              return (
-                <li
-                  key={res.id}
-                  className={`crud-item-card ${isBeingEdited ? 'is-active-edit' : ''}`}
-                >
-                  <div className="crud-item-content">
-                    <div className="crud-item-title-row">
-                      <h4 className="crud-item-title">{res.titre}</h4>
-                    </div>
-
-                    {/* Zero-Pill Typography Metadata */}
-                    <div className="crud-item-meta">
-                      <span className="meta-field font-semibold">{res.filiere}</span>
-                      <span className="meta-separator" aria-hidden="true">·</span>
-                      <span className="meta-field">{res.niveau}</span>
-
-                      {res.codeUe && (
-                        <>
-                          <span className="meta-separator" aria-hidden="true">·</span>
-                          <span className="meta-field font-mono">{res.codeUe}</span>
-                        </>
-                      )}
-
-                      {res.universityName && (
-                        <>
-                          <span className="meta-separator" aria-hidden="true">·</span>
-                          <span className="meta-field font-semibold text-indigo-600 dark:text-indigo-400">
-                            🏛️ {res.universityName}
-                          </span>
-                        </>
-                      )}
-
-                      {res.authorName && (
-                        <>
-                          <span className="meta-separator" aria-hidden="true">·</span>
-                          <span className="meta-field text-slate-500">
-                            Publié par : {res.authorName}
-                          </span>
-                        </>
-                      )}
-
-                      <span className="meta-separator" aria-hidden="true">·</span>
-                      <span className="meta-field text-emerald-600 dark:text-emerald-400 font-semibold">
-                        📥 {res.downloads || 0} téléchargements
-                      </span>
-                    </div>
-
-                    {res.description && (
-                      <p className="crud-item-desc">{res.description}</p>
-                    )}
-                  </div>
-
-                  {/* Actions RBAC rigoureusement conditionnées */}
-                  <div className="crud-item-actions">
-                    {/* Bouton Télécharger : accessible à tous, y compris l'Étudiant */}
-                    <button
-                      type="button"
-                      className="action-btn action-btn-download"
-                      onClick={() => handleDownload(res)}
-                      title="Télécharger le document"
-                    >
-                      <Download size={14} />
-                      <span>Télécharger</span>
-                    </button>
-
-                    {/* Mode confirmation de suppression */}
-                    {isConfirmingDelete ? (
-                      <div className="delete-confirm-box">
-                        <span className="delete-confirm-text">Supprimer ?</span>
-                        <button
-                          type="button"
-                          className="btn-confirm-yes"
-                          onClick={() => handleDelete(res.id)}
-                        >
-                          Oui
-                        </button>
-                        <button
-                          type="button"
-                          className="btn-confirm-no"
-                          onClick={() => setConfirmDeleteId(null)}
-                        >
-                          Non
-                        </button>
-                      </div>
-                    ) : (
-                      <>
-                        {/* Bouton Modifier : Masqué si canEditThis est false */}
-                        {canEditThis && (
-                          <button
-                            type="button"
-                            className="action-btn action-btn-edit"
-                            onClick={() => handleEdit(res)}
-                            title="Modifier cette ressource"
-                          >
-                            <Pencil size={14} />
-                            <span>Modifier</span>
-                          </button>
-                        )}
-
-                        {/* Bouton Supprimer : Masqué si canDeleteThis est false */}
-                        {canDeleteThis && (
-                          <button
-                            type="button"
-                            className="action-btn action-btn-delete"
-                            onClick={() => setConfirmDeleteId(res.id)}
-                            title="Supprimer cette ressource"
-                          >
-                            <Trash2 size={14} />
-                            <span>Supprimer</span>
-                          </button>
-                        )}
-
-                        {/* Pour le délégué : indicateur discret lorsque la ressource est hors département */}
-                        {isDelegate && !canEditThis && (
-                          <span className="badge-scope-readonly" title="Cette ressource appartient à un autre département">
-                            <Lock size={12} />
-                            <span>Lecture seule</span>
-                          </span>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={setCurrentPage}
+              totalItems={filteredResources.length}
+              pageSize={ITEMS_PER_PAGE}
+            />
+          </>
         )}
       </section>
     </div>

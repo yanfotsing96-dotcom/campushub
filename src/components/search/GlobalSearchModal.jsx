@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Search,
@@ -40,42 +40,53 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen, onClose]);
 
-  // Filter matching results
-  const lowerQuery = query.toLowerCase().trim();
-
-  const matchedResources = resources.filter((item) => {
-    if (!lowerQuery) return true;
-    return (
-      item.titre?.toLowerCase().includes(lowerQuery) ||
-      item.codeUe?.toLowerCase().includes(lowerQuery) ||
-      item.filiere?.toLowerCase().includes(lowerQuery) ||
-      item.niveau?.toLowerCase().includes(lowerQuery) ||
-      item.enseignant?.toLowerCase().includes(lowerQuery) ||
-      item.description?.toLowerCase().includes(lowerQuery)
-    );
-  });
-
-  const matchedNotes = notes.filter((item) => {
-    if (!lowerQuery) return true;
-    return (
-      item.title?.toLowerCase().includes(lowerQuery) ||
-      item.content?.toLowerCase().includes(lowerQuery)
-    );
-  });
-
-  const filteredItems = [];
-  if (activeCategory === 'all' || activeCategory === 'courses') {
-    matchedResources.slice(0, 8).forEach((r) => {
-      filteredItems.push({ type: 'course', data: r });
+  // Filter matching resources memoized
+  const matchedResources = useMemo(() => {
+    if (!isOpen) return [];
+    const lowerQuery = query.toLowerCase().trim();
+    if (!lowerQuery) return resources;
+    return resources.filter((item) => {
+      return (
+        item.titre?.toLowerCase().includes(lowerQuery) ||
+        item.codeUe?.toLowerCase().includes(lowerQuery) ||
+        item.filiere?.toLowerCase().includes(lowerQuery) ||
+        item.niveau?.toLowerCase().includes(lowerQuery) ||
+        item.enseignant?.toLowerCase().includes(lowerQuery) ||
+        item.description?.toLowerCase().includes(lowerQuery)
+      );
     });
-  }
-  if (activeCategory === 'all' || activeCategory === 'notes') {
-    matchedNotes.slice(0, 5).forEach((n) => {
-      filteredItems.push({ type: 'note', data: n });
-    });
-  }
+  }, [isOpen, query, resources]);
 
-  const handleSelect = (item) => {
+  // Filter matching notes memoized
+  const matchedNotes = useMemo(() => {
+    if (!isOpen) return [];
+    const lowerQuery = query.toLowerCase().trim();
+    if (!lowerQuery) return notes;
+    return notes.filter((item) => {
+      return (
+        item.title?.toLowerCase().includes(lowerQuery) ||
+        item.content?.toLowerCase().includes(lowerQuery)
+      );
+    });
+  }, [isOpen, query, notes]);
+
+  // Filter matching results memoized
+  const filteredItems = useMemo(() => {
+    const items = [];
+    if (activeCategory === 'all' || activeCategory === 'courses') {
+      matchedResources.slice(0, 8).forEach((r) => {
+        items.push({ type: 'course', data: r });
+      });
+    }
+    if (activeCategory === 'all' || activeCategory === 'notes') {
+      matchedNotes.slice(0, 5).forEach((n) => {
+        items.push({ type: 'note', data: n });
+      });
+    }
+    return items;
+  }, [matchedResources, matchedNotes, activeCategory]);
+
+  const handleSelect = useCallback((item) => {
     if (!item) return;
     onClose();
     if (item.type === 'course') {
@@ -84,12 +95,12 @@ export default function GlobalSearchModal({ isOpen, onClose }) {
     } else {
       navigate('/notebook');
     }
-  };
+  }, [onClose, recordDownload, navigate]);
 
-  const handleViewAllResults = () => {
+  const handleViewAllResults = useCallback(() => {
     onClose();
     navigate(`/search?q=${encodeURIComponent(query)}`);
-  };
+  }, [onClose, navigate, query]);
 
   if (!isOpen) return null;
 

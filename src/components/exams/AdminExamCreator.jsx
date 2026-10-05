@@ -4,21 +4,12 @@ import {
   Plus,
   Trash2,
   CheckCircle2,
-  AlertCircle,
   Timer,
   Layers,
-  GraduationCap,
   Calendar,
   Sparkles,
-  HelpCircle,
-  Eye,
-  Check,
   X,
-  FileText,
-  User,
-  Clock,
   ShieldCheck,
-  ChevronDown,
 } from 'lucide-react';
 import { examService } from '../../services/examService';
 import { useAuth } from '../../hooks/useAuth';
@@ -33,7 +24,7 @@ export default function AdminExamCreator({ onExamCreated }) {
   const [feedback, setFeedback] = useState(null);
 
   // Form State
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState(() => ({
     titre: '',
     codeUe: 'INF201',
     filiereId: 'Informatique',
@@ -44,7 +35,7 @@ export default function AdminExamCreator({ onExamCreated }) {
     dateFin: new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString().slice(0, 16),
     professor: user?.fullName || user?.nom || 'Dr. T. Mbarga',
     description: 'Contrôle continu en ligne sous surveillance chronométrée.',
-  });
+  }));
 
   // Dynamic Questions Builder
   const [questions, setQuestions] = useState([
@@ -127,7 +118,8 @@ export default function AdminExamCreator({ onExamCreated }) {
 
   const handleRemoveQuestion = (idx) => {
     if (questions.length <= 1) {
-      alert('Une épreuve doit comporter au moins une question.');
+      setFeedback({ type: 'error', message: 'Une épreuve doit comporter au moins une question.' });
+      setTimeout(() => setFeedback(null), 3500);
       return;
     }
     setQuestions((prev) => prev.filter((_, i) => i !== idx));
@@ -170,7 +162,8 @@ export default function AdminExamCreator({ onExamCreated }) {
       const copy = [...prev];
       const q = { ...copy[qIdx] };
       if (q.options.length <= 2) {
-        alert('Un QCM requiert au moins 2 options.');
+        setFeedback({ type: 'error', message: 'Un QCM requiert au moins 2 options.' });
+        setTimeout(() => setFeedback(null), 3500);
         return prev;
       }
       q.options = q.options.filter((o) => o.id !== optId);
@@ -187,7 +180,8 @@ export default function AdminExamCreator({ onExamCreated }) {
     if (!formData.titre.trim()) return;
 
     if (questions.length === 0) {
-      alert('Veuillez ajouter au moins une question.');
+      setFeedback({ type: 'error', message: 'Veuillez ajouter au moins une question.' });
+      setTimeout(() => setFeedback(null), 3500);
       return;
     }
 
@@ -225,7 +219,8 @@ export default function AdminExamCreator({ onExamCreated }) {
       });
       setTimeout(() => setFeedback(null), 4000);
     } catch (err) {
-      alert('Erreur lors de la création : ' + err.message);
+      setFeedback({ type: 'error', message: 'Erreur lors de la création : ' + err.message });
+      setTimeout(() => setFeedback(null), 4000);
     }
   };
 

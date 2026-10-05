@@ -18,7 +18,7 @@ export default function CheckoutModal({ plan, billingCycle, onClose, onSuccess }
 
   // Form Inputs
   const [phoneNumber, setPhoneNumber] = useState('677849210');
-  const [studentName, setStudentName] = useState(user?.fullName || user?.nom || 'Yan Fotsing');
+  const [studentName, setStudentName] = useState(user?.fullName || user?.nom || 'Étudiant');
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvc, setCardCvc] = useState('');
@@ -72,7 +72,7 @@ export default function CheckoutModal({ plan, billingCycle, onClose, onSuccess }
           billingCycle,
           activatedAt: new Date().toISOString(),
           badge: 'Membre Pro Certifié UY1',
-          matricule: '23S40192',
+          matricule: user?.matricule || '',
         };
         localStorage.setItem('campushub_user_is_pro', 'true');
         localStorage.setItem('campushub_pro_subscription', JSON.stringify(subData));
@@ -91,7 +91,7 @@ Plateforme CampusHub — Université de Yaoundé I
 Date: ${new Date().toLocaleDateString()}
 Réf Transaction: TX-${Date.now()}
 -------------------------------------------
-Client: ${studentName} (Matricule: 23S40192)
+Client: ${studentName} (Matricule: ${user?.matricule || 'N/A'})
 Formule: ${plan.name} (${cycleLabel})
 Montant payé: ${price.toLocaleString()} FCFA
 Mode de règlement: ${
@@ -345,7 +345,7 @@ Merci pour votre confiance sur CampusHub !`;
                             required
                             value={studentName}
                             onChange={(e) => setStudentName(e.target.value)}
-                            placeholder="Ex : Yan Fotsing"
+                            placeholder={`Ex : ${studentName}`}
                             className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
                           />
                         </div>

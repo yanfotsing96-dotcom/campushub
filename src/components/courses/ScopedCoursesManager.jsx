@@ -1,22 +1,23 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
   BookOpen,
   Search,
   Filter,
   FileText,
-  Video,
-  Download,
   Plus,
   Lock,
   CheckCircle2,
   X,
-  Code,
   Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { departmentScopeService } from '../../services/departmentScopeService';
 import { DEPARTMENTS, ACADEMIC_LEVELS } from '../../constants/academicScopes';
 import { ROLES, normalizeRole } from '../../constants/rbacConstants';
+import CourseMaterialCard from './CourseMaterialCard';
+import Pagination from '../common/Pagination';
+
+const MATERIALS_PER_PAGE = 6;
 
 export default function ScopedCoursesManager() {
   const { user } = useAuth();
@@ -31,6 +32,18 @@ export default function ScopedCoursesManager() {
   const [selectedCourseId, setSelectedCourseId] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [rawPage, setRawPage] = useState(1);
+
+  // Derive filter key to compute page without cascading setState inside useEffect
+  const filterKey = `${activeDepartmentId}-${activeNiveau}-${selectedCourseId}-${selectedType}-${searchQuery}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+
+  let currentPage = rawPage;
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
+    setRawPage(1);
+    currentPage = 1;
+  }
 
   // Publication modal
   const [publishModalOpen, setPublishModalOpen] = useState(false);
@@ -66,6 +79,18 @@ export default function ScopedCoursesManager() {
     );
   }, [user, isAdmin, activeDepartmentId, activeNiveau, selectedCourseId, selectedType, searchQuery]);
 
+  // Paginated materials
+  const totalPages = Math.ceil(materials.length / MATERIALS_PER_PAGE);
+  const paginatedMaterials = useMemo(() => {
+    const startIndex = (currentPage - 1) * MATERIALS_PER_PAGE;
+    return materials.slice(startIndex, startIndex + MATERIALS_PER_PAGE);
+  }, [materials, currentPage]);
+
+  const handleDownloadMaterial = useCallback(() => {
+    setToastMessage(`Téléchargement certifié pour le matricule ${user?.matricule || 'Inscrit'}.`);
+    setTimeout(() => setToastMessage(''), 4000);
+  }, [user?.matricule]);
+
   const handlePublishSubmit = (e) => {
     e.preventDefault();
     if (!newTitle.trim()) return;
@@ -88,7 +113,8 @@ export default function ScopedCoursesManager() {
       setToastMessage('Support pédagogique publié avec succès dans votre filière !');
       setTimeout(() => setToastMessage(''), 4000);
     } catch (err) {
-      alert(err.message);
+      setToastMessage(err.message);
+      setTimeout(() => setToastMessage(''), 4000);
     }
   };
 
@@ -105,7 +131,7 @@ export default function ScopedCoursesManager() {
               </span>
 
               <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
-                Matricule : <strong>{user?.matricule || '23S40192'}</strong>
+                Matricule : <strong>{user?.matricule || 'Actif'}</strong>
               </span>
 
               <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300">
@@ -259,56 +285,25 @@ export default function ScopedCoursesManager() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {materials.map((mat) => (
-            <div
-              key={mat.id}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-xs space-y-3 hover:border-indigo-300 dark:hover:border-indigo-800 transition-all flex flex-col justify-between"
-            >
-              <div className="space-y-2.5">
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-black uppercase tracking-wider bg-indigo-600 text-white">
-                      {mat.codeUe}
-                    </span>
-                    <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
-                      {mat.format}
-                    </span>
-                  </div>
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {paginatedMaterials.map((mat) => (
+              <CourseMaterialCard
+                key={mat.id}
+                mat={mat}
+                userMatricule={user?.matricule}
+                onDownload={handleDownloadMaterial}
+              />
+            ))}
+          </div>
 
-                  <span className="text-[11px] text-slate-400">
-                    {mat.size || mat.duration}
-                  </span>
-                </div>
-
-                <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 leading-snug">
-                  {mat.titre}
-                </h3>
-
-                <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                  {mat.description}
-                </p>
-              </div>
-
-              <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400 text-[11px]">
-                  <span>Enseignant : <strong>{mat.enseignant}</strong></span>
-                </div>
-
-                <a
-                  href={mat.url}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    alert(`Téléchargement sécurisé certifié pour l'étudiant matricule ${user?.matricule || '23S40192'}.`);
-                  }}
-                  className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-950 font-bold text-xs flex items-center gap-1.5 transition-colors"
-                >
-                  {mat.type === 'video' ? <Video size={13} /> : mat.type === 'code' ? <Code size={13} /> : <Download size={13} />}
-                  <span>{mat.type === 'video' ? 'Visionner' : 'Télécharger'}</span>
-                </a>
-              </div>
-            </div>
-          ))}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setRawPage}
+            totalItems={materials.length}
+            pageSize={MATERIALS_PER_PAGE}
+          />
         </div>
       )}
 

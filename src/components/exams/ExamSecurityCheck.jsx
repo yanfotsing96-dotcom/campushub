@@ -18,8 +18,8 @@ export default function ExamSecurityCheck({ exam, user, onVerified, onCancel }) 
   const [error, setError] = useState('');
   const [failedAttempts, setFailedAttempts] = useState(0);
 
-  const officialName = user?.nom || 'Étudiant UY1';
-  const officialMatricule = user?.matricule || '23S40192';
+  const officialName = user?.fullName || user?.nom || user?.name || 'Étudiant';
+  const officialMatricule = user?.matricule || '';
 
   // Normalization helper
   const cleanStr = (s) =>
@@ -177,7 +177,7 @@ export default function ExamSecurityCheck({ exam, user, onVerified, onCancel }) 
                     setFullNameInput(e.target.value);
                     setError('');
                   }}
-                  placeholder="Ex : Yan Fotsing"
+                  placeholder={`Ex : ${officialName}`}
                   className="w-full pl-10 pr-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 />
               </div>
@@ -197,7 +197,7 @@ export default function ExamSecurityCheck({ exam, user, onVerified, onCancel }) 
                     setMatriculeInput(e.target.value.toUpperCase());
                     setError('');
                   }}
-                  placeholder="Ex : 23S40192"
+                  placeholder={`Ex : ${officialMatricule || '26U1001'}`}
                   className="w-full pl-10 pr-3.5 py-2.5 text-xs font-mono font-bold uppercase tracking-wider rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 />
               </div>

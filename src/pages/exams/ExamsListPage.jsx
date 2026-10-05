@@ -5,13 +5,8 @@ import {
   Award,
   CheckCircle2,
   ArrowRight,
-  Plus,
   ShieldCheck,
-  Crown,
-  Sparkles,
-  Calendar,
   Layers,
-  Clock,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { examService } from '../../services/examService';
@@ -50,7 +45,7 @@ export default function ExamsListPage() {
 
   // Student's graded copies
   const mySubmissions = useMemo(() => {
-    return examService.getStudentSubmissions(user?.matricule || '23S40192');
+    return examService.getStudentSubmissions(user?.matricule || '');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user?.matricule, updateCounter]);
 
@@ -87,7 +82,7 @@ export default function ExamsListPage() {
             </h1>
 
             <p className="text-sm md:text-base text-slate-300 leading-relaxed">
-              Compositions chronométrées en temps réel pour la filière <strong>{user?.filiere || 'Informatique'}</strong> ({user?.niveau || 'L2'}). Correction instantanée, sauvegarde automatique et enregistrement sécurisé sous votre matricule <strong>{user?.matricule || '23S40192'}</strong>.
+              Compositions chronométrées en temps réel pour la filière <strong>{user?.filiere || 'Informatique'}</strong> ({user?.niveau || 'L2'}). Correction instantanée, sauvegarde automatique et enregistrement sécurisé sous votre matricule <strong>{user?.matricule || 'Officiel'}</strong>.
             </p>
           </div>
 

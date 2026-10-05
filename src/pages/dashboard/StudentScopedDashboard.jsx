@@ -23,7 +23,8 @@ export default function StudentScopedDashboard() {
 
   const filiereId = user?.filiereId || user?.filiere || 'Informatique';
   const niveau = user?.niveau || 'L2';
-  const matricule = user?.matricule || '23S40192';
+  const matricule = user?.matricule || '';
+  const displayName = user?.fullName || user?.nom || 'Étudiant';
 
   const department = useMemo(() => {
     return departmentScopeService.getDepartment(filiereId);
@@ -60,7 +61,7 @@ export default function StudentScopedDashboard() {
 
             <div>
               <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
-                <span>Bonjour, {user?.nom || 'Étudiant'} !</span>
+                <span>Bonjour, {displayName} !</span>
               </h1>
               <p className="text-xs md:text-sm text-indigo-200/90 font-medium mt-1">
                 Portail réservé : <strong>{department.label}</strong> ({department.code}) · {selectedUniversity.name}

@@ -15,7 +15,7 @@ import { examService } from '../../services/examService';
 
 export default function SecureExamPlayer({ exam, onExit }) {
   const { user } = useAuth();
-  const studentMatricule = user?.matricule || '23S40192';
+  const studentMatricule = user?.matricule || '';
 
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState(() => {
@@ -85,22 +85,28 @@ export default function SecureExamPlayer({ exam, onExit }) {
   useEffect(() => {
     if (result) return;
 
+    let warningTimeout = null;
     const handleFocusLoss = () => {
       setFocusLossCount((prev) => {
         const next = prev + 1;
         setShowIntegrityWarning(true);
-        setTimeout(() => setShowIntegrityWarning(false), 5000);
+        if (warningTimeout) clearTimeout(warningTimeout);
+        warningTimeout = setTimeout(() => setShowIntegrityWarning(false), 5000);
         return next;
       });
     };
 
-    window.addEventListener('blur', handleFocusLoss);
-    document.addEventListener('visibilitychange', () => {
+    const handleVisibilityChange = () => {
       if (document.hidden) handleFocusLoss();
-    });
+    };
+
+    window.addEventListener('blur', handleFocusLoss);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
     return () => {
       window.removeEventListener('blur', handleFocusLoss);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      if (warningTimeout) clearTimeout(warningTimeout);
     };
   }, [result]);
 
