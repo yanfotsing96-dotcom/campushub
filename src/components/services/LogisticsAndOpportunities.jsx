@@ -18,11 +18,15 @@ import {
   INITIAL_MARKETPLACE_ITEMS,
   INITIAL_INTERNSHIPS_PROJECTS,
 } from './data/servicesData';
+import { useAuth } from '../../hooks/useAuth';
 
 const STORAGE_MARKETPLACE_KEY = 'campushub_services_marketplace';
 const STORAGE_OPPORTUNITIES_KEY = 'campushub_services_opportunities';
 
 export default function LogisticsAndOpportunities() {
+  const { user } = useAuth();
+  const currentSeller = `${user?.fullName || user?.nom || 'Yan Fotsing'} (Moi)`;
+  const currentMatricule = user?.matricule || '23S40192';
   const [activeTab, setActiveTab] = useState('items'); // 'items' or 'opportunities'
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedFilter, setSelectedFilter] = useState('ALL');
@@ -84,8 +88,8 @@ export default function LogisticsAndOpportunities() {
         type: newItemData.type,
         price: newItemData.price || 'Prêt Gratuit',
         condition: newItemData.condition,
-        seller: 'Yanick Fotsing (Moi)',
-        matricule: '23S40192',
+        seller: currentSeller,
+        matricule: currentMatricule,
         level: 'L2 Informatique',
         location: newItemData.location || 'Campus Ngoa-Ekellé',
         date: 'À l\'instant',

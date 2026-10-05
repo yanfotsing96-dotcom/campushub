@@ -1,19 +1,36 @@
 import { useAuth } from '../../hooks/useAuth';
-import { normalizeRole, isRoleAtLeast } from '../../constants/rbacConstants';
+import {
+  normalizeRole,
+  isRoleAtLeast,
+  canAddResource,
+  canModifyResource,
+  canDeleteResource,
+} from '../../constants/rbacConstants';
 
 /**
  * Composant de garde de permission pour l'affichage conditionnel d'éléments d'interface
- * Exemple :
+ * 
+ * Exemples :
+ * <PermissionGuard action="add_resource" targetFiliere="Informatique">
+ *    <button>Ajouter un cours</button>
+ * </PermissionGuard>
+ *
+ * <PermissionGuard action="modify_resource" resource={res}>
+ *    <button>Modifier</button>
+ * </PermissionGuard>
+ *
  * <PermissionGuard permission="moderation:resources">
  *    <button>Modérer ce document</button>
  * </PermissionGuard>
  *
- * ou
  * <PermissionGuard role="delegate">
  *    <button>Publier une annonce officielle</button>
  * </PermissionGuard>
  */
 export default function PermissionGuard({
+  action,
+  resource,
+  targetFiliere,
   permission,
   role,
   fallback = null,
@@ -22,7 +39,18 @@ export default function PermissionGuard({
   const { user, can } = useAuth();
   const currentRole = normalizeRole(user?.role);
 
-  // Check role hierarchy if role is provided
+  // 1. Check granular resource action if specified
+  if (action) {
+    if (action === 'add_resource') {
+      if (!canAddResource(user, targetFiliere)) return fallback;
+    } else if (action === 'modify_resource' || action === 'edit_resource') {
+      if (!canModifyResource(user, resource)) return fallback;
+    } else if (action === 'delete_resource') {
+      if (!canDeleteResource(user, resource)) return fallback;
+    }
+  }
+
+  // 2. Check role hierarchy if role is provided
   if (role) {
     const hasRequiredRole = isRoleAtLeast(currentRole, role);
     if (!hasRequiredRole) {
@@ -30,7 +58,7 @@ export default function PermissionGuard({
     }
   }
 
-  // Check specific permission if permission is provided
+  // 3. Check specific permission if permission is provided
   if (permission) {
     const hasPerm = can(permission);
     if (!hasPerm) {
@@ -43,3 +71,4 @@ export default function PermissionGuard({
 
 // Alias exporté pratique
 export const Can = PermissionGuard;
+

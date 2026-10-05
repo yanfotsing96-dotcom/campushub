@@ -177,7 +177,7 @@ export default function ExamSecurityCheck({ exam, user, onVerified, onCancel }) 
                     setFullNameInput(e.target.value);
                     setError('');
                   }}
-                  placeholder="Ex : Yanick Fotsing"
+                  placeholder="Ex : Yan Fotsing"
                   className="w-full pl-10 pr-3.5 py-2.5 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 font-semibold focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                 />
               </div>

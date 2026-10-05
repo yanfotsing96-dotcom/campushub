@@ -18,11 +18,15 @@ import {
   INITIAL_CAMPUS_TIPS,
   INITIAL_MOTIVATION_POSTS,
 } from './data/servicesData';
+import { useAuth } from '../../hooks/useAuth';
 
 const STORAGE_CARPOOL_KEY = 'campushub_services_carpool';
 const STORAGE_POSTS_KEY = 'campushub_services_motivation_posts';
 
 export default function CampusLifeAndCarpooling() {
+  const { user } = useAuth();
+  const userName = user?.fullName || user?.nom || 'Yan Fotsing';
+  const userMatricule = user?.matricule || '23S40192';
   const [activeSection, setActiveSection] = useState('carpool'); // 'carpool', 'tips', 'motivation'
 
   // Carpool State
@@ -87,9 +91,9 @@ export default function CampusLifeAndCarpooling() {
 
     const createdRide = {
       id: `ride-${Date.now()}`,
-      driver: 'Yanick Fotsing (Moi)',
-      matricule: '23S40192',
-      filiere: 'L2 Informatique',
+      driver: `${userName} (Moi)`,
+      matricule: userMatricule,
+      filiere: `${user?.niveau || 'L2'} ${user?.filiere || 'Informatique'}`,
       vehicle: 'Véhicule Partagé UY1',
       departure: newRideData.departure.trim(),
       destination: newRideData.destination,
@@ -137,7 +141,7 @@ export default function CampusLifeAndCarpooling() {
 
     const newPost = {
       id: `post-${Date.now()}`,
-      author: 'Yanick Fotsing (L2 Info)',
+      author: `${userName} (${user?.niveau || 'L2'} ${user?.filiere || 'Info'})`,
       date: 'À l\'instant',
       tag: newMotivationTag,
       likes: 1,

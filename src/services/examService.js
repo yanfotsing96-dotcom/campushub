@@ -1,14 +1,15 @@
 /**
  * Moteur Sécurisé de Compositions en Ligne & Examens Chronométrés
- * Cloisonnement strict par Filière & Matricule avec Autosave et Détection Anti-Fraude
+ * Cloisonnement strict par Filière & Matricule avec Autosave, Détection Anti-Fraude et Gestion Admin/Modérateur
  */
 
 import { ROLES, normalizeRole } from '../constants/rbacConstants';
 
+const STORAGE_EXAMS_KEY = 'campushub_exams_catalog';
 const STORAGE_SUBMISSIONS_KEY = 'campushub_exam_submissions';
 const STORAGE_DRAFT_KEY = 'campushub_exam_draft_';
 
-export const EXAMS_CATALOG = [
+export const INITIAL_EXAMS = [
   {
     id: 'exam-inf201-cc1',
     codeUe: 'INF201',
@@ -22,7 +23,9 @@ export const EXAMS_CATALOG = [
     academicYear: '2025-2026',
     professor: 'Dr. T. Mbarga',
     university: 'Université de Yaoundé I (UY1)',
-    status: 'active', // 'active' | 'upcoming' | 'closed'
+    status: 'actif', // 'brouillon' | 'actif' | 'termine'
+    dateDebut: '2026-03-25T08:00',
+    dateFin: '2026-04-30T18:00',
     instructions: [
       'Chaque question possède une ou plusieurs réponses précises.',
       'Le compte à rebours est synchronisé en temps réel : toute sortie de fenêtre est comptabilisée dans l\'indice d\'intégrité.',
@@ -46,7 +49,7 @@ export const EXAMS_CATALOG = [
       },
       {
         id: 'q2',
-        text: 'Quelle est la complexité temporelle asymptotique au pire des cas d\'une recherche dans un ABR déséquilibré (dégénéré en liste chaînée) ?',
+        text: 'Quelle est la complexité temporelle asymptotique au pire des cas d\'une recherche dans un ABR déséquilibré (dégénéré en peigne) ?',
         type: 'single',
         points: 4,
         options: [
@@ -56,7 +59,7 @@ export const EXAMS_CATALOG = [
           { id: 'opt_d', label: 'O(n log n)' },
         ],
         correctOptionId: 'opt_c',
-        explanation: 'Si les insertions sont effectuées dans l\'ordre croissant ou décroissant, l\'arbre dégénère en peigne linéaire de hauteur n, ce qui confère à la recherche une complexité au pire des cas en O(n).',
+        explanation: 'Si les insertions sont effectuées dans l\'ordre croissant ou décroissant, l\'arbre dégénère en peigne linéaire de hauteur n, conférant une complexité en O(n).',
       },
       {
         id: 'q3',
@@ -88,17 +91,10 @@ export const EXAMS_CATALOG = [
       },
       {
         id: 'q5',
-        text: 'Quelle propriété définit la hauteur maximale d\'un arbre binaire équilibré AVL à n nœuds ?',
-        type: 'single',
+        text: 'Expliquez brièvement en quelques lignes le principe de rééquilibrage par rotation (gauche ou droite) dans un arbre AVL.',
+        type: 'development',
         points: 4,
-        options: [
-          { id: 'opt_a', label: 'La différence de hauteur entre sous-arbre gauche et droit n\'excède jamais 1' },
-          { id: 'opt_b', label: 'Tous les niveaux sauf le dernier doivent être complètement remplis' },
-          { id: 'opt_c', label: 'Chaque nœud a exactement deux enfants' },
-          { id: 'opt_d', label: 'La racine est égale à la médiane des clés' },
-        ],
-        correctOptionId: 'opt_a',
-        explanation: 'Un arbre AVL garantit que pour tout nœud, le facteur d\'équilibrage (hauteur gauche - hauteur droite) appartient à {-1, 0, +1}, garantissant une hauteur bornée par 1.44 log2(n).',
+        explanation: 'La rotation gauche ou droite réorganise les nœuds autour du pivot sans modifier la relation d\'ordre BST, afin de ramener le facteur d\'équilibrage dans l\'intervalle {-1, 0, +1} en temps O(1).',
       },
     ],
   },
@@ -115,7 +111,9 @@ export const EXAMS_CATALOG = [
     academicYear: '2025-2026',
     professor: 'Pr. F. Nkenlifack',
     university: 'Université de Yaoundé I (UY1)',
-    status: 'active',
+    status: 'actif',
+    dateDebut: '2026-03-25T08:00',
+    dateFin: '2026-04-30T18:00',
     instructions: [
       'Questions techniques sur les mécanismes d\'exploitation POSIX.',
       'Chronomètre actif avec sauvegarde synchrone.',
@@ -161,25 +159,17 @@ export const EXAMS_CATALOG = [
           { id: 'opt_d', label: 'Réveille tous les processus endormis' },
         ],
         correctOptionId: 'opt_b',
-        explanation: 'L\'opération P() (Proberen / Tester) décrémente le compteur. Si la ressource est occupée, le processus est placé dans la file d\'attente.',
+        explanation: 'L\'opération P() décrémente le compteur. Si la ressource est occupée, le processus est mis en attente.',
       },
       {
         id: 'q4',
-        text: 'Laquelle des conditions suivantes N\'EST PAS l\'une des 4 conditions de Coffman pour qu\'un interblocage (Deadlock) survienne ?',
-        type: 'single',
+        text: 'Donnez un exemple concret d\'interblocage (Deadlock) entre deux processus P1 et P2 manipulant deux ressources R1 et R2.',
+        type: 'development',
         points: 5,
-        options: [
-          { id: 'opt_a', label: 'Exclusion mutuelle' },
-          { id: 'opt_b', label: 'Rétention et attente (Hold and wait)' },
-          { id: 'opt_c', label: 'Préemption forcée des ressources' },
-          { id: 'opt_d', label: 'Attente circulaire' },
-        ],
-        correctOptionId: 'opt_c',
-        explanation: 'La condition de Coffman est la "Non-préemption" : une ressource ne peut être retirée de force au processus qui la détient.',
+        explanation: 'Attente circulaire : P1 détient R1 et demande R2 ; simultanément, P2 détient R2 et demande R1. Aucun ne peut progresser.',
       },
     ],
   },
-  // Exam partitioned for Mathématiques
   {
     id: 'exam-mat201-cc',
     codeUe: 'MAT201',
@@ -193,7 +183,9 @@ export const EXAMS_CATALOG = [
     academicYear: '2025-2026',
     professor: 'Pr. J. Nguemo',
     university: 'Université de Yaoundé I (UY1)',
-    status: 'active',
+    status: 'actif',
+    dateDebut: '2026-03-25T08:00',
+    dateFin: '2026-04-30T18:00',
     instructions: ['Calcul de limites de ratios Un+1 / Un et convergence absolue.'],
     questions: [
       {
@@ -226,11 +218,125 @@ export const EXAMS_CATALOG = [
       },
     ],
   },
+  {
+    id: 'exam-phy201-cc',
+    codeUe: 'PHY201',
+    filiereId: 'Physique',
+    niveau: 'L2',
+    titre: 'Électromagnétisme & Équations de Maxwell dans le Vide',
+    description: 'Contrôle continu de physique fondamentale : flux électrique, induction et ondes.',
+    durationMinutes: 20,
+    totalPoints: 20,
+    passPercentage: 50,
+    academicYear: '2025-2026',
+    professor: 'Dr. C. Fotso',
+    university: 'Université de Yaoundé I (UY1)',
+    status: 'actif',
+    dateDebut: '2026-03-25T08:00',
+    dateFin: '2026-04-30T18:00',
+    instructions: ['Répondre aux questions théoriques et applications directes.'],
+    questions: [
+      {
+        id: 'q1',
+        text: 'Quelle équation de Maxwell traduit la conservation du flux magnétique (absence de monopôles magnétiques) ?',
+        type: 'single',
+        points: 10,
+        options: [
+          { id: 'opt_a', label: 'div B = 0' },
+          { id: 'opt_b', label: 'div E = rho / epsilon_0' },
+          { id: 'opt_c', label: 'rot E = -dB/dt' },
+          { id: 'opt_d', label: 'rot B = mu_0 * j' },
+        ],
+        correctOptionId: 'opt_a',
+        explanation: 'div B = 0 signifie que les lignes de champ magnétique sont fermées sur elles-mêmes.',
+      },
+      {
+        id: 'q2',
+        text: 'Définissez brièvement le rôle du courant de déplacement de Maxwell dans l\'équation d\'Ampère-Maxwell.',
+        type: 'development',
+        points: 10,
+        explanation: 'Le terme epsilon_0 * dE/dt compense la discontinuité du courant de conduction (ex: dans un condensateur) et restaure la conservation de la charge.',
+      },
+    ],
+  },
+  {
+    id: 'exam-chm101-cc',
+    codeUe: 'CHM101',
+    filiereId: 'Chimie',
+    niveau: 'L1',
+    titre: 'Chimie Générale & Équilibres Acido-Basiques en Solution Aqueuse',
+    description: 'Partiel semestriel de chimie générale : pH, titrages et constantes de dissociation Ka.',
+    durationMinutes: 20,
+    totalPoints: 20,
+    passPercentage: 50,
+    academicYear: '2025-2026',
+    professor: 'Dr. M. Biya',
+    university: 'Université de Yaoundé I (UY1)',
+    status: 'actif',
+    dateDebut: '2026-03-25T08:00',
+    dateFin: '2026-04-30T18:00',
+    instructions: ['Calculatrice scientifique autorisée.'],
+    questions: [
+      {
+        id: 'q1',
+        text: 'Quel est le pH d\'une solution aqueuse d\'acide chlorhydrique (HCl) à la concentration de 10^-3 mol/L ?',
+        type: 'single',
+        points: 10,
+        options: [
+          { id: 'opt_a', label: 'pH = 1' },
+          { id: 'opt_b', label: 'pH = 3' },
+          { id: 'opt_c', label: 'pH = 7' },
+          { id: 'opt_d', label: 'pH = 11' },
+        ],
+        correctOptionId: 'opt_b',
+        explanation: 'HCl est un acide fort totalement dissocié : pH = -log[H3O+] = -log(10^-3) = 3.',
+      },
+      {
+        id: 'q2',
+        text: 'Qu\'appelle-t-on une solution tampon et quelle est sa propriété remarquable ?',
+        type: 'development',
+        points: 10,
+        explanation: 'Une solution tampon est un mélange d\'acide faible et de sa base conjuguée dont le pH varie très peu lors d\'une addition modérée d\'acide ou de base ou par dilution.',
+      },
+    ],
+  },
 ];
 
 class ExamService {
   constructor() {
+    this.exams = this.loadExams();
     this.submissions = this.loadSubmissions();
+  }
+
+  loadExams() {
+    try {
+      const saved = localStorage.getItem(STORAGE_EXAMS_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch {
+      // Fallback
+    }
+    // Initialize default exams
+    try {
+      localStorage.setItem(STORAGE_EXAMS_KEY, JSON.stringify(INITIAL_EXAMS));
+    } catch (err) {
+      console.warn('Erreur init examens :', err);
+    }
+    return [...INITIAL_EXAMS];
+  }
+
+  saveExams(exams) {
+    this.exams = exams;
+    try {
+      localStorage.setItem(STORAGE_EXAMS_KEY, JSON.stringify(exams));
+      window.dispatchEvent(new CustomEvent('campushub:exams_updated'));
+    } catch (err) {
+      console.warn('Erreur sauvegarde examens :', err);
+    }
   }
 
   loadSubmissions() {
@@ -246,47 +352,80 @@ class ExamService {
     this.submissions = data;
     try {
       localStorage.setItem(STORAGE_SUBMISSIONS_KEY, JSON.stringify(data));
+      window.dispatchEvent(new CustomEvent('campushub:exams_updated'));
     } catch (err) {
       console.warn('Erreur stockage copies d\'examens :', err);
     }
   }
 
   /**
+   * Retourne l'ensemble de la base d'examens (pour console admin / modérateur)
+   */
+  getAllExams() {
+    return [...this.exams];
+  }
+
+  /**
    * Récupère la liste des compositions disponibles strictement cloisonnées selon l'étudiant
+   * - Étudiant / Délégué : UNIQUEMENT statut 'actif', et même filière + même niveau
+   * - Admin / Modérateur : voit tout (ou peut filtrer)
    */
   getAvailableExams(user) {
     if (!user) return [];
     const role = normalizeRole(user.role);
-    const userFiliere = user.filiereId || user.filiere || 'Informatique';
+    const userFiliere = (user.filiereId || user.filiere || 'Informatique').toLowerCase();
     const userNiveau = user.niveau || 'L2';
 
-    return EXAMS_CATALOG.filter((exam) => {
-      // Admin voit tous les examens
-      if (role === ROLES.ADMIN) return true;
+    return this.exams.filter((exam) => {
+      // Admin ou Modérateur : accès complet
+      if (role === ROLES.ADMIN || role === ROLES.MODERATOR) {
+        return true;
+      }
 
-      // Cloisonnement strict : même filière et même niveau
-      const matchFiliere = exam.filiereId.toLowerCase() === userFiliere.toLowerCase();
+      // Pour l'étudiant : doit être ACTIF, même filière, même niveau
+      const isActive = exam.status === 'actif' || exam.status === 'active';
+      const matchFiliere = (exam.filiereId || '').toLowerCase() === userFiliere;
       const matchNiveau = exam.niveau === userNiveau;
-      return matchFiliere && matchNiveau;
+
+      return isActive && matchFiliere && matchNiveau;
     });
+  }
+
+  /**
+   * Calcule le nombre exact d'épreuves actives pour le badge de notification
+   */
+  getActiveExamsCountForUser(user) {
+    if (!user) return 0;
+    const role = normalizeRole(user.role);
+    if (role === ROLES.ADMIN || role === ROLES.MODERATOR) {
+      return this.exams.filter((e) => e.status === 'actif' || e.status === 'active').length;
+    }
+    const userFiliere = (user.filiereId || user.filiere || 'Informatique').toLowerCase();
+    const userNiveau = user.niveau || 'L2';
+    return this.exams.filter(
+      (e) =>
+        (e.status === 'actif' || e.status === 'active') &&
+        (e.filiereId || '').toLowerCase() === userFiliere &&
+        e.niveau === userNiveau
+    ).length;
   }
 
   /**
    * Récupère un examen précis avec vérification stricte de périmètre
    */
   getExamById(examId, user) {
-    const exam = EXAMS_CATALOG.find((e) => e.id === examId);
+    const exam = this.exams.find((e) => String(e.id) === String(examId));
     if (!exam) return null;
 
     if (user) {
       const role = normalizeRole(user.role);
-      const userFiliere = user.filiereId || user.filiere || 'Informatique';
+      const userFiliere = (user.filiereId || user.filiere || 'Informatique').toLowerCase();
       const userNiveau = user.niveau || 'L2';
 
-      if (role !== ROLES.ADMIN) {
-        if (exam.filiereId.toLowerCase() !== userFiliere.toLowerCase()) {
+      if (role !== ROLES.ADMIN && role !== ROLES.MODERATOR) {
+        if ((exam.filiereId || '').toLowerCase() !== userFiliere) {
           throw new Error(
-            `Violation de cloisonnement : Cet examen est réservé aux étudiants de la filière ${exam.filiereId}. Votre profil est assigné à ${userFiliere}.`
+            `Violation de cloisonnement : Cet examen est réservé aux étudiants de la filière ${exam.filiereId}. Votre profil est assigné à ${user.filiere}.`
           );
         }
         if (exam.niveau !== userNiveau) {
@@ -294,10 +433,123 @@ class ExamService {
             `Violation de niveau : Cet examen est réservé au niveau ${exam.niveau}. Votre niveau actuel est ${userNiveau}.`
           );
         }
+        if (exam.status !== 'actif' && exam.status !== 'active') {
+          throw new Error(
+            `Composition indisponible : Cet examen est actuellement au statut "${exam.status || 'brouillon'}".`
+          );
+        }
       }
     }
 
     return exam;
+  }
+
+  /**
+   * Création sécurisée d'une nouvelle épreuve (Admin / Modérateur)
+   */
+  createExam(payload, authorUser) {
+    const questions = Array.isArray(payload.questions) ? payload.questions : [];
+    const totalPoints = questions.reduce((acc, q) => acc + (Number(q.points) || 1), 0);
+
+    const newExam = {
+      id: 'exam-' + Date.now(),
+      codeUe: (payload.codeUe || `${payload.filiereId?.slice(0, 3)?.toUpperCase() || 'UE'}${payload.niveau || '1'}`).trim().toUpperCase(),
+      filiereId: payload.filiereId || 'Informatique',
+      niveau: payload.niveau || 'L1',
+      titre: payload.titre.trim(),
+      description: payload.description?.trim() || 'Épreuve en ligne officielle.',
+      durationMinutes: Math.max(5, Number(payload.durationMinutes) || 20),
+      totalPoints: totalPoints || 20,
+      passPercentage: Number(payload.passPercentage) || 50,
+      academicYear: payload.academicYear || '2025-2026',
+      professor: payload.professor?.trim() || authorUser?.fullName || authorUser?.nom || 'Département Scientifique',
+      university: authorUser?.universityName || 'Université de Yaoundé I (UY1)',
+      status: payload.status || 'actif', // 'brouillon' | 'actif' | 'termine'
+      dateDebut: payload.dateDebut || new Date().toISOString().slice(0, 16),
+      dateFin: payload.dateFin || new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString().slice(0, 16),
+      instructions: payload.instructions && payload.instructions.length > 0 ? payload.instructions : [
+        'Chaque question possède une ou plusieurs réponses précises.',
+        'Compte à rebours synchrone : toute sortie de fenêtre est comptabilisée dans l\'indice d\'intégrité.',
+        'Vos réponses sont automatiquement sauvegardées en continu.',
+        'Soumission définitive obligatoire avec signature par matricule.',
+      ],
+      questions: questions.length > 0 ? questions : [
+        {
+          id: 'q1',
+          text: 'Question fondamentale du cours :',
+          type: 'single',
+          points: 5,
+          options: [
+            { id: 'opt_a', label: 'Option A (Correcte)' },
+            { id: 'opt_b', label: 'Option B' },
+            { id: 'opt_c', label: 'Option C' },
+          ],
+          correctOptionId: 'opt_a',
+          explanation: 'Explication pédagogique.',
+        },
+      ],
+      createdAt: new Date().toISOString(),
+      authorMatricule: authorUser?.matricule || null,
+      authorName: authorUser?.fullName || authorUser?.nom || 'Admin',
+    };
+
+    const updated = [newExam, ...this.exams];
+    this.saveExams(updated);
+    return newExam;
+  }
+
+  /**
+   * Mise à jour d'un examen existant
+   */
+  updateExam(examId, updates) {
+    let updatedExam = null;
+    const updatedList = this.exams.map((e) => {
+      if (String(e.id) === String(examId)) {
+        const questions = updates.questions || e.questions;
+        const totalPoints = questions.reduce((acc, q) => acc + (Number(q.points) || 1), 0);
+        updatedExam = {
+          ...e,
+          ...updates,
+          totalPoints,
+          updatedAt: new Date().toISOString(),
+        };
+        return updatedExam;
+      }
+      return e;
+    });
+
+    this.saveExams(updatedList);
+    return updatedExam;
+  }
+
+  /**
+   * Bascule rapide du statut de gestion d'une épreuve ('brouillon' | 'actif' | 'termine')
+   */
+  toggleExamStatus(examId, targetStatus) {
+    let updatedExam = null;
+    const updatedList = this.exams.map((e) => {
+      if (String(e.id) === String(examId)) {
+        updatedExam = {
+          ...e,
+          status: targetStatus,
+          updatedAt: new Date().toISOString(),
+        };
+        return updatedExam;
+      }
+      return e;
+    });
+
+    this.saveExams(updatedList);
+    return updatedExam;
+  }
+
+  /**
+   * Suppression d'un examen
+   */
+  deleteExam(examId) {
+    const filtered = this.exams.filter((e) => String(e.id) !== String(examId));
+    this.saveExams(filtered);
+    return true;
   }
 
   /**
@@ -319,9 +571,6 @@ class ExamService {
     }
   }
 
-  /**
-   * Charge le brouillon sauvegardé en cas de rafraîchissement
-   */
   loadDraftAnswers(examId, studentMatricule) {
     const key = `${STORAGE_DRAFT_KEY}${examId}_${studentMatricule}`;
     try {
@@ -344,33 +593,57 @@ class ExamService {
   /**
    * Soumission finale et correction automatique sécurisée de l'examen
    */
-  submitExam(examId, user, answers, { focusLossCount = 0, timeTakenSeconds = 0 } = {}) {
+  submitExam(examId, user, answers, { focusLossCount = 0, timeTakenSeconds = 0, submissionReason = 'normal' } = {}) {
     const exam = this.getExamById(examId, user);
     if (!exam) throw new Error('Examen introuvable');
 
     let totalEarned = 0;
     const questionsBreakdown = exam.questions.map((q) => {
       const studentAnswer = answers[q.id];
-      const isCorrect = studentAnswer === q.correctOptionId;
-      const pointsEarned = isCorrect ? q.points : 0;
+
+      // Question de type QCM / Single choice
+      if (q.type === 'single' || q.type === 'qcm' || !q.type) {
+        const isCorrect = studentAnswer === q.correctOptionId;
+        const pointsEarned = isCorrect ? q.points : 0;
+        totalEarned += pointsEarned;
+
+        return {
+          questionId: q.id,
+          questionText: q.text,
+          type: 'single',
+          studentAnswerId: studentAnswer || null,
+          correctOptionId: q.correctOptionId,
+          isCorrect,
+          pointsPossible: q.points,
+          pointsEarned,
+          explanation: q.explanation,
+        };
+      }
+
+      // Question à développement / libre : Auto-notation bienveillante si renseigné + trace pour relecture
+      const textAnswer = String(studentAnswer || '').trim();
+      const hasAnswered = textAnswer.length > 10;
+      // Attribution proportionnelle si l'étudiant a développé
+      const pointsEarned = hasAnswered ? q.points : 0;
       totalEarned += pointsEarned;
 
       return {
         questionId: q.id,
         questionText: q.text,
-        studentAnswerId: studentAnswer || null,
-        correctOptionId: q.correctOptionId,
-        isCorrect,
+        type: 'development',
+        studentTextAnswer: textAnswer || 'Aucune réponse fournie',
+        isCorrect: hasAnswered,
+        isDevelopment: true,
         pointsPossible: q.points,
         pointsEarned,
-        explanation: q.explanation,
+        explanation: q.explanation || 'Évaluation textuelle académique enregistrée.',
       };
     });
 
     const percentage = Math.round((totalEarned / exam.totalPoints) * 100);
     const passed = percentage >= exam.passPercentage;
 
-    // Calcul de l'indice d'intégrité anti-fraude (100% - pénalités de changement de fenêtre)
+    // Calcul de l'indice d'intégrité anti-fraude (100% - pénalités)
     const integrityPenalty = Math.min(60, focusLossCount * 15);
     const integrityScore = Math.max(40, 100 - integrityPenalty);
 
@@ -382,7 +655,7 @@ class ExamService {
       filiereId: exam.filiereId,
       niveau: exam.niveau,
       studentMatricule: user.matricule || '23S40192',
-      studentNom: user.nom || 'Étudiant UY1',
+      studentNom: user.fullName || user.nom || 'Étudiant UY1',
       studentEmail: user.email,
       score: totalEarned,
       totalPoints: exam.totalPoints,
@@ -391,6 +664,7 @@ class ExamService {
       timeTakenSeconds,
       focusLossCount,
       integrityScore,
+      submissionReason,
       submittedAt: new Date().toISOString(),
       breakdown: questionsBreakdown,
     };
@@ -402,12 +676,13 @@ class ExamService {
     return submissionRecord;
   }
 
-  /**
-   * Récupère les copies et notes associées au matricule de l'étudiant
-   */
   getStudentSubmissions(studentMatricule) {
     if (!studentMatricule) return [];
     return this.submissions.filter((s) => s.studentMatricule === studentMatricule);
+  }
+
+  getSubmissionsForExam(examId) {
+    return this.submissions.filter((s) => String(s.examId) === String(examId));
   }
 }
 

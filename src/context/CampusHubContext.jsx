@@ -2,6 +2,7 @@
 import { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { CAMEROON_UNIVERSITIES } from '../constants/academicConstants';
 import { normalizeRole, ROLE_LABELS } from '../constants/rbacConstants';
+import { useAuth } from './AuthContext';
 
 const CampusHubContext = createContext(null);
 
@@ -12,6 +13,9 @@ const STORAGE_KEY_ROLE = 'campushub_user_role';
 const STORAGE_KEY_UNI = 'campushub_selected_university';
 
 export function CampusHubProvider({ children }) {
+  const auth = useAuth();
+  const authUser = auth?.user;
+
   // National University Selection: 'ALL' or specific university ID ('UY1', 'ENSPY', 'UDO', etc.)
   const [selectedUniversityId, setSelectedUniversityId] = useState(() => {
     try {
@@ -24,9 +28,10 @@ export function CampusHubProvider({ children }) {
   // Pro Status State
   const [isPro, setIsPro] = useState(() => {
     try {
+      if (authUser?.isPro !== undefined) return authUser.isPro;
       return localStorage.getItem(STORAGE_KEY_PRO) === 'true';
     } catch {
-      return false;
+      return true;
     }
   });
 
@@ -43,6 +48,7 @@ export function CampusHubProvider({ children }) {
   // Academic Role: 'Étudiant' | 'Délégué' | 'Modérateur' | 'Administrateur'
   const [userRole, setUserRole] = useState(() => {
     try {
+      if (authUser?.roleLabel) return authUser.roleLabel;
       const saved = localStorage.getItem(STORAGE_KEY_ROLE) || 'Étudiant';
       return ROLE_LABELS[normalizeRole(saved)] || 'Étudiant';
     } catch {
@@ -151,6 +157,9 @@ export function CampusHubProvider({ children }) {
   const switchRole = (newRole) => {
     const label = ROLE_LABELS[normalizeRole(newRole)] || newRole;
     setUserRole(label);
+    if (auth?.switchRole) {
+      auth.switchRole(newRole);
+    }
     triggerToast({
       title: `Rôle mis à jour : ${label}`,
       message: `Vos privilèges sur CampusHub ont été ajustés en mode ${label}.`,
@@ -182,41 +191,50 @@ export function CampusHubProvider({ children }) {
   const progressPercent = Math.min(100, Math.round(((xp % 500) / 500) * 100));
 
   // Feature Permissions & Quotas
+  const effectiveRole = authUser?.roleLabel || userRole;
   const permissions = {
     isPro,
-    canAccessAdmin: userRole === 'Administrateur' || userRole === 'Modérateur',
-    isDelegate: userRole === 'Délégué',
-    isTeacher: userRole === 'Enseignant',
+    canAccessAdmin: effectiveRole === 'Administrateur' || effectiveRole === 'Modérateur',
+    isDelegate: effectiveRole === 'Délégué',
+    isTeacher: effectiveRole === 'Enseignant',
     playgroundRunsLimit: isPro ? Infinity : 10,
     aiSummariesLimit: isPro ? Infinity : 3,
     storageLimitGB: isPro ? 15 : 0.05,
     hasAntiPlagiarismFullAudit: isPro,
   };
 
+  const studentName = authUser?.fullName || authUser?.nom || authUser?.name || 'Yan Fotsing';
+  const studentMatricule = authUser?.matricule || '23S40192';
+  const studentStatus = authUser?.status || (isPro ? 'Étudiant Pro' : effectiveRole);
+
+  const student = {
+    fullName: studentName,
+    name: studentName,
+    matricule: studentMatricule,
+    status: studentStatus,
+    nationalId: authUser?.nationalId || 'CM-UY1-2026-0492',
+    filiere: authUser?.filiere || 'Informatique & Génie Logiciel',
+    niveau: authUser?.niveau || 'Licence 2',
+    universityId: selectedUniversity.id,
+    universityName: selectedUniversity.name,
+    universityShortName: selectedUniversity.shortName,
+    universityCity: selectedUniversity.city,
+    department: `${selectedUniversity.shortName} · Département Informatique`,
+    email: authUser?.email || 'yanfotsing96@gmail.com',
+    role: effectiveRole,
+    isPro,
+    xp,
+    currentLevel,
+    nextLevelXp,
+    progressPercent,
+    subscription,
+  };
+
   return (
     <CampusHubContext.Provider
       value={{
         // Student Info
-        student: {
-          name: 'Yanick Fotsing',
-          matricule: '23S40192',
-          nationalId: 'CM-UY1-2026-0492',
-          filiere: 'Informatique & Génie Logiciel',
-          niveau: 'Licence 2',
-          universityId: selectedUniversity.id,
-          universityName: selectedUniversity.name,
-          universityShortName: selectedUniversity.shortName,
-          universityCity: selectedUniversity.city,
-          department: `${selectedUniversity.shortName} · Département Informatique`,
-          email: 'yanfotsing96@gmail.com',
-          role: userRole,
-          isPro,
-          xp,
-          currentLevel,
-          nextLevelXp,
-          progressPercent,
-          subscription,
-        },
+        student,
         selectedUniversity,
         selectedUniversityId,
         setUniversity,

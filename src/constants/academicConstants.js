@@ -160,18 +160,20 @@ export const DOCUMENT_TYPES = [
 
 export const DEFAULT_USER = {
   id: 'usr_nat_001',
-  nom: 'Yanick Fotsing',
+  nom: 'Yan Fotsing',
+  fullName: 'Yan Fotsing',
   email: 'yanfotsing96@gmail.com',
   universityId: 'UY1',
   universityName: 'Université de Yaoundé I',
   filiere: 'Informatique',
   niveau: 'L2',
   matricule: '23S40192',
+  status: 'Étudiant Pro',
   nationalId: 'CM-UY1-2026-0492',
   bio: 'Étudiant en Licence 2 Informatique (UY1/Polytechnique). Passionné par le développement système en C, l\'intelligence artificielle et le Cloud.',
   avatar: null,
   role: 'Étudiant',
-  isPro: false,
+  isPro: true,
   badges: ['🇨🇲 CampusHub National', '💻 Développeur C/Python', '🚀 Major Algorithmique'],
   stats: {
     contributions: 14,
@@ -197,6 +199,9 @@ export const DEFAULT_RESOURCES = [
     rating: 4.9,
     format: 'PDF',
     updatedAt: '2026-03-15',
+    authorMatricule: '23U1084',
+    authorName: 'Brice Kamga (Délégué INF201)',
+    authorRole: 'delegate',
   },
   {
     id: 2,
@@ -214,6 +219,9 @@ export const DEFAULT_RESOURCES = [
     rating: 4.8,
     format: 'PDF',
     updatedAt: '2026-03-10',
+    authorMatricule: '23U1084',
+    authorName: 'Brice Kamga (Délégué INF201)',
+    authorRole: 'delegate',
   },
   {
     id: 3,
@@ -231,6 +239,9 @@ export const DEFAULT_RESOURCES = [
     rating: 4.7,
     format: 'PDF',
     updatedAt: '2026-02-28',
+    authorMatricule: 'ADM-UY1-001',
+    authorName: 'Prof. Joseph Nguemo (Super Admin)',
+    authorRole: 'admin',
   },
   {
     id: 4,
@@ -248,6 +259,9 @@ export const DEFAULT_RESOURCES = [
     rating: 4.9,
     format: 'PDF',
     updatedAt: '2026-02-28',
+    authorMatricule: '23U5021',
+    authorName: 'Délégué Mathématiques',
+    authorRole: 'delegate',
   },
   {
     id: 5,
@@ -265,6 +279,9 @@ export const DEFAULT_RESOURCES = [
     rating: 4.6,
     format: 'PDF',
     updatedAt: '2026-01-20',
+    authorMatricule: '23U6110',
+    authorName: 'Délégué Physique',
+    authorRole: 'delegate',
   },
   {
     id: 6,
@@ -282,6 +299,9 @@ export const DEFAULT_RESOURCES = [
     rating: 4.8,
     format: 'PDF',
     updatedAt: '2026-03-01',
+    authorMatricule: '23U7204',
+    authorName: 'Délégué Réseaux',
+    authorRole: 'delegate',
   },
   {
     id: 7,
@@ -299,6 +319,9 @@ export const DEFAULT_RESOURCES = [
     rating: 4.8,
     format: 'PDF',
     updatedAt: '2026-03-12',
+    authorMatricule: '23U1084',
+    authorName: 'Brice Kamga (Délégué INF201)',
+    authorRole: 'delegate',
   },
   {
     id: 8,
@@ -316,6 +339,9 @@ export const DEFAULT_RESOURCES = [
     rating: 4.5,
     format: 'PDF',
     updatedAt: '2026-02-05',
+    authorMatricule: '23U8301',
+    authorName: 'Délégué Chimie',
+    authorRole: 'delegate',
   },
   {
     id: 9,
@@ -333,6 +359,9 @@ export const DEFAULT_RESOURCES = [
     rating: 4.6,
     format: 'PDF',
     updatedAt: '2026-02-22',
+    authorMatricule: 'MOD-FS-042',
+    authorName: 'Dr. Sarah Eyenga (Modératrice)',
+    authorRole: 'moderator',
   },
 ];
 

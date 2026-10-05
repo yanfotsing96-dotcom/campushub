@@ -14,7 +14,7 @@ export default function SupportTicketForm() {
   const { student, triggerToast } = useCampusHub();
 
   const [formData, setFormData] = useState({
-    name: student.name || 'Yanick Fotsing',
+    name: student.fullName || student.name || 'Yan Fotsing',
     email: student.email || 'yanfotsing96@gmail.com',
     university: student.universityShortName || 'Univ. Yaoundé I',
     category: 'bug',

@@ -113,7 +113,7 @@ export const RATED_DOCUMENTS = [
 ];
 
 export const STUDENT_GAMIFICATION_PROFILE = {
-  name: 'Yanick Fotsing',
+  name: 'Yan Fotsing',
   matricule: '23S40192',
   level: 'Licence 2 · Informatique',
   rank: 'Tuteur Académique Émérite',
@@ -209,7 +209,7 @@ export const MERIT_BADGES = [
 export const UY1_LEADERBOARD = [
   { rank: 1, name: 'Jean-Paul Kamga', filiere: 'L3 Info', xp: 5120, badges: 9, avatarBg: '#6366f1' },
   { rank: 2, name: 'Christelle Mvondo', filiere: 'L2 Maths-Info', xp: 4210, badges: 7, avatarBg: '#10b981' },
-  { rank: 3, name: 'Yanick Fotsing (Moi)', filiere: 'L2 Info', xp: 3450, badges: 5, avatarBg: '#8b5cf6', isCurrentUser: true },
+  { rank: 3, name: 'Yan Fotsing (Moi)', filiere: 'L2 Info', xp: 3450, badges: 5, avatarBg: '#8b5cf6', isCurrentUser: true },
   { rank: 4, name: 'Éric Talla', filiere: 'M1 Génie Logiciel', xp: 2980, badges: 6, avatarBg: '#f59e0b' },
   { rank: 5, name: 'Vanessa Manga', filiere: 'L3 Info', xp: 2640, badges: 4, avatarBg: '#ec4899' },
 ];

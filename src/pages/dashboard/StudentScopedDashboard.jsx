@@ -14,6 +14,7 @@ import { departmentScopeService } from '../../services/departmentScopeService';
 import { examService } from '../../services/examService';
 import RoleBadge from '../../components/common/RoleBadge';
 import ScopedCoursesManager from '../../components/courses/ScopedCoursesManager';
+import DynamicPoleTechBlock from '../../components/tech/DynamicPoleTechBlock';
 
 export default function StudentScopedDashboard() {
   const { user } = useAuth();
@@ -140,7 +141,10 @@ export default function StudentScopedDashboard() {
         </div>
       </div>
 
-      {/* 3. Navigation Tabs */}
+      {/* 3. Pôle Spécialisé & Outils Filière Dynamiques */}
+      <DynamicPoleTechBlock showSimulator={false} />
+
+      {/* 4. Navigation Tabs */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-1.5 shadow-sm">
         <div className="grid grid-cols-3 gap-1.5 max-w-xl">
           <button

@@ -171,6 +171,14 @@ export default function SecureExamRoom({ exam, onExit }) {
     setLastAutosave(new Date().toLocaleTimeString());
   };
 
+  const handleTextAnswer = (questionId, textVal) => {
+    if (result || isLockedByAntiCheat) return;
+    const updated = { ...answers, [questionId]: textVal };
+    setAnswers(updated);
+    examService.saveDraftAnswers(exam.id, studentMatricule, updated, remainingSeconds);
+    setLastAutosave(new Date().toLocaleTimeString());
+  };
+
   const formatTime = (secs) => {
     const mins = Math.floor(secs / 60);
     const s = secs % 60;
@@ -469,33 +477,53 @@ export default function SecureExamRoom({ exam, onExit }) {
           {currentQ.text}
         </h3>
 
-        {/* Options */}
-        <div className="space-y-3">
-          {currentQ.options.map((opt) => {
-            const isSelected = answers[currentQ.id] === opt.id;
-            return (
-              <label
-                key={opt.id}
-                className={`flex items-start gap-3 p-4 rounded-2xl border transition-all cursor-pointer ${
-                  isSelected
-                    ? 'bg-indigo-50/80 dark:bg-indigo-950/60 border-indigo-500 shadow-xs'
-                    : 'bg-slate-50/50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
-                }`}
-              >
-                <input
-                  type="radio"
-                  name={`question_${currentQ.id}`}
-                  checked={isSelected}
-                  onChange={() => handleSelectOption(currentQ.id, opt.id)}
-                  className="mt-0.5 text-indigo-600 focus:ring-indigo-500"
-                />
-                <span className="text-xs md:text-sm text-slate-800 dark:text-slate-200 font-medium leading-relaxed">
-                  {opt.label}
-                </span>
-              </label>
-            );
-          })}
-        </div>
+        {/* Options (QCM) ou Zone de Réponse Textuelle (Développement) */}
+        {currentQ.type === 'development' || !currentQ.options || currentQ.options.length === 0 ? (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-xs">
+              <span className="font-bold text-slate-700 dark:text-slate-300">
+                Votre argumentation & développement scientifique :
+              </span>
+              <span className="text-[11px] font-mono text-emerald-600 dark:text-emerald-400 font-semibold">
+                Sauvegarde automatique active
+              </span>
+            </div>
+            <textarea
+              rows={6}
+              value={answers[currentQ.id] || ''}
+              onChange={(e) => handleTextAnswer(currentQ.id, e.target.value)}
+              placeholder="Rédigez votre réponse structurée, démonstrations ou fragments de code C/Python..."
+              className="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/40 text-xs md:text-sm font-medium text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none leading-relaxed"
+            />
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {currentQ.options.map((opt) => {
+              const isSelected = answers[currentQ.id] === opt.id;
+              return (
+                <label
+                  key={opt.id}
+                  className={`flex items-start gap-3 p-4 rounded-2xl border transition-all cursor-pointer ${
+                    isSelected
+                      ? 'bg-indigo-50/80 dark:bg-indigo-950/60 border-indigo-500 shadow-xs'
+                      : 'bg-slate-50/50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 hover:bg-slate-100 dark:hover:bg-slate-800'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name={`question_${currentQ.id}`}
+                    checked={isSelected}
+                    onChange={() => handleSelectOption(currentQ.id, opt.id)}
+                    className="mt-0.5 text-indigo-600 focus:ring-indigo-500"
+                  />
+                  <span className="text-xs md:text-sm text-slate-800 dark:text-slate-200 font-medium leading-relaxed">
+                    {opt.label}
+                  </span>
+                </label>
+              );
+            })}
+          </div>
+        )}
 
         {/* Navigation & Final Submit */}
         <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">

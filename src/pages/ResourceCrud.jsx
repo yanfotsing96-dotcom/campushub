@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   BookOpen,
   Plus,
@@ -11,27 +11,80 @@ import {
   Layers,
   FileText,
   Library,
-  Sparkles
+  Sparkles,
+  ShieldCheck,
+  Crown,
+  Award,
+  Lock,
+  Download,
+  CheckCircle2,
+  AlertCircle,
 } from 'lucide-react';
 import '../styles/ResourceCrud.css';
 
 import { useResources } from '../hooks/useResources';
+import { usePermissions } from '../hooks/usePermissions';
+import { ROLES, ROLE_LABELS } from '../constants/rbacConstants';
 
 function ResourceCrud() {
-  const { resources, addResource, updateResource, deleteResource } = useResources();
+  const { resources, addResource, updateResource, deleteResource, recordDownload } = useResources();
+  const {
+    user,
+    role,
+    roleLabel,
+    isStudent,
+    isDelegate,
+    isModerator,
+    isAdmin,
+    canAddResource,
+    canModifyResource,
+    canDeleteResource,
+    switchRole,
+    demoProfiles,
+  } = usePermissions();
+
+  const userFiliere = user?.filiereId || user?.filiere || 'Informatique';
 
   const [formData, setFormData] = useState({
     titre: '',
-    filiere: 'Informatique',
-    niveau: 'L1',
-    description: ''
+    filiere: userFiliere,
+    niveau: user?.niveau || 'L1',
+    description: '',
   });
+
   const [editingId, setEditingId] = useState(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterFiliere, setFilterFiliere] = useState('all');
   const [filterNiveau, setFilterNiveau] = useState('all');
   const [sortBy, setSortBy] = useState('recent');
   const [confirmDeleteId, setConfirmDeleteId] = useState(null);
+  const [feedbackNotice, setFeedbackNotice] = useState(null);
+
+  // Derive effective editing state securely: if user role no longer permits editing, effectiveEditingId is null
+  const activeEditingResource = useMemo(() => {
+    return editingId !== null ? resources.find((r) => r.id === editingId) : null;
+  }, [editingId, resources]);
+
+  const canEditActive = useMemo(() => {
+    return activeEditingResource ? canModifyResource(activeEditingResource) : false;
+  }, [activeEditingResource, canModifyResource]);
+
+  const effectiveEditingId = canEditActive ? editingId : null;
+
+  // Derive the active filière value for the form:
+  // If editing an existing resource, use formData.filiere.
+  // If adding as delegate, force userFiliere. Otherwise, use formData.filiere.
+  const effectiveFiliere = effectiveEditingId !== null
+    ? formData.filiere
+    : (isDelegate ? userFiliere : (formData.filiere || 'Informatique'));
+
+  // Auto-dismiss feedback notice
+  useEffect(() => {
+    if (feedbackNotice) {
+      const timer = setTimeout(() => setFeedbackNotice(null), 3500);
+      return () => clearTimeout(timer);
+    }
+  }, [feedbackNotice]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -42,30 +95,80 @@ function ResourceCrud() {
     e.preventDefault();
     if (!formData.titre.trim()) return;
 
-    if (editingId !== null) {
-      updateResource(editingId, {
+    if (effectiveEditingId !== null) {
+      const targetResource = resources.find((r) => r.id === effectiveEditingId);
+      if (!targetResource || !canModifyResource(targetResource)) {
+        setFeedbackNotice({
+          type: 'error',
+          message: 'Action refusée : Vous n\'avez pas les permissions pour modifier cette ressource.',
+        });
+        return;
+      }
+
+      updateResource(effectiveEditingId, {
         ...formData,
+        filiere: effectiveFiliere,
         titre: formData.titre.trim(),
       });
       setEditingId(null);
+      setFeedbackNotice({
+        type: 'success',
+        message: 'Ressource mise à jour avec succès.',
+      });
     } else {
+      // Check RBAC permission for creation
+      if (!canAddResource(effectiveFiliere)) {
+        setFeedbackNotice({
+          type: 'error',
+          message: isStudent
+            ? 'Action non autorisée : Les étudiants ont un accès en lecture seule.'
+            : `Action non autorisée : En tant que délégué, vous ne pouvez publier que dans votre filière (${userFiliere}).`,
+        });
+        return;
+      }
+
       addResource({
         ...formData,
+        filiere: effectiveFiliere,
         titre: formData.titre.trim(),
+        universityName: user?.universityName || 'Université de Yaoundé I',
+        authorId: user?.id || null,
+        authorMatricule: user?.matricule || '23U1084',
+        authorName: user?.fullName || user?.nom || 'Délégué Promotion',
+        authorRole: role,
+      });
+
+      setFeedbackNotice({
+        type: 'success',
+        message: `Ressource publiée avec succès pour la filière ${effectiveFiliere} !`,
       });
     }
 
-    setFormData({ titre: '', filiere: 'Informatique', niveau: 'L1', description: '' });
+    setFormData({
+      titre: '',
+      filiere: isDelegate ? userFiliere : 'Informatique',
+      niveau: 'L1',
+      description: '',
+    });
   };
 
   const handleEdit = (res) => {
+    if (!canModifyResource(res)) {
+      setFeedbackNotice({
+        type: 'error',
+        message: 'Modification interdite pour ce document.',
+      });
+      return;
+    }
+
     setEditingId(res.id);
     setFormData({
       titre: res.titre,
       filiere: res.filiere,
       niveau: res.niveau,
-      description: res.description || ''
+      description: res.description || '',
     });
+
     const formElement = document.querySelector('.crud-form-card');
     if (formElement) {
       formElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -74,15 +177,42 @@ function ResourceCrud() {
 
   const handleCancelEdit = () => {
     setEditingId(null);
-    setFormData({ titre: '', filiere: 'Informatique', niveau: 'L1', description: '' });
+    setFormData({
+      titre: '',
+      filiere: isDelegate ? userFiliere : 'Informatique',
+      niveau: 'L1',
+      description: '',
+    });
   };
 
   const handleDelete = (id) => {
+    const targetResource = resources.find((r) => r.id === id);
+    if (!targetResource || !canDeleteResource(targetResource)) {
+      setFeedbackNotice({
+        type: 'error',
+        message: 'Suppression interdite pour ce document.',
+      });
+      setConfirmDeleteId(null);
+      return;
+    }
+
     deleteResource(id);
     if (editingId === id) {
       handleCancelEdit();
     }
     setConfirmDeleteId(null);
+    setFeedbackNotice({
+      type: 'success',
+      message: 'Ressource supprimée du catalogue.',
+    });
+  };
+
+  const handleDownload = (res) => {
+    recordDownload(res.id);
+    setFeedbackNotice({
+      type: 'success',
+      message: `Téléchargement lancé pour "${res.titre}" (Format ${res.format || 'PDF'}).`,
+    });
   };
 
   // Filtrage et tri mémorisés
@@ -91,7 +221,8 @@ function ResourceCrud() {
       .filter((res) => {
         const matchesSearch =
           res.titre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (res.description && res.description.toLowerCase().includes(searchQuery.toLowerCase()));
+          (res.description && res.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
+          (res.codeUe && res.codeUe.toLowerCase().includes(searchQuery.toLowerCase()));
         const matchesFiliere = filterFiliere === 'all' || res.filiere === filterFiliere;
         const matchesNiveau = filterNiveau === 'all' || res.niveau === filterNiveau;
         return matchesSearch && matchesFiliere && matchesNiveau;
@@ -111,13 +242,100 @@ function ResourceCrud() {
     return {
       total: resources.length,
       filieresCount: filieres.size,
-      niveauxCount: niveaux.size
+      niveauxCount: niveaux.size,
     };
   }, [resources]);
 
   return (
     <div className="crud-container">
-      {/* En-tête principal */}
+      {/* 1. Simulateur RBAC en Direct pour Tests Rapides */}
+      <section className="rbac-simulator-bar" aria-label="Simulateur RBAC de Profils Démo">
+        <div className="rbac-sim-label">
+          <ShieldCheck size={16} className="text-indigo-600 dark:text-indigo-400" />
+          <span>Contrôle d'Accès RBAC :</span>
+        </div>
+        <div className="rbac-sim-buttons">
+          {demoProfiles && demoProfiles.map((p) => {
+            const isActive = role === p.role;
+            const Icon = p.role === ROLES.ADMIN ? Crown : p.role === ROLES.MODERATOR ? ShieldCheck : p.role === ROLES.DELEGATE ? Award : BookOpen;
+            return (
+              <button
+                key={p.role}
+                type="button"
+                className={`rbac-sim-btn ${isActive ? 'active' : ''}`}
+                onClick={() => switchRole(p.role)}
+                title={`Basculer vers le profil démo ${ROLE_LABELS[p.role]} (${p.nom})`}
+              >
+                <Icon size={14} />
+                <span>{ROLE_LABELS[p.role]}</span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* 2. Bannière de Périmètre Sécurisé (Scope & Permissions) */}
+      <section className={`rbac-scope-banner ${role}`} aria-live="polite">
+        <div className="rbac-scope-left">
+          <span className={`rbac-role-pill ${
+            isAdmin
+              ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/60 dark:text-purple-300'
+              : isModerator
+              ? 'bg-sky-100 text-sky-800 dark:bg-sky-900/60 dark:text-sky-300'
+              : isDelegate
+              ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300'
+              : 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-300'
+          }`}>
+            {isAdmin && <Crown size={13} />}
+            {isModerator && <ShieldCheck size={13} />}
+            {isDelegate && <Award size={13} />}
+            {isStudent && <BookOpen size={13} />}
+            <span>Profil : {roleLabel}</span>
+          </span>
+
+          <div className="rbac-scope-text">
+            {isStudent && (
+              <span>
+                <strong>Mode Lecture Seule :</strong> Vous pouvez consulter et télécharger les cours. Le dépôt et la modification de ressources sont réservés aux délégués et modérateurs.
+              </span>
+            )}
+            {isDelegate && (
+              <span>
+                <strong>Écriture Ciblée ({userFiliere}) :</strong> Vous pouvez ajouter des cours pour votre filière et gérer les ressources publiées par votre classe.
+              </span>
+            )}
+            {(isAdmin || isModerator) && (
+              <span>
+                <strong>Accès Intégral :</strong> Vous disposez des autorisations complètes d'ajout, modification et suppression sur tous les départements.
+              </span>
+            )}
+          </div>
+        </div>
+
+        <div className="text-xs font-mono text-slate-500 dark:text-slate-400">
+          Matricule : <strong>{user?.matricule || '23S40192'}</strong>
+        </div>
+      </section>
+
+      {/* 3. Feedback toast interactif */}
+      {feedbackNotice && (
+        <div
+          className={`flex items-center gap-2.5 p-3.5 mb-6 rounded-xl border text-sm font-semibold transition-all ${
+            feedbackNotice.type === 'error'
+              ? 'bg-red-50 dark:bg-red-950/60 text-red-700 dark:text-red-300 border-red-200 dark:border-red-800'
+              : feedbackNotice.type === 'warning'
+              ? 'bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 border-amber-200 dark:border-amber-800'
+              : 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800'
+          }`}
+        >
+          {feedbackNotice.type === 'error' && <AlertCircle size={18} className="text-red-600 flex-shrink-0" />}
+          {feedbackNotice.type === 'warning' && <AlertCircle size={18} className="text-amber-600 flex-shrink-0" />}
+          {feedbackNotice.type === 'success' && <CheckCircle2 size={18} className="text-emerald-600 flex-shrink-0" />}
+          <span>{feedbackNotice.message}</span>
+        </div>
+      )}
+
+      {/* 4. En-tête principal */}
       <header className="crud-header">
         <div className="crud-title-group">
           <h2>
@@ -125,12 +343,12 @@ function ResourceCrud() {
             Gestion des Ressources Pédagogiques
           </h2>
           <p className="crud-subtitle">
-            Centralisez, mettez à jour et organisez les supports de cours universitaires.
+            Catalogue académique vérifié des universités et grandes écoles du Cameroun.
           </p>
         </div>
       </header>
 
-      {/* Cartes d'indicateurs rapides */}
+      {/* 5. Cartes d'indicateurs rapides */}
       <section className="crud-stats-row">
         <div className="crud-stat-card">
           <div className="crud-stat-icon-wrapper">
@@ -163,130 +381,157 @@ function ResourceCrud() {
         </div>
       </section>
 
-      {/* Formulaire de création / modification */}
-      <div className={`crud-form-card ${editingId !== null ? 'editing' : ''}`}>
-        <div className="form-header-row">
-          <h3>
-            {editingId !== null ? (
-              <>
-                <Pencil size={18} className="form-label-icon" />
-                Modifier la ressource
-              </>
-            ) : (
-              <>
-                <Plus size={18} className="form-label-icon" />
-                Ajouter une nouvelle ressource
-              </>
-            )}
-          </h3>
-          {editingId !== null && (
-            <span className="form-badge-mode">Mode Édition</span>
-          )}
+      {/* 6. Formulaire conditionnel : Masqué pour les Étudiants / Affiché pour Délégués, Modérateurs, Admins */}
+      {isStudent ? (
+        <div className="rbac-read-only-card" role="region" aria-label="Notice lecture seule étudiant">
+          <div className="rbac-read-only-icon">
+            <Lock size={20} />
+          </div>
+          <div className="rbac-read-only-content">
+            <h4>Accès Consultation Étudiant Actif</h4>
+            <p>
+              En tant qu'étudiant standard, vous bénéficiez d'un accès libre pour consulter, filtrer et télécharger l'ensemble des cours et annales. Le formulaire d'ajout et les outils d'édition sont réservés aux délégués de filière et administrateurs.
+            </p>
+          </div>
         </div>
-
-        <form onSubmit={handleSubmit} className="form-grid">
-          <div className="form-group">
-            <label htmlFor="titre">
-              <FileText size={15} className="form-label-icon" />
-              Titre du cours ou document :
-            </label>
-            <div className="input-with-icon">
-              <BookOpen size={16} className="input-prefix-icon" />
-              <input
-                id="titre"
-                type="text"
-                name="titre"
-                value={formData.titre}
-                onChange={handleChange}
-                placeholder="Ex: Programmation Web Avancée (React & Node.js)"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="form-row">
-            <div className="form-group">
-              <label htmlFor="filiere">
-                <Layers size={15} className="form-label-icon" />
-                Filière académique :
-              </label>
-              <select
-                id="filiere"
-                name="filiere"
-                value={formData.filiere}
-                onChange={handleChange}
-              >
-                <option value="Informatique">Informatique</option>
-                <option value="Mathématiques">Mathématiques</option>
-                <option value="Physique">Physique</option>
-                <option value="Chimie">Chimie</option>
-                <option value="Biologie">Biologie</option>
-                <option value="Économie">Économie</option>
-              </select>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="niveau">
-                <GraduationCap size={15} className="form-label-icon" />
-                Niveau d'études :
-              </label>
-              <select
-                id="niveau"
-                name="niveau"
-                value={formData.niveau}
-                onChange={handleChange}
-              >
-                <option value="L1">Licence 1 (L1)</option>
-                <option value="L2">Licence 2 (L2)</option>
-                <option value="L3">Licence 3 (L3)</option>
-                <option value="M1">Master 1 (M1)</option>
-                <option value="M2">Master 2 (M2)</option>
-              </select>
-            </div>
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="description">
-              <FileText size={15} className="form-label-icon" />
-              Description & Objectifs :
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Ex: Contenu du cours, chapitres clés, références bibliographiques ou prérequis..."
-              rows={3}
-            />
-          </div>
-
-          <div className="form-actions">
-            <button type="submit" className="btn-primary">
+      ) : (
+        <div className={`crud-form-card ${editingId !== null ? 'editing' : ''}`}>
+          <div className="form-header-row">
+            <h3>
               {editingId !== null ? (
                 <>
-                  <Check size={16} /> Mettre à jour
+                  <Pencil size={18} className="form-label-icon" />
+                  Modifier la ressource pédagogique
                 </>
               ) : (
                 <>
-                  <Plus size={16} /> Ajouter la ressource
+                  <Plus size={18} className="form-label-icon" />
+                  Ajouter une nouvelle ressource {isDelegate && `(Filière : ${userFiliere})`}
                 </>
               )}
-            </button>
-
+            </h3>
             {editingId !== null && (
-              <button
-                type="button"
-                className="btn-secondary"
-                onClick={handleCancelEdit}
-              >
-                <X size={15} /> Annuler
-              </button>
+              <span className="form-badge-mode">Mode Édition Sécurisé</span>
             )}
           </div>
-        </form>
-      </div>
 
-      {/* Barre d'outils et recherche de la liste */}
+          <form onSubmit={handleSubmit} className="form-grid">
+            <div className="form-group">
+              <label htmlFor="titre">
+                <FileText size={15} className="form-label-icon" />
+                Titre du cours ou document :
+              </label>
+              <div className="input-with-icon">
+                <BookOpen size={16} className="input-prefix-icon" />
+                <input
+                  id="titre"
+                  type="text"
+                  name="titre"
+                  value={formData.titre}
+                  onChange={handleChange}
+                  placeholder="Ex: Algorithmes Gloutons et Programmation Dynamique (Python & C)"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <div className="form-group">
+                <label htmlFor="filiere">
+                  <Layers size={15} className="form-label-icon" />
+                  Filière académique :
+                </label>
+                <select
+                  id="filiere"
+                  name="filiere"
+                  value={formData.filiere}
+                  onChange={handleChange}
+                >
+                  {isDelegate ? (
+                    <option value={userFiliere}>{userFiliere} (Votre filière assignée)</option>
+                  ) : (
+                    <>
+                      <option value="Informatique">Informatique & Génie Logiciel</option>
+                      <option value="IA-Data">IA & Data Science</option>
+                      <option value="Cyber-Reseaux">Systèmes, Réseaux & Cyber</option>
+                      <option value="Mathématiques">Mathématiques & Modélisation</option>
+                      <option value="Physique">Physique & Électronique</option>
+                      <option value="Chimie">Chimie & Matériaux</option>
+                      <option value="Biologie">Biosciences & Santé</option>
+                      <option value="Genie-Civil">Génie Civil & Environnement</option>
+                    </>
+                  )}
+                </select>
+                {isDelegate && (
+                  <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1">
+                    ✓ Autorisation accordée uniquement sur votre filière de mandat ({userFiliere}).
+                  </span>
+                )}
+              </div>
+
+              <div className="form-group">
+                <label htmlFor="niveau">
+                  <GraduationCap size={15} className="form-label-icon" />
+                  Niveau d'études :
+                </label>
+                <select
+                  id="niveau"
+                  name="niveau"
+                  value={formData.niveau}
+                  onChange={handleChange}
+                >
+                  <option value="L1">Licence 1 (L1)</option>
+                  <option value="L2">Licence 2 (L2)</option>
+                  <option value="L3">Licence 3 (L3)</option>
+                  <option value="M1">Master 1 (M1)</option>
+                  <option value="M2">Master 2 (M2)</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="description">
+                <FileText size={15} className="form-label-icon" />
+                Description & Objectifs d'apprentissage :
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                placeholder="Ex: Contenu du syllabus, chapitres clés, références bibliographiques ou prérequis d'examen..."
+                rows={3}
+              />
+            </div>
+
+            <div className="form-actions">
+              <button type="submit" className="btn-primary">
+                {editingId !== null ? (
+                  <>
+                    <Check size={16} /> Mettre à jour
+                  </>
+                ) : (
+                  <>
+                    <Plus size={16} /> Publier la ressource
+                  </>
+                )}
+              </button>
+
+              {editingId !== null && (
+                <button
+                  type="button"
+                  className="btn-secondary"
+                  onClick={handleCancelEdit}
+                >
+                  <X size={15} /> Annuler
+                </button>
+              )}
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* 7. Barre d'outils et filtres de recherche */}
       <section className="crud-list-section">
         <div className="section-toolbar">
           <div className="section-toolbar-left">
@@ -301,7 +546,7 @@ function ResourceCrud() {
               <Search size={15} className="search-box-icon" />
               <input
                 type="text"
-                placeholder="Filtrer les cours..."
+                placeholder="Rechercher par titre ou mot-clé..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
@@ -314,14 +559,28 @@ function ResourceCrud() {
               aria-label="Filtrer par filière"
             >
               <option value="all">Toutes les filières</option>
-              <option value="Informatique">Informatique & Génie Logiciel (Tech)</option>
-              <option value="IA-Data">IA & Data Science (Tech)</option>
-              <option value="Cyber-Reseaux">Systèmes, Réseaux & Cyber (Tech)</option>
+              <option value="Informatique">Informatique & Génie Logiciel</option>
+              <option value="IA-Data">IA & Data Science</option>
+              <option value="Cyber-Reseaux">Systèmes, Réseaux & Cyber</option>
               <option value="Mathématiques">Mathématiques & Modélisation</option>
               <option value="Physique">Physique & Électronique</option>
               <option value="Chimie">Chimie & Matériaux</option>
               <option value="Biologie">Biosciences & Santé</option>
               <option value="Genie-Civil">Génie Civil & Environnement</option>
+            </select>
+
+            <select
+              className="filter-select"
+              value={filterNiveau}
+              onChange={(e) => setFilterNiveau(e.target.value)}
+              aria-label="Filtrer par niveau"
+            >
+              <option value="all">Tous les niveaux</option>
+              <option value="L1">Licence 1 (L1)</option>
+              <option value="L2">Licence 2 (L2)</option>
+              <option value="L3">Licence 3 (L3)</option>
+              <option value="M1">Master 1 (M1)</option>
+              <option value="M2">Master 2 (M2)</option>
             </select>
 
             <select
@@ -336,7 +595,7 @@ function ResourceCrud() {
           </div>
         </div>
 
-        {/* Liste des ressources ou état vide */}
+        {/* 8. Liste des ressources conditionnée selon les permissions RBAC */}
         {filteredResources.length === 0 ? (
           <div className="empty-state">
             <div className="empty-state-icon">
@@ -346,9 +605,9 @@ function ResourceCrud() {
             <p>
               {searchQuery || filterFiliere !== 'all' || filterNiveau !== 'all'
                 ? 'Aucun résultat ne correspond à vos filtres actuels. Réinitialisez la recherche pour afficher la totalité des ressources.'
-                : 'Votre catalogue est vide. Utilisez le formulaire ci-dessus pour ajouter votre premier cours ou document.'}
+                : 'Votre catalogue est vide pour le moment.'}
             </p>
-            {(searchQuery || filterFiliere !== 'all') && (
+            {(searchQuery || filterFiliere !== 'all' || filterNiveau !== 'all') && (
               <button
                 type="button"
                 className="btn-secondary"
@@ -368,6 +627,10 @@ function ResourceCrud() {
               const isBeingEdited = editingId === res.id;
               const isConfirmingDelete = confirmDeleteId === res.id;
 
+              // RBAC checks for action buttons on each card
+              const canEditThis = canModifyResource(res);
+              const canDeleteThis = canDeleteResource(res);
+
               return (
                 <li
                   key={res.id}
@@ -378,11 +641,19 @@ function ResourceCrud() {
                       <h4 className="crud-item-title">{res.titre}</h4>
                     </div>
 
-                    {/* Zero-Pill Typography Metadata avec séparateurs typographiques */}
+                    {/* Zero-Pill Typography Metadata */}
                     <div className="crud-item-meta">
-                      <span className="meta-field">{res.filiere}</span>
+                      <span className="meta-field font-semibold">{res.filiere}</span>
                       <span className="meta-separator" aria-hidden="true">·</span>
                       <span className="meta-field">{res.niveau}</span>
+
+                      {res.codeUe && (
+                        <>
+                          <span className="meta-separator" aria-hidden="true">·</span>
+                          <span className="meta-field font-mono">{res.codeUe}</span>
+                        </>
+                      )}
+
                       {res.universityName && (
                         <>
                           <span className="meta-separator" aria-hidden="true">·</span>
@@ -391,12 +662,20 @@ function ResourceCrud() {
                           </span>
                         </>
                       )}
-                      {res.updatedAt && (
+
+                      {res.authorName && (
                         <>
                           <span className="meta-separator" aria-hidden="true">·</span>
-                          <span>Mis à jour le {res.updatedAt}</span>
+                          <span className="meta-field text-slate-500">
+                            Publié par : {res.authorName}
+                          </span>
                         </>
                       )}
+
+                      <span className="meta-separator" aria-hidden="true">·</span>
+                      <span className="meta-field text-emerald-600 dark:text-emerald-400 font-semibold">
+                        📥 {res.downloads || 0} téléchargements
+                      </span>
                     </div>
 
                     {res.description && (
@@ -404,7 +683,20 @@ function ResourceCrud() {
                     )}
                   </div>
 
+                  {/* Actions RBAC rigoureusement conditionnées */}
                   <div className="crud-item-actions">
+                    {/* Bouton Télécharger : accessible à tous, y compris l'Étudiant */}
+                    <button
+                      type="button"
+                      className="action-btn action-btn-download"
+                      onClick={() => handleDownload(res)}
+                      title="Télécharger le document"
+                    >
+                      <Download size={14} />
+                      <span>Télécharger</span>
+                    </button>
+
+                    {/* Mode confirmation de suppression */}
                     {isConfirmingDelete ? (
                       <div className="delete-confirm-box">
                         <span className="delete-confirm-text">Supprimer ?</span>
@@ -425,25 +717,39 @@ function ResourceCrud() {
                       </div>
                     ) : (
                       <>
-                        <button
-                          type="button"
-                          className="action-btn action-btn-edit"
-                          onClick={() => handleEdit(res)}
-                          title="Modifier cette ressource"
-                        >
-                          <Pencil size={14} />
-                          <span>Modifier</span>
-                        </button>
+                        {/* Bouton Modifier : Masqué si canEditThis est false */}
+                        {canEditThis && (
+                          <button
+                            type="button"
+                            className="action-btn action-btn-edit"
+                            onClick={() => handleEdit(res)}
+                            title="Modifier cette ressource"
+                          >
+                            <Pencil size={14} />
+                            <span>Modifier</span>
+                          </button>
+                        )}
 
-                        <button
-                          type="button"
-                          className="action-btn action-btn-delete"
-                          onClick={() => setConfirmDeleteId(res.id)}
-                          title="Supprimer cette ressource"
-                        >
-                          <Trash2 size={14} />
-                          <span>Supprimer</span>
-                        </button>
+                        {/* Bouton Supprimer : Masqué si canDeleteThis est false */}
+                        {canDeleteThis && (
+                          <button
+                            type="button"
+                            className="action-btn action-btn-delete"
+                            onClick={() => setConfirmDeleteId(res.id)}
+                            title="Supprimer cette ressource"
+                          >
+                            <Trash2 size={14} />
+                            <span>Supprimer</span>
+                          </button>
+                        )}
+
+                        {/* Pour le délégué : indicateur discret lorsque la ressource est hors département */}
+                        {isDelegate && !canEditThis && (
+                          <span className="badge-scope-readonly" title="Cette ressource appartient à un autre département">
+                            <Lock size={12} />
+                            <span>Lecture seule</span>
+                          </span>
+                        )}
                       </>
                     )}
                   </div>

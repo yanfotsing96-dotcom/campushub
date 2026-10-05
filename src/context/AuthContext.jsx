@@ -24,17 +24,30 @@ export function AuthProvider({ children }) {
     const niveau = saved?.niveau || 'L2';
     const matricule = saved?.matricule || '23S40192';
     const universityId = saved?.universityId || 'UY1';
+    
+    // Clean up any legacy hardcoded "Yanick" in saved storage
+    const rawName = saved?.fullName || saved?.nom || saved?.name || 'Yan Fotsing';
+    const fullName = (rawName && !rawName.includes('Yanick')) ? rawName : 'Yan Fotsing';
+    const isPro = saved?.isPro ?? true;
+    
+    const roleLabel = ROLE_LABELS[norm] || 'Étudiant';
+    const status = saved?.status || (norm === ROLES.STUDENT && isPro ? 'Étudiant Pro' : roleLabel);
 
     return {
       ...saved,
+      fullName,
+      nom: fullName,
+      name: fullName,
+      status,
       matricule,
       filiere: saved?.filiere || 'Informatique',
       filiereId,
       niveau,
       universityId,
+      isPro,
       role: norm,
       roleNormalized: norm,
-      roleLabel: ROLE_LABELS[norm],
+      roleLabel,
       scope: {
         filiereId,
         niveau,
@@ -79,11 +92,14 @@ export function AuthProvider({ children }) {
   const switchRole = useCallback((newRole) => {
     const norm = normalizeRole(newRole);
     setUser((prev) => {
+      const roleLabel = ROLE_LABELS[norm] || 'Étudiant';
+      const status = norm === ROLES.STUDENT && prev?.isPro ? 'Étudiant Pro' : roleLabel;
       const updated = {
         ...prev,
         role: norm,
         roleNormalized: norm,
-        roleLabel: ROLE_LABELS[norm],
+        roleLabel,
+        status,
         scope: {
           ...prev.scope,
           isFullAccess: norm === ROLES.ADMIN,
@@ -91,7 +107,7 @@ export function AuthProvider({ children }) {
       };
       storageService.set(STORAGE_KEYS.AUTH_USER, updated);
       try {
-        localStorage.setItem('campushub_user_role', ROLE_LABELS[norm]);
+        localStorage.setItem('campushub_user_role', roleLabel);
       } catch (err) {
         console.warn('Erreur stockage role :', err);
       }
@@ -117,17 +133,25 @@ export function AuthProvider({ children }) {
     const filiereId = requestedFiliere || existing.filiereId || existing.filiere || 'Informatique';
     const niveau = requestedNiveau || existing.niveau || 'L2';
     const matricule = existing.matricule || '23S40192';
+    const fullName = existing.fullName || existing.nom || existing.name || 'Yan Fotsing';
+    const roleLabel = ROLE_LABELS[targetRole] || 'Étudiant';
+    const isPro = existing.isPro ?? true;
+    const status = targetRole === ROLES.STUDENT && isPro ? 'Étudiant Pro' : roleLabel;
 
     const updated = {
       ...existing,
       email: email || existing.email,
+      fullName,
+      nom: fullName,
+      name: fullName,
+      status,
       matricule,
       filiere: filiereId,
       filiereId,
       niveau,
       role: targetRole,
       roleNormalized: targetRole,
-      roleLabel: ROLE_LABELS[targetRole],
+      roleLabel,
       scope: {
         filiereId,
         niveau,
@@ -162,10 +186,14 @@ export function AuthProvider({ children }) {
     const nomFamille = formData?.nom?.trim() || 'Étudiant UY1';
     const nomComplet = prenom ? `${prenom} ${nomFamille}` : nomFamille;
     const username = formData?.username?.trim() || formData?.email?.split('@')[0] || `etudiant_${Date.now()}`;
+    const roleLabel = ROLE_LABELS[targetRole] || 'Étudiant';
 
     const newUser = {
       id: 'usr_' + Date.now(),
+      fullName: nomComplet,
       nom: nomComplet,
+      name: nomComplet,
+      status: roleLabel,
       prenom,
       nomFamille,
       username,
@@ -180,7 +208,7 @@ export function AuthProvider({ children }) {
       badges: ['🚀 Nouvel Arrivant', '📚 CampusHub Cameroun', `🎓 Filière ${filiereId}`],
       role: targetRole,
       roleNormalized: targetRole,
-      roleLabel: ROLE_LABELS[targetRole],
+      roleLabel,
       scope: {
         filiereId,
         niveau,
@@ -203,12 +231,23 @@ export function AuthProvider({ children }) {
   const updateProfile = (partialUpdates) => {
     setUser((prev) => {
       const targetRole = partialUpdates.role ? normalizeRole(partialUpdates.role) : prev.role;
+      const roleLabel = ROLE_LABELS[targetRole] || prev.roleLabel;
+      const rawName = partialUpdates.fullName || partialUpdates.nom || partialUpdates.name || prev.fullName || prev.nom || 'Yan Fotsing';
+      const fullName = (rawName && !rawName.includes('Yanick')) ? rawName : 'Yan Fotsing';
+      const isPro = partialUpdates.isPro !== undefined ? partialUpdates.isPro : prev.isPro;
+      const status = partialUpdates.status || (targetRole === ROLES.STUDENT && isPro ? 'Étudiant Pro' : roleLabel);
+
       const updated = {
         ...prev,
         ...partialUpdates,
+        fullName,
+        nom: fullName,
+        name: fullName,
+        status,
+        isPro,
         role: targetRole,
         roleNormalized: targetRole,
-        roleLabel: ROLE_LABELS[targetRole],
+        roleLabel,
       };
       storageService.set(STORAGE_KEYS.AUTH_USER, updated);
       return updated;

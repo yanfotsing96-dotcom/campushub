@@ -10,13 +10,15 @@ import {
   Phone,
 } from 'lucide-react';
 import { TEST_PAYMENT_METHODS } from './data/pricingData';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function CheckoutModal({ plan, billingCycle, onClose, onSuccess }) {
+  const { user } = useAuth();
   const [selectedMethod, setSelectedMethod] = useState('momo'); // 'momo', 'om', 'card'
 
   // Form Inputs
   const [phoneNumber, setPhoneNumber] = useState('677849210');
-  const [studentName, setStudentName] = useState('Yanick Fotsing');
+  const [studentName, setStudentName] = useState(user?.fullName || user?.nom || 'Yan Fotsing');
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvc, setCardCvc] = useState('');
@@ -343,7 +345,7 @@ Merci pour votre confiance sur CampusHub !`;
                             required
                             value={studentName}
                             onChange={(e) => setStudentName(e.target.value)}
-                            placeholder="Ex : Yanick Fotsing"
+                            placeholder="Ex : Yan Fotsing"
                             className="w-full px-3 py-2 text-xs rounded-xl border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100"
                           />
                         </div>

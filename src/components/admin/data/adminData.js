@@ -32,7 +32,7 @@ export const INITIAL_ADMIN_USERS = [
   },
   {
     id: 'usr-3',
-    name: 'Yanick Fotsing',
+    name: 'Yan Fotsing',
     email: 'yanfotsing96@gmail.com',
     matricule: '23S40192',
     filiere: 'Licence 2 Informatique',
@@ -207,7 +207,7 @@ export const RECENT_AUDIT_LOGS = [
     id: 'log-3',
     action: 'Blocage de compte',
     details: 'Compte suspect #23S99999 suspendu pour tentative de plagiat massif',
-    admin: 'Yanick Fotsing (Admin)',
+    admin: 'Yan Fotsing (Admin)',
     timestamp: 'Il y a 2 jours',
   },
   {

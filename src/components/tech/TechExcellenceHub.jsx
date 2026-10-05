@@ -3,7 +3,6 @@ import {
   Terminal,
   Play,
   RotateCcw,
-  Cpu,
   Layers,
   Shield,
   FileCode,
@@ -17,10 +16,17 @@ import {
   UNIX_POSIX_COMMANDS,
 } from './data/techProblemsData';
 import { useCampusHub } from '../../hooks/useCampusHub';
+import { useAuth } from '../../hooks/useAuth';
+import { getDepartmentPole } from './data/departmentPoleConfig';
 
 export default function TechExcellenceHub() {
   const { student, permissions, earnXp } = useCampusHub();
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('playground'); // 'playground', 'algorithms', 'systems', 'bank'
+
+  const userFiliere = user?.filiere || student?.filiere || 'Informatique';
+  const pole = getDepartmentPole(userFiliere);
+  const PoleIcon = pole.icon;
 
   // Playground state
   const [selectedChallengeId, setSelectedChallengeId] = useState('c-trees');
@@ -78,15 +84,15 @@ export default function TechExcellenceHub() {
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-xs transition-colors">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div className="space-y-1">
-            <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border border-indigo-200/50">
-              <Cpu size={14} className="text-indigo-600" />
-              <span>Pôle d'Excellence Informatique & Génie Logiciel (Cœur Tech)</span>
+            <div className={`inline-flex items-center gap-2 px-2.5 py-1 rounded-full text-xs font-black uppercase tracking-wider ${pole.badgeClass}`}>
+              <PoleIcon size={14} />
+              <span>{pole.title} ({pole.badge})</span>
             </div>
             <h2 className="text-xl md:text-2xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-2">
-              Laboratoire de Programmation & Algorithmique Nationale
+              Laboratoire Pratique & Compilateur Universitaire
             </h2>
             <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400">
-              Compilateur C (GCC/POSIX), bac à sable Python 3, requêtes SQL et mémentos d'architecture pour les universités du Cameroun.
+              {pole.description} Compilateur C (GCC/POSIX), bac à sable Python 3, requêtes SQL et mémentos scientifiques.
             </p>
           </div>
 

@@ -22,6 +22,7 @@ export default function ScopedCoursesManager() {
   const { user } = useAuth();
   const currentRole = normalizeRole(user?.role);
   const isAdmin = currentRole === ROLES.ADMIN;
+  const isStudent = currentRole === ROLES.STUDENT;
 
   const [activeDepartmentId, setActiveDepartmentId] = useState(
     user?.filiereId || user?.filiere || 'Informatique'
@@ -124,16 +125,18 @@ export default function ScopedCoursesManager() {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 self-start md:self-auto">
-            <button
-              type="button"
-              onClick={() => setPublishModalOpen(true)}
-              className="px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-2 transition-all shadow-md shadow-indigo-500/20"
-            >
-              <Plus size={15} />
-              <span>Déposer un support</span>
-            </button>
-          </div>
+          {!isStudent && (
+            <div className="flex items-center gap-2 self-start md:self-auto">
+              <button
+                type="button"
+                onClick={() => setPublishModalOpen(true)}
+                className="px-4 py-2.5 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-2 transition-all shadow-md shadow-indigo-500/20"
+              >
+                <Plus size={15} />
+                <span>Déposer un support</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Admin Switcher for Cross-Department Verification */}

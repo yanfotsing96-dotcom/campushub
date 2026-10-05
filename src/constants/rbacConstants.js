@@ -105,6 +105,10 @@ export const PERMISSIONS = {
   USE_PLAYGROUND: 'playground:use',
   USE_NOTEBOOK: 'notebook:use',
   UPLOAD_RESOURCE: 'resource:upload',
+  RESOURCE_ADD: 'resource:add',
+  RESOURCE_EDIT: 'resource:edit',
+  RESOURCE_DELETE: 'resource:delete',
+  RESOURCE_MANAGE_ANY: 'resource:manage_any',
   RATE_RESOURCE: 'resource:rate',
 
   // Delegate permissions
@@ -130,36 +134,41 @@ export const PERMISSIONS = {
 
 export const ROLE_PERMISSIONS = {
   [ROLES.STUDENT]: [
+    // Accès en lecture seule strict
     PERMISSIONS.VIEW_CATALOG,
     PERMISSIONS.DOWNLOAD_DOCS,
     PERMISSIONS.USE_PLAYGROUND,
     PERMISSIONS.USE_NOTEBOOK,
-    PERMISSIONS.UPLOAD_RESOURCE,
     PERMISSIONS.RATE_RESOURCE,
   ],
   [ROLES.DELEGATE]: [
-    // All student permissions
+    // Permissions de base
     PERMISSIONS.VIEW_CATALOG,
     PERMISSIONS.DOWNLOAD_DOCS,
     PERMISSIONS.USE_PLAYGROUND,
     PERMISSIONS.USE_NOTEBOOK,
-    PERMISSIONS.UPLOAD_RESOURCE,
     PERMISSIONS.RATE_RESOURCE,
-    // Delegate specific permissions
+    // Permissions délégué (écriture partielle et gestion de classe)
+    PERMISSIONS.RESOURCE_ADD,
+    PERMISSIONS.RESOURCE_EDIT,
+    PERMISSIONS.RESOURCE_DELETE,
     PERMISSIONS.PUBLISH_CLASS_ANNOUNCEMENT,
     PERMISSIONS.PIN_ANNOUNCEMENT,
     PERMISSIONS.MANAGE_CLASS_SCHEDULE,
     PERMISSIONS.VIEW_CLASS_ROSTER,
   ],
   [ROLES.MODERATOR]: [
-    // All student permissions
+    // Permissions de base
     PERMISSIONS.VIEW_CATALOG,
     PERMISSIONS.DOWNLOAD_DOCS,
     PERMISSIONS.USE_PLAYGROUND,
     PERMISSIONS.USE_NOTEBOOK,
-    PERMISSIONS.UPLOAD_RESOURCE,
     PERMISSIONS.RATE_RESOURCE,
-    // Moderator specific permissions
+    // Gestion complète des ressources et modération
+    PERMISSIONS.RESOURCE_ADD,
+    PERMISSIONS.RESOURCE_EDIT,
+    PERMISSIONS.RESOURCE_DELETE,
+    PERMISSIONS.RESOURCE_MANAGE_ANY,
     PERMISSIONS.MODERATE_RESOURCES,
     PERMISSIONS.AUDIT_PLAGIARISM,
     PERMISSIONS.RESOLVE_REPORTS,
@@ -168,7 +177,7 @@ export const ROLE_PERMISSIONS = {
     PERMISSIONS.VIEW_ANALYTICS,
   ],
   [ROLES.ADMIN]: [
-    // Full access to every permission
+    // Plein accès à toutes les permissions
     ...Object.values(PERMISSIONS),
   ],
 };
@@ -193,6 +202,103 @@ export function hasPermission(role, permission) {
   const normRole = normalizeRole(role);
   const permissions = ROLE_PERMISSIONS[normRole] || [];
   return permissions.includes(permission);
+}
+
+/**
+ * Règle RBAC : Détermine si l'utilisateur est autorisé à ajouter une nouvelle ressource
+ * - Étudiant : Strictement interdit (false)
+ * - Délégué : Autorisé pour sa propre filière
+ * - Modérateur / Admin : Autorisé pour toutes les filières
+ */
+export function canAddResource(user, targetFiliere = null) {
+  if (!user) return false;
+  const role = normalizeRole(user.role);
+
+  // Étudiant : strictement interdit
+  if (role === ROLES.STUDENT) return false;
+
+  // Modérateur / Admin : accès universel
+  if (role === ROLES.ADMIN || role === ROLES.MODERATOR) return true;
+
+  // Délégué : autorisé pour sa filière
+  if (role === ROLES.DELEGATE) {
+    if (!targetFiliere) return true;
+    const userFiliere = (user.filiereId || user.filiere || '').toLowerCase().trim();
+    const target = String(targetFiliere).toLowerCase().trim();
+    return !userFiliere || target === userFiliere;
+  }
+
+  return false;
+}
+
+/**
+ * Règle RBAC : Détermine si l'utilisateur peut modifier une ressource
+ * - Étudiant : Strictement interdit (bouton masqué)
+ * - Délégué : Autorisé uniquement pour les ressources qu'il a lui-même créées OU celles de sa filière/classe
+ * - Modérateur / Admin : Accès total sur n'importe quelle ressource
+ */
+export function canModifyResource(user, resource) {
+  if (!user || !resource) return false;
+  const role = normalizeRole(user.role);
+
+  // Étudiant : strictement interdit
+  if (role === ROLES.STUDENT) return false;
+
+  // Modérateur / Admin : accès total
+  if (role === ROLES.ADMIN || role === ROLES.MODERATOR) return true;
+
+  // Délégué : restreint à ses publications ou sa filière
+  if (role === ROLES.DELEGATE) {
+    const userFiliere = (user.filiereId || user.filiere || '').toLowerCase().trim();
+    const resFiliere = (resource.filiere || resource.filiereId || '').toLowerCase().trim();
+
+    // 1. Ressource créée par l'utilisateur lui-même (par id ou matricule)
+    const isOwnCreation = Boolean(
+      (user.id && resource.authorId && String(resource.authorId) === String(user.id)) ||
+      (user.matricule && resource.authorMatricule && String(resource.authorMatricule).toUpperCase() === String(user.matricule).toUpperCase())
+    );
+
+    // 2. Ressource appartenant à la même filière (classe du délégué)
+    const isSameFiliere = Boolean(userFiliere && resFiliere && userFiliere === resFiliere);
+
+    return isOwnCreation || isSameFiliere;
+  }
+
+  return false;
+}
+
+/**
+ * Règle RBAC : Détermine si l'utilisateur peut supprimer une ressource
+ * - Étudiant : Strictement interdit (bouton masqué)
+ * - Délégué : Autorisé uniquement pour les ressources qu'il a lui-même créées OU celles de sa filière/classe
+ * - Modérateur / Admin : Accès total
+ */
+export function canDeleteResource(user, resource) {
+  if (!user || !resource) return false;
+  const role = normalizeRole(user.role);
+
+  // Étudiant : strictement interdit
+  if (role === ROLES.STUDENT) return false;
+
+  // Modérateur / Admin : accès total
+  if (role === ROLES.ADMIN || role === ROLES.MODERATOR) return true;
+
+  // Délégué : restreint à ses publications ou sa filière
+  if (role === ROLES.DELEGATE) {
+    const userFiliere = (user.filiereId || user.filiere || '').toLowerCase().trim();
+    const resFiliere = (resource.filiere || resource.filiereId || '').toLowerCase().trim();
+
+    const isOwnCreation = Boolean(
+      (user.id && resource.authorId && String(resource.authorId) === String(user.id)) ||
+      (user.matricule && resource.authorMatricule && String(resource.authorMatricule).toUpperCase() === String(user.matricule).toUpperCase())
+    );
+
+    const isSameFiliere = Boolean(userFiliere && resFiliere && userFiliere === resFiliere);
+
+    return isOwnCreation || isSameFiliere;
+  }
+
+  return false;
 }
 
 /**
@@ -228,7 +334,9 @@ export function getDashboardRouteForRole(role) {
 export const DEMO_PROFILES = [
   {
     role: ROLES.STUDENT,
-    nom: 'Yanick Fotsing (Étudiant)',
+    nom: 'Yan Fotsing',
+    fullName: 'Yan Fotsing',
+    status: 'Étudiant Pro',
     email: 'yanfotsing96@gmail.com',
     filiere: 'Informatique',
     filiereId: 'Informatique',

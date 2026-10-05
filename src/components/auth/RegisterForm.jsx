@@ -146,7 +146,7 @@ export default function RegisterForm({ onSubmit }) {
               required
               value={formData.prenom}
               onChange={handleChange}
-              placeholder="Ex : Yanick"
+              placeholder="Ex : Yan"
             />
           </div>
         </div>

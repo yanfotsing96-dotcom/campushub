@@ -201,7 +201,7 @@ ORDER BY moyenne_generale DESC;`,
     expectedOutput: `+------------+--------------------+----------------+----------------------+------------------+-------------------+
 | matricule  | nom                | filiere        | total_cours_inscrits | moyenne_generale | mention           |
 +------------+--------------------+----------------+----------------------+------------------+-------------------+
-| 23S40192   | Yanick Fotsing     | Informatique   | 8                    | 17.50            | Mention Très Bien |
+| 23S40192   | Yan Fotsing        | Informatique   | 8                    | 17.50            | Mention Très Bien |
 | 23S10482   | Samuel Ndzie       | Informatique   | 8                    | 16.20            | Mention Très Bien |
 | 22S84912   | Marcelle Eyenga    | Informatique   | 7                    | 14.80            | Mention Bien      |
 | 23S77142   | Patrick Kouam      | Mathématiques  | 6                    | 13.40            | Mention Assez Bien|

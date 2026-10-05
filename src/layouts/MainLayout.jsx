@@ -7,6 +7,9 @@ import {
   GraduationCap,
   Sparkles,
   Building,
+  ShieldCheck,
+  Award,
+  BookOpen,
 } from 'lucide-react';
 import AppSidebar from '../components/layout/AppSidebar';
 import GlobalSearchModal from '../components/search/GlobalSearchModal';
@@ -14,9 +17,10 @@ import UniversitySelectorModal from '../components/common/UniversitySelectorModa
 import GlobalToast from '../components/common/GlobalToast';
 import ThemeToggle from '../components/common/ThemeToggle';
 import LanguageSelector from '../components/common/LanguageSelector';
-import RoleBadge from '../components/common/RoleBadge';
 import { useCampusHub } from '../hooks/useCampusHub';
+import { useAuth } from '../hooks/useAuth';
 import { useLanguage } from '../hooks/useLanguage';
+import { ROLES, normalizeRole } from '../constants/rbacConstants';
 
 export default function MainLayout() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -25,8 +29,84 @@ export default function MainLayout() {
   const [universityModalOpen, setUniversityModalOpen] = useState(false);
 
   const { student, selectedUniversity } = useCampusHub();
+  const { user } = useAuth();
   const { t } = useLanguage();
   const location = useLocation();
+
+  // Dynamic user data from authentication state
+  const fullName = user?.fullName || user?.nom || student?.fullName || student?.name || 'Yan Fotsing';
+  const matricule = user?.matricule || student?.matricule || '23S40192';
+  const role = user?.role || student?.role || 'Étudiant';
+  const isPro = user?.isPro !== undefined ? user.isPro : student?.isPro;
+  const status = user?.status || (isPro ? 'Étudiant Pro' : (user?.roleLabel || student?.role)) || 'Étudiant';
+
+  // Dynamic initials helper
+  const getInitials = (name) => {
+    if (!name) return 'YF';
+    const parts = name.trim().split(/\s+/);
+    if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  };
+
+  // Role conditional styling helper (SaaS / Vercel theme)
+  const getRoleTheme = (userRole, userStatus) => {
+    const norm = normalizeRole(userRole);
+    const isProUser = userStatus === 'Étudiant Pro' || userStatus?.toLowerCase().includes('pro');
+
+    if (isProUser && norm === ROLES.STUDENT) {
+      return {
+        badgeBg: 'bg-gradient-to-r from-amber-500/15 via-yellow-500/15 to-amber-500/15 text-amber-700 dark:text-amber-300 border-amber-300/60 dark:border-amber-700/60 shadow-amber-500/10',
+        dotBg: 'bg-amber-500',
+        avatarBg: 'bg-gradient-to-tr from-amber-500 via-indigo-600 to-purple-600 text-white',
+        borderHover: 'hover:border-amber-400 dark:hover:border-amber-600',
+        icon: Crown,
+        label: userStatus || 'Étudiant Pro',
+      };
+    }
+
+    switch (norm) {
+      case ROLES.ADMIN:
+        return {
+          badgeBg: 'bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800',
+          dotBg: 'bg-purple-500',
+          avatarBg: 'bg-gradient-to-tr from-purple-600 to-indigo-600 text-white',
+          borderHover: 'hover:border-purple-400 dark:hover:border-purple-600',
+          icon: Crown,
+          label: userStatus || 'Administrateur',
+        };
+      case ROLES.MODERATOR:
+        return {
+          badgeBg: 'bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800',
+          dotBg: 'bg-sky-500',
+          avatarBg: 'bg-gradient-to-tr from-sky-600 to-blue-600 text-white',
+          borderHover: 'hover:border-sky-400 dark:hover:border-sky-600',
+          icon: ShieldCheck,
+          label: userStatus || 'Modérateur',
+        };
+      case ROLES.DELEGATE:
+        return {
+          badgeBg: 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+          dotBg: 'bg-emerald-500',
+          avatarBg: 'bg-gradient-to-tr from-emerald-600 to-teal-600 text-white',
+          borderHover: 'hover:border-emerald-400 dark:hover:border-emerald-600',
+          icon: Award,
+          label: userStatus || 'Délégué',
+        };
+      case ROLES.STUDENT:
+      default:
+        return {
+          badgeBg: 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800',
+          dotBg: 'bg-indigo-500',
+          avatarBg: 'bg-gradient-to-tr from-indigo-600 to-blue-600 text-white',
+          borderHover: 'hover:border-indigo-400 dark:hover:border-indigo-600',
+          icon: BookOpen,
+          label: userStatus || 'Étudiant',
+        };
+    }
+  };
+
+  const roleTheme = getRoleTheme(role, status);
+  const RoleIcon = roleTheme.icon;
 
   // Listen for Cmd+K / Ctrl+K keyboard shortcut
   useEffect(() => {
@@ -178,21 +258,35 @@ export default function MainLayout() {
 
               <ThemeToggle />
 
-              {/* Profile Avatar Link with RBAC Role Badge */}
+              {/* Profile Avatar Link with Dynamic User Info & Conditional Role Badge */}
               <Link
                 to="/profile"
-                className="flex items-center gap-2 p-1 pl-1.5 pr-2 rounded-2xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
-                title="Consulter mon profil"
+                className={`group flex items-center gap-2 p-1 pl-1.5 pr-2.5 rounded-2xl border border-slate-200 dark:border-slate-700/80 bg-slate-50/90 dark:bg-slate-800/90 hover:bg-slate-100 dark:hover:bg-slate-700/90 transition-all shadow-2xs ${roleTheme.borderHover}`}
+                title={`Profil de ${fullName} (${status} · ${matricule})`}
               >
-                <div className="w-7 h-7 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">
-                  {student.name.charAt(0)}
+                {/* Avatar with Initials & live status dot */}
+                <div className="relative flex-shrink-0">
+                  <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-xl ${roleTheme.avatarBg} font-bold text-xs flex items-center justify-center shadow-xs transition-transform group-hover:scale-105`}>
+                    {getInitials(fullName)}
+                  </div>
+                  <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ${roleTheme.dotBg} border-2 border-white dark:border-slate-800`} />
                 </div>
-                <div className="text-left hidden xl:block leading-tight">
-                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100 block">
-                    {student.name.split(' ')[0]}
+
+                {/* User Info (Full Name + Matricule) */}
+                <div className="text-left hidden md:block leading-tight">
+                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100 block group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors truncate max-w-[150px]">
+                    {fullName}
+                  </span>
+                  <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400 block tracking-tight">
+                    {matricule}
                   </span>
                 </div>
-                <RoleBadge role={student.role} size="xs" />
+
+                {/* Status Badge with Conditional Role Colors */}
+                <span className={`hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border text-[10px] font-black uppercase tracking-wider ${roleTheme.badgeBg}`}>
+                  <RoleIcon size={11} className="flex-shrink-0" />
+                  <span>{roleTheme.label}</span>
+                </span>
               </Link>
             </div>
           </div>

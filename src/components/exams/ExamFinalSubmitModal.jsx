@@ -6,6 +6,7 @@ import {
   X,
   CheckCircle2,
   Lock,
+  User,
 } from 'lucide-react';
 
 export default function ExamFinalSubmitModal({
@@ -19,25 +20,39 @@ export default function ExamFinalSubmitModal({
   focusLossCount,
   isSubmitting,
 }) {
+  const officialMatricule = user?.matricule || '23S40192';
+  const officialFullName = user?.fullName || user?.nom || 'Yan Fotsing';
+
   const [confirmMatricule, setConfirmMatricule] = useState('');
+  const [confirmNom, setConfirmNom] = useState('');
+  const [certifiedHonour, setCertifiedHonour] = useState(true);
   const [error, setError] = useState('');
 
   if (!isOpen) return null;
 
-  const officialMatricule = user?.matricule || '23S40192';
   const unansweredCount = totalQuestions - answeredCount;
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
 
-    const cleanInput = confirmMatricule.trim().toUpperCase();
-    const cleanOfficial = officialMatricule.trim().toUpperCase();
+    const cleanInputMatricule = confirmMatricule.trim().toUpperCase();
+    const cleanOfficialMatricule = officialMatricule.trim().toUpperCase();
 
-    if (cleanInput !== cleanOfficial) {
+    if (cleanInputMatricule !== cleanOfficialMatricule) {
       setError(
         `Matricule de confirmation invalide. Vous devez saisir votre matricule officiel (${officialMatricule}) pour sceller la copie.`
       );
+      return;
+    }
+
+    if (!confirmNom.trim()) {
+      setError('Veuillez renseigner votre Nom Complet d\'étudiant.');
+      return;
+    }
+
+    if (!certifiedHonour) {
+      setError('Vous devez certifier sur l\'honneur l\'intégrité de votre composition.');
       return;
     }
 
@@ -46,6 +61,8 @@ export default function ExamFinalSubmitModal({
 
   const handleQuickSign = () => {
     setConfirmMatricule(officialMatricule);
+    setConfirmNom(officialFullName);
+    setCertifiedHonour(true);
     setError('');
   };
 
@@ -113,11 +130,31 @@ export default function ExamFinalSubmitModal({
           </div>
         )}
 
-        {/* Matricule Confirmation Form */}
+        {/* Identity Confirmation Form (Full Name & Matricule) */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
             <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
-              Saisissez votre Numéro de Matricule pour signer définitivement * :
+              1. Confirmez votre Nom Complet d'étudiant * :
+            </label>
+            <div className="relative">
+              <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                required
+                value={confirmNom}
+                onChange={(e) => {
+                  setConfirmNom(e.target.value);
+                  setError('');
+                }}
+                placeholder={`Ex : ${officialFullName}`}
+                className="w-full pl-10 pr-3.5 py-2.5 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+              2. Saisissez votre Numéro de Matricule officiel * :
             </label>
             <div className="relative">
               <Award size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -133,19 +170,33 @@ export default function ExamFinalSubmitModal({
                 className="w-full pl-10 pr-3.5 py-2.5 text-xs font-mono font-bold uppercase tracking-wider rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 focus:outline-none"
               />
             </div>
-
-            {error && (
-              <span className="text-[11px] font-semibold text-rose-600 block pt-1">
-                {error}
-              </span>
-            )}
           </div>
+
+          {/* Honor certification */}
+          <label className="flex items-start gap-2.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 cursor-pointer text-xs">
+            <input
+              type="checkbox"
+              checked={certifiedHonour}
+              onChange={(e) => setCertifiedHonour(e.target.checked)}
+              className="mt-0.5 text-indigo-600 focus:ring-indigo-500 rounded"
+            />
+            <span className="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
+              Je certifie sur l'honneur être l'auteur authentique et exclusif de cette composition, réalisée conformément au règlement des examens universitaires du MINESUP.
+            </span>
+          </label>
+
+          {error && (
+            <div className="p-2.5 rounded-xl bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900 text-rose-700 dark:text-rose-300 text-[11px] font-semibold flex items-center gap-1.5">
+              <AlertTriangle size={14} className="flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
 
           {/* Quick Sign Shortcut */}
           <div className="flex items-center justify-between text-xs pt-1">
             <span className="text-[11px] text-slate-400 flex items-center gap-1">
               <Lock size={11} />
-              <span>Matricule certifié : {officialMatricule}</span>
+              <span>Identité certifiée : {officialMatricule}</span>
             </span>
 
             <button
@@ -153,7 +204,7 @@ export default function ExamFinalSubmitModal({
               onClick={handleQuickSign}
               className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 hover:underline"
             >
-              Signer automatiquement
+              Remplir automatiquement
             </button>
           </div>
 

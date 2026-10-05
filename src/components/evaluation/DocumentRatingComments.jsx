@@ -10,10 +10,14 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { RATED_DOCUMENTS } from './data/evaluationData';
+import { useAuth } from '../../hooks/useAuth';
 
 const STORAGE_KEY_DOCS = 'campushub_rated_documents';
 
 export default function DocumentRatingComments() {
+  const { user } = useAuth();
+  const currentAuthor = `${user?.fullName || user?.nom || 'Yan Fotsing'} (Moi)`;
+  const currentMatricule = user?.matricule || '23S40192';
   const [documents, setDocuments] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY_DOCS);
@@ -56,8 +60,8 @@ export default function DocumentRatingComments() {
 
     const newReview = {
       id: `c-${Date.now()}`,
-      author: 'Yanick Fotsing (Moi)',
-      matricule: '23S40192',
+      author: currentAuthor,
+      matricule: currentMatricule,
       level: 'L2 Informatique',
       rating: newRating,
       date: 'À l\'instant',
@@ -120,8 +124,8 @@ export default function DocumentRatingComments() {
 
     const newReply = {
       id: `r-${Date.now()}`,
-      author: 'Yanick Fotsing (Moi)',
-      matricule: '23S40192',
+      author: currentAuthor,
+      matricule: currentMatricule,
       date: 'À l\'instant',
       text: replyText.trim(),
       likes: 0,

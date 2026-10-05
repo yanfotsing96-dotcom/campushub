@@ -8,17 +8,32 @@ export const resourceService = {
       storageService.set(STORAGE_KEYS.RESOURCES, DEFAULT_RESOURCES);
       return [...DEFAULT_RESOURCES];
     }
+    // Enrich with author info from defaults if missing
+    const defaultMap = new Map(DEFAULT_RESOURCES.map((d) => [String(d.id), d]));
+    const enriched = resources.map((r) => {
+      const def = defaultMap.get(String(r.id));
+      if (def && (!r.authorMatricule || !r.authorName)) {
+        return {
+          ...r,
+          authorMatricule: r.authorMatricule || def.authorMatricule,
+          authorName: r.authorName || def.authorName,
+          authorRole: r.authorRole || def.authorRole,
+        };
+      }
+      return r;
+    });
+
     // If fewer than default resources, supplement with missing default resources
-    if (resources.length < DEFAULT_RESOURCES.length) {
-      const existingIds = new Set(resources.map((r) => String(r.id)));
+    if (enriched.length < DEFAULT_RESOURCES.length) {
+      const existingIds = new Set(enriched.map((r) => String(r.id)));
       const missing = DEFAULT_RESOURCES.filter((r) => !existingIds.has(String(r.id)));
       if (missing.length > 0) {
-        const merged = [...resources, ...missing];
+        const merged = [...enriched, ...missing];
         storageService.set(STORAGE_KEYS.RESOURCES, merged);
         return merged;
       }
     }
-    return resources;
+    return enriched;
   },
 
   getById(id) {
@@ -40,6 +55,11 @@ export const resourceService = {
       downloads: 0,
       format: resourceData.format || 'PDF',
       updatedAt: new Date().toISOString().split('T')[0],
+      universityName: resourceData.universityName || 'Université de Yaoundé I',
+      authorId: resourceData.authorId || null,
+      authorMatricule: resourceData.authorMatricule || null,
+      authorName: resourceData.authorName || 'Contributeur Académique',
+      authorRole: resourceData.authorRole || 'delegate',
     };
 
     const updated = [newResource, ...list];
