@@ -104,6 +104,34 @@ export default function LearningPage() {
         <div className="absolute left-1/3 -top-12 w-48 h-48 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
       </div>
 
+      {/* Flagship Tech Hub Bridge Banner */}
+      <div className="p-4 rounded-3xl bg-gradient-to-r from-indigo-500/15 via-purple-500/15 to-emerald-500/15 border border-indigo-200 dark:border-indigo-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-xs">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center flex-shrink-0 shadow-md">
+            <Cpu size={20} />
+          </div>
+          <div>
+            <h4 className="text-xs font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+              <span>Étudiants en Informatique & Génie Logiciel</span>
+              <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-indigo-600 text-white">
+                Cœur Tech National
+              </span>
+            </h4>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              Accédez au laboratoire complet avec Playground C/Python/SQL, annales d'examens nationales et mémentos POSIX.
+            </p>
+          </div>
+        </div>
+
+        <a
+          href="/tech-hub"
+          className="px-4 py-2 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs transition-colors whitespace-nowrap self-start sm:self-auto flex items-center gap-1.5"
+        >
+          <Terminal size={13} />
+          <span>Explorer le Pôle Tech</span>
+        </a>
+      </div>
+
       {/* Navigation Tabs Bar */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-1.5 shadow-sm">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">

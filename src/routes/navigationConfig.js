@@ -10,14 +10,38 @@ import {
   Briefcase,
   ShieldCheck,
   Crown,
+  Cpu,
+  HelpCircle,
+  LayoutDashboard,
+  FileCheck2,
 } from 'lucide-react';
 
 export const NAVIGATION_ITEMS = [
   {
+    path: '/dashboard',
+    label: 'Tableau de Bord Filière',
+    icon: LayoutDashboard,
+    isPrimary: true,
+    description: 'Espace étudiant cloisonné par filière et niveau',
+  },
+  {
+    path: '/exams',
+    label: 'Compositions en Ligne',
+    icon: FileCheck2,
+    description: 'Évaluations chronométrées, autosave et relevés notés',
+  },
+  {
     path: '/ressources',
-    label: 'Ressources',
+    label: 'Ressources Nationales',
     icon: Library,
-    description: 'Gestion & catalogue des cours (CRUD)',
+    description: 'Gestion & catalogue des cours (CRUD multi-universités)',
+  },
+  {
+    path: '/tech-hub',
+    label: 'Pôle Info & Tech',
+    icon: Cpu,
+    isTechCore: true,
+    description: 'Playground C/Py/SQL, algorithmes et annales nationales',
   },
   {
     path: '/search',
@@ -56,10 +80,31 @@ export const NAVIGATION_ITEMS = [
     description: 'Offres Pro, paiements sécurisés & Mobile Money',
   },
   {
+    path: '/delegate',
+    label: 'Espace Délégué',
+    icon: Award,
+    requiredRole: 'delegate',
+    description: 'Avis officiels, calendrier de classe et coordination amphi',
+  },
+  {
+    path: '/moderation',
+    label: 'Console Modération',
+    icon: ShieldCheck,
+    requiredRole: 'moderator',
+    description: 'Signalements, audit anti-plagiat et conformité',
+  },
+  {
     path: '/admin',
     label: 'Administration',
-    icon: ShieldCheck,
+    icon: Crown,
+    requiredRole: 'admin',
     description: 'Gestion des comptes, modération & statistiques UY1',
+  },
+  {
+    path: '/help',
+    label: 'Centre d\'Aide & FAQ',
+    icon: HelpCircle,
+    description: 'FAQ, guide d\'accueil et tickets de support',
   },
   {
     path: '/favs-history',

@@ -11,19 +11,24 @@ import {
   FileCheck2,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
+import { useCampusHub } from '../hooks/useCampusHub';
+import { CAMEROON_UNIVERSITIES } from '../constants/academicConstants';
+import RoleBadge from '../components/common/RoleBadge';
 import Button from '../components/common/Button';
 import Toast from '../components/common/Toast';
 import '../styles/ProfilePage.css';
 
 export default function ProfilePage() {
   const { user, updateProfile } = useAuth();
+  const { student, setUniversity } = useCampusHub();
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    nom: user?.nom || '',
-    email: user?.email || '',
-    filiere: user?.filiere || 'Informatique',
-    niveau: user?.niveau || 'L2',
+    nom: user?.nom || student.name || '',
+    email: user?.email || student.email || '',
+    universityId: student.universityId || 'UY1',
+    filiere: user?.filiere || student.filiere || 'Informatique & Génie Logiciel',
+    niveau: user?.niveau || student.niveau || 'L2',
     bio: user?.bio || '',
   });
   const [toastMessage, setToastMessage] = useState(null);
@@ -36,8 +41,11 @@ export default function ProfilePage() {
   const handleSave = (e) => {
     e.preventDefault();
     updateProfile(formData);
+    if (formData.universityId) {
+      setUniversity(formData.universityId);
+    }
     setIsEditing(false);
-    setToastMessage('Profil mis à jour avec succès !');
+    setToastMessage('Profil national actualisé avec succès !');
     setTimeout(() => setToastMessage(null), 3000);
   };
 
@@ -113,10 +121,23 @@ export default function ProfilePage() {
             >
               Matricule : {user?.matricule || '21U2458'}
             </span>
+            <span
+              style={{
+                fontSize: '0.75rem',
+                fontWeight: 700,
+                padding: '3px 8px',
+                borderRadius: '6px',
+                background: 'rgba(16, 185, 129, 0.1)',
+                color: '#10b981',
+              }}
+            >
+              🇨🇲 {student.universityShortName}
+            </span>
+            <RoleBadge role={student.role} size="sm" />
           </div>
 
           <p style={{ margin: '6px 0 0 0', color: 'var(--rc-text-secondary, #64748b)', fontSize: '0.9375rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Mail size={15} /> {user?.email}
+            <Mail size={15} /> {user?.email} · {student.department}
           </p>
         </div>
 
@@ -285,6 +306,24 @@ export default function ProfilePage() {
                   style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--rc-border, #cbd5e1)', fontFamily: 'inherit' }}
                 />
               </div>
+            </div>
+
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600 }}>
+                Université ou École d'Ingénieurs au Cameroun :
+              </label>
+              <select
+                name="universityId"
+                value={formData.universityId}
+                onChange={handleChange}
+                style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--rc-border, #cbd5e1)', fontFamily: 'inherit' }}
+              >
+                {CAMEROON_UNIVERSITIES.map((uni) => (
+                  <option key={uni.id} value={uni.id}>
+                    [{uni.code}] {uni.name} ({uni.city})
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '16px' }}>

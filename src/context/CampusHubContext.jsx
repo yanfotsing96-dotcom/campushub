@@ -1,5 +1,7 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, useMemo } from 'react';
+import { CAMEROON_UNIVERSITIES } from '../constants/academicConstants';
+import { normalizeRole, ROLE_LABELS } from '../constants/rbacConstants';
 
 const CampusHubContext = createContext(null);
 
@@ -7,8 +9,18 @@ const STORAGE_KEY_PRO = 'campushub_user_is_pro';
 const STORAGE_KEY_SUB = 'campushub_pro_subscription';
 const STORAGE_KEY_XP = 'campushub_student_xp';
 const STORAGE_KEY_ROLE = 'campushub_user_role';
+const STORAGE_KEY_UNI = 'campushub_selected_university';
 
 export function CampusHubProvider({ children }) {
+  // National University Selection: 'ALL' or specific university ID ('UY1', 'ENSPY', 'UDO', etc.)
+  const [selectedUniversityId, setSelectedUniversityId] = useState(() => {
+    try {
+      return localStorage.getItem(STORAGE_KEY_UNI) || 'UY1';
+    } catch {
+      return 'UY1';
+    }
+  });
+
   // Pro Status State
   const [isPro, setIsPro] = useState(() => {
     try {
@@ -28,10 +40,11 @@ export function CampusHubProvider({ children }) {
     }
   });
 
-  // Academic Role: 'Étudiant' | 'Délégué' | 'Modérateur' | 'Enseignant' | 'Administrateur'
+  // Academic Role: 'Étudiant' | 'Délégué' | 'Modérateur' | 'Administrateur'
   const [userRole, setUserRole] = useState(() => {
     try {
-      return localStorage.getItem(STORAGE_KEY_ROLE) || 'Étudiant';
+      const saved = localStorage.getItem(STORAGE_KEY_ROLE) || 'Étudiant';
+      return ROLE_LABELS[normalizeRole(saved)] || 'Étudiant';
     } catch {
       return 'Étudiant';
     }
@@ -53,6 +66,7 @@ export function CampusHubProvider({ children }) {
   // Synchronize localStorage
   useEffect(() => {
     try {
+      localStorage.setItem(STORAGE_KEY_UNI, selectedUniversityId);
       localStorage.setItem(STORAGE_KEY_PRO, isPro ? 'true' : 'false');
       if (subscription) {
         localStorage.setItem(STORAGE_KEY_SUB, JSON.stringify(subscription));
@@ -64,7 +78,45 @@ export function CampusHubProvider({ children }) {
     } catch (err) {
       console.warn('Erreur synchronisation CampusHubContext :', err);
     }
-  }, [isPro, subscription, userRole, xp]);
+  }, [selectedUniversityId, isPro, subscription, userRole, xp]);
+
+  // Selected University Object
+  const selectedUniversity = useMemo(() => {
+    if (selectedUniversityId === 'ALL') {
+      return {
+        id: 'ALL',
+        code: 'CAMEROUN',
+        name: 'Réseau National Universitaire du Cameroun',
+        shortName: 'Toutes Universités',
+        type: 'Consortium Académique National',
+        city: 'National',
+        region: 'Cameroun',
+        badgeColor: '#10b981',
+        isFlagship: true,
+      };
+    }
+    return (
+      CAMEROON_UNIVERSITIES.find((u) => u.id === selectedUniversityId) ||
+      CAMEROON_UNIVERSITIES[0]
+    );
+  }, [selectedUniversityId]);
+
+  // Switch University
+  const setUniversity = (uniId) => {
+    setSelectedUniversityId(uniId);
+    const targetUni =
+      uniId === 'ALL'
+        ? { shortName: 'Toutes les universités du Cameroun' }
+        : CAMEROON_UNIVERSITIES.find((u) => u.id === uniId);
+
+    triggerToast({
+      title: 'Établissement actualisé 🇨🇲',
+      message: `Votre espace d'étude est désormais configuré pour : ${
+        targetUni?.shortName || uniId
+      }.`,
+      type: 'info',
+    });
+  };
 
   // Activate Pro Membership
   const activatePro = (planDetails) => {
@@ -97,20 +149,18 @@ export function CampusHubProvider({ children }) {
 
   // Switch Role
   const switchRole = (newRole) => {
-    setUserRole(newRole);
+    const label = ROLE_LABELS[normalizeRole(newRole)] || newRole;
+    setUserRole(label);
     triggerToast({
-      title: `Rôle mis à jour : ${newRole}`,
-      message: `Vos privilèges sur CampusHub ont été ajustés en mode ${newRole}.`,
+      title: `Rôle mis à jour : ${label}`,
+      message: `Vos privilèges sur CampusHub ont été ajustés en mode ${label}.`,
       type: 'info',
     });
   };
 
   // Award XP
   const earnXp = (amount, reason) => {
-    setXp((prev) => {
-      const next = prev + amount;
-      return next;
-    });
+    setXp((prev) => prev + amount);
     triggerToast({
       title: `+${amount} XP Gagnés !`,
       message: reason || 'Action méritoire validée sur la plateforme.',
@@ -150,9 +200,14 @@ export function CampusHubProvider({ children }) {
         student: {
           name: 'Yanick Fotsing',
           matricule: '23S40192',
-          filiere: 'Informatique',
+          nationalId: 'CM-UY1-2026-0492',
+          filiere: 'Informatique & Génie Logiciel',
           niveau: 'Licence 2',
-          department: 'Faculté des Sciences · UY1',
+          universityId: selectedUniversity.id,
+          universityName: selectedUniversity.name,
+          universityShortName: selectedUniversity.shortName,
+          universityCity: selectedUniversity.city,
+          department: `${selectedUniversity.shortName} · Département Informatique`,
           email: 'yanfotsing96@gmail.com',
           role: userRole,
           isPro,
@@ -162,6 +217,10 @@ export function CampusHubProvider({ children }) {
           progressPercent,
           subscription,
         },
+        selectedUniversity,
+        selectedUniversityId,
+        setUniversity,
+        allUniversities: CAMEROON_UNIVERSITIES,
         permissions,
         activatePro,
         cancelPro,

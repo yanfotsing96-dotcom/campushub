@@ -314,12 +314,14 @@ function ResourceCrud() {
               aria-label="Filtrer par filière"
             >
               <option value="all">Toutes les filières</option>
-              <option value="Informatique">Informatique</option>
-              <option value="Mathématiques">Mathématiques</option>
-              <option value="Physique">Physique</option>
-              <option value="Chimie">Chimie</option>
-              <option value="Biologie">Biologie</option>
-              <option value="Économie">Économie</option>
+              <option value="Informatique">Informatique & Génie Logiciel (Tech)</option>
+              <option value="IA-Data">IA & Data Science (Tech)</option>
+              <option value="Cyber-Reseaux">Systèmes, Réseaux & Cyber (Tech)</option>
+              <option value="Mathématiques">Mathématiques & Modélisation</option>
+              <option value="Physique">Physique & Électronique</option>
+              <option value="Chimie">Chimie & Matériaux</option>
+              <option value="Biologie">Biosciences & Santé</option>
+              <option value="Genie-Civil">Génie Civil & Environnement</option>
             </select>
 
             <select
@@ -381,6 +383,14 @@ function ResourceCrud() {
                       <span className="meta-field">{res.filiere}</span>
                       <span className="meta-separator" aria-hidden="true">·</span>
                       <span className="meta-field">{res.niveau}</span>
+                      {res.universityName && (
+                        <>
+                          <span className="meta-separator" aria-hidden="true">·</span>
+                          <span className="meta-field font-semibold text-indigo-600 dark:text-indigo-400">
+                            🏛️ {res.universityName}
+                          </span>
+                        </>
+                      )}
                       {res.updatedAt && (
                         <>
                           <span className="meta-separator" aria-hidden="true">·</span>

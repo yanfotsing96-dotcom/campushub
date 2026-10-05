@@ -19,57 +19,97 @@ import {
   Zap,
   CheckCircle2,
   ChevronDown,
+  Building,
+  Cpu,
+  HelpCircle,
+  LayoutDashboard,
+  FileCheck2,
 } from 'lucide-react';
 import ThemeToggle from '../common/ThemeToggle';
+import RoleBadge from '../common/RoleBadge';
+import RoleVerificationModal from '../auth/RoleVerificationModal';
 import { useCampusHub } from '../../hooks/useCampusHub';
 import { useResources } from '../../hooks/useResources';
 import { useAuth } from '../../hooks/useAuth';
+import { useLanguage } from '../../hooks/useLanguage';
+import { ROLES, normalizeRole, isRoleAtLeast, ROLE_LABELS } from '../../constants/rbacConstants';
 
 const NAVIGATION_GROUPS = [
   {
-    title: 'ACADÉMIQUE',
+    id: 'filiere',
+    titleKey: 'nav.dashboard',
     items: [
-      { path: '/ressources', label: 'Ressources & Cours', icon: Library },
-      { path: '/search', label: 'Recherche & Filtres', icon: Search },
-      { path: '/favs-history', label: 'Favoris & Historique', icon: Star, hasBadge: true },
+      { path: '/dashboard', labelKey: 'nav.dashboard', defaultLabel: 'Tableau de Bord Filière', icon: LayoutDashboard, isPrimary: true },
+      { path: '/exams', labelKey: 'nav.exams', defaultLabel: 'Compositions en Ligne', icon: FileCheck2 },
     ],
   },
   {
-    title: 'OUTILS D\'ÉTUDE',
+    id: 'tech',
+    titleKey: 'nav.coreTechFlagship',
     items: [
-      { path: '/learning', label: 'Playground & IA', icon: Sparkles },
-      { path: '/productivity', label: 'Productivité & iCal', icon: Clock },
-      { path: '/evaluation', label: 'Évaluation & Mérite', icon: Award },
+      { path: '/tech-hub', labelKey: 'nav.techHub', defaultLabel: 'Pôle Informatique & Code', icon: Cpu, isFlagshipTech: true },
     ],
   },
   {
-    title: 'VIE DU CAMPUS',
+    id: 'resources',
+    titleKey: 'nav.nationalResources',
     items: [
-      { path: '/services', label: 'Services & Covoiturage', icon: Briefcase },
+      { path: '/ressources', labelKey: 'nav.resources', defaultLabel: 'Catalogue Multi-Universités', icon: Library },
+      { path: '/search', labelKey: 'nav.search', defaultLabel: 'Recherche & Filtres', icon: Search },
+      { path: '/favs-history', labelKey: 'nav.favorites', defaultLabel: 'Favoris & Historique', icon: Star, hasBadge: true },
     ],
   },
   {
-    title: 'PRO & CONTRÔLE',
+    id: 'study',
+    titleKey: 'nav.studyTools',
     items: [
-      { path: '/pricing', label: 'CampusHub Pro', icon: Crown, highlight: true },
-      { path: '/admin', label: 'Administration', icon: ShieldCheck, adminOnly: true },
+      { path: '/learning', labelKey: 'nav.learning', defaultLabel: 'Playground & IA', icon: Sparkles },
+      { path: '/productivity', labelKey: 'nav.productivity', defaultLabel: 'Productivité & iCal', icon: Clock },
+      { path: '/evaluation', labelKey: 'nav.evaluation', defaultLabel: 'Évaluation & Mérite', icon: Award },
     ],
   },
   {
-    title: 'MON ESPACE',
+    id: 'campus',
+    titleKey: 'nav.campusLife',
     items: [
-      { path: '/notebook', label: 'Carnet Privé', icon: BookMarked },
-      { path: '/profile', label: 'Profil Étudiant', icon: User },
+      { path: '/services', labelKey: 'nav.services', defaultLabel: 'Services & Covoiturage', icon: Briefcase },
+    ],
+  },
+  {
+    id: 'pro',
+    titleKey: 'nav.proGovernance',
+    items: [
+      { path: '/pricing', labelKey: 'nav.pricing', defaultLabel: 'CampusHub Pro', icon: Crown, highlight: true },
+      { path: '/delegate', labelKey: 'nav.delegate', defaultLabel: 'Espace Délégué', icon: Award, requiredRole: ROLES.DELEGATE },
+      { path: '/moderation', labelKey: 'nav.moderation', defaultLabel: 'Console Modération', icon: ShieldCheck, requiredRole: ROLES.MODERATOR },
+      { path: '/admin', labelKey: 'nav.admin', defaultLabel: 'Administration', icon: Crown, requiredRole: ROLES.ADMIN },
+    ],
+  },
+  {
+    id: 'help',
+    titleKey: 'nav.assistanceGuides',
+    items: [
+      { path: '/help', labelKey: 'nav.help', defaultLabel: 'Centre d\'Aide & FAQ', icon: HelpCircle },
+    ],
+  },
+  {
+    id: 'space',
+    titleKey: 'nav.mySpace',
+    items: [
+      { path: '/notebook', labelKey: 'nav.notebook', defaultLabel: 'Carnet Privé', icon: BookMarked },
+      { path: '/profile', labelKey: 'nav.profile', defaultLabel: 'Profil National', icon: User },
     ],
   },
 ];
 
-export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch, onNavigate }) {
+export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch, onNavigate, onOpenUniversityModal }) {
   const { student, switchRole } = useCampusHub();
   const { favoritesCount } = useResources();
   const { logout } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
+  const [verificationModalRole, setVerificationModalRole] = useState(null);
 
   const handleLogout = () => {
     logout();
@@ -85,16 +125,16 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch
       {/* 1. Header with Brand & Collapse Trigger */}
       <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
         <Link to="/ressources" className="flex items-center gap-3 overflow-hidden">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 to-purple-600 text-white flex items-center justify-center font-black flex-shrink-0 shadow-md shadow-indigo-500/20">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-700 to-purple-600 text-white flex items-center justify-center font-black flex-shrink-0 shadow-md shadow-indigo-500/20">
             <GraduationCap size={22} />
           </div>
           {!isCollapsed && (
             <div className="leading-tight">
               <span className="font-black text-slate-900 dark:text-slate-100 text-base tracking-tight block">
-                CampusHub
+                CampusHub 🇨🇲
               </span>
-              <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 block uppercase tracking-wider">
-                Univ. Yaoundé I
+              <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 block uppercase tracking-wider truncate max-w-[150px]">
+                {student.universityShortName}
               </span>
             </div>
           )}
@@ -113,9 +153,27 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch
       {/* 2. Student Role & Pro Status Widget */}
       {!isCollapsed && (
         <div className="p-3.5 mx-3 my-2 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2.5">
+          {/* University Switcher Pill */}
+          <button
+            type="button"
+            onClick={onOpenUniversityModal}
+            className="w-full px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-indigo-50/50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-left flex items-center justify-between text-xs transition-colors shadow-2xs"
+            title="Changer d'université camerounaise"
+          >
+            <div className="flex items-center gap-1.5 truncate">
+              <Building size={13} className="text-indigo-600 flex-shrink-0" />
+              <span className="font-bold text-slate-800 dark:text-slate-200 truncate text-[11px]">
+                {student.universityShortName}
+              </span>
+            </div>
+            <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold flex-shrink-0 bg-indigo-50 dark:bg-indigo-950 px-1.5 py-0.5 rounded">
+              {t('header.switchUniversity')}
+            </span>
+          </button>
+
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold text-xs flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 font-bold text-xs flex items-center justify-center">
                 {student.name.charAt(0)}
               </div>
               <div className="leading-tight">
@@ -133,33 +191,51 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch
               <button
                 type="button"
                 onClick={() => setRoleDropdownOpen((prev) => !prev)}
-                className="px-2 py-1 rounded-lg bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-[10px] font-bold text-slate-700 dark:text-slate-300 flex items-center gap-1 hover:border-indigo-400 transition-colors"
+                className="p-1 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 flex items-center gap-1 hover:border-indigo-400 transition-colors shadow-2xs"
                 title="Bascule de rôle simulation"
               >
-                <span>{student.role}</span>
-                <ChevronDown size={11} className={roleDropdownOpen ? 'rotate-180' : ''} />
+                <RoleBadge role={student.role} size="xs" />
+                <ChevronDown size={11} className={`text-slate-400 mr-0.5 ${roleDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {roleDropdownOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-40 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-xl p-1 z-50 text-xs">
-                  {['Étudiant', 'Délégué', 'Modérateur', 'Administrateur'].map((r) => (
-                    <button
-                      key={r}
-                      type="button"
-                      onClick={() => {
-                        switchRole(r);
-                        setRoleDropdownOpen(false);
-                      }}
-                      className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs font-semibold flex items-center justify-between ${
-                        student.role === r
-                          ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold'
-                          : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
-                      }`}
-                    >
-                      <span>{r}</span>
-                      {student.role === r && <CheckCircle2 size={12} />}
-                    </button>
-                  ))}
+                <div className="absolute right-0 top-full mt-1.5 w-52 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-1.5 z-50 text-xs animate-in fade-in zoom-in-95">
+                  <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-1">
+                    Changer de Rôle (RBAC)
+                  </div>
+                  {[
+                    { id: ROLES.STUDENT, label: 'Étudiant' },
+                    { id: ROLES.DELEGATE, label: 'Délégué de classe' },
+                    { id: ROLES.MODERATOR, label: 'Modérateur' },
+                    { id: ROLES.ADMIN, label: 'Administrateur' },
+                  ].map((r) => {
+                    const normCurrent = normalizeRole(student.role);
+                    const isSelected = normCurrent === r.id;
+                    return (
+                      <button
+                        key={r.id}
+                        type="button"
+                        onClick={() => {
+                          setRoleDropdownOpen(false);
+                          if (r.id === ROLES.STUDENT) {
+                            switchRole(ROLE_LABELS[r.id]);
+                          } else {
+                            setVerificationModalRole(r.id);
+                          }
+                        }}
+                        className={`w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors ${
+                          isSelected
+                            ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold'
+                            : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <RoleBadge role={r.id} size="xs" />
+                        </div>
+                        {isSelected && <CheckCircle2 size={13} />}
+                      </button>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -205,22 +281,33 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch
 
       {/* 3. Navigation Links List */}
       <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-4 scrollbar-thin">
-        {NAVIGATION_GROUPS.map((group) => (
-          <div key={group.title} className="space-y-1">
-            {!isCollapsed && (
-              <span className="px-3 text-[10px] font-black uppercase tracking-wider text-slate-400 block mb-1">
-                {group.title}
-              </span>
-            )}
+        {NAVIGATION_GROUPS.map((group) => {
+          const visibleItems = group.items.filter((item) => {
+            if (item.requiredRole) {
+              return isRoleAtLeast(student.role, item.requiredRole);
+            }
+            return true;
+          });
 
-            {group.items.map((item) => {
-              const Icon = item.icon;
-              return (
-                <NavLink
-                  key={item.path}
-                  to={item.path}
-                  onClick={onNavigate}
-                  title={isCollapsed ? item.label : undefined}
+          if (visibleItems.length === 0) return null;
+
+          return (
+            <div key={group.id} className="space-y-1">
+              {!isCollapsed && (
+                <span className="px-3 text-[10px] font-black uppercase tracking-wider text-slate-400 block mb-1">
+                  {t(group.titleKey)}
+                </span>
+              )}
+
+              {visibleItems.map((item) => {
+                const Icon = item.icon;
+                const label = t(item.labelKey, item.defaultLabel);
+                return (
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    onClick={onNavigate}
+                    title={isCollapsed ? label : undefined}
                   className={({ isActive }) =>
                     `flex items-center gap-3 px-3 py-2 rounded-2xl text-xs font-semibold transition-all ${
                       isActive
@@ -241,12 +328,18 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch
                   />
 
                   {!isCollapsed && (
-                    <span className="flex-1 truncate">{item.label}</span>
+                    <span className="flex-1 truncate">{label}</span>
                   )}
 
                   {!isCollapsed && item.hasBadge && favoritesCount > 0 && (
                     <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
                       {favoritesCount}
+                    </span>
+                  )}
+
+                  {!isCollapsed && item.isFlagshipTech && (
+                    <span className="px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-2xs">
+                      TECH
                     </span>
                   )}
 
@@ -256,10 +349,11 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch
                     </span>
                   )}
                 </NavLink>
-              );
-            })}
-          </div>
-        ))}
+                );
+              })}
+            </div>
+          );
+        })}
       </nav>
 
       {/* 4. Footer Utilities: Search, Theme & Logout */}
@@ -275,7 +369,7 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch
         >
           <div className="flex items-center gap-2">
             <Search size={14} className="text-indigo-600" />
-            {!isCollapsed && <span>Rechercher...</span>}
+            {!isCollapsed && <span>{t('header.searchLabel')}</span>}
           </div>
           {!isCollapsed && (
             <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
@@ -298,13 +392,20 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch
             type="button"
             onClick={handleLogout}
             className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors flex items-center gap-1.5 text-xs font-semibold"
-            title="Se déconnecter"
+            title={t('nav.logout')}
           >
             <LogOut size={15} />
-            {!isCollapsed && <span>Déconnexion</span>}
+            {!isCollapsed && <span>{t('nav.logout')}</span>}
           </button>
         </div>
       </div>
+
+      <RoleVerificationModal
+        targetRole={verificationModalRole}
+        isOpen={!!verificationModalRole}
+        onClose={() => setVerificationModalRole(null)}
+        onSuccess={(elevated) => switchRole(ROLE_LABELS[elevated])}
+      />
     </aside>
   );
 }
