@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   ShieldCheck,
@@ -6,9 +7,11 @@ import {
   BarChart2,
   Lock,
 } from 'lucide-react';
-import UserModerationManager from '../components/admin/UserModerationManager';
-import ContentReportsQueue from '../components/admin/ContentReportsQueue';
-import AnalyticsDashboard from '../components/admin/AnalyticsDashboard';
+import RouteLoadingSkeleton from '../components/common/RouteLoadingSkeleton';
+
+const UserModerationManager = lazy(() => import('../components/admin/UserModerationManager'));
+const ContentReportsQueue = lazy(() => import('../components/admin/ContentReportsQueue'));
+const AnalyticsDashboard = lazy(() => import('../components/admin/AnalyticsDashboard'));
 
 const TABS = [
   {
@@ -113,11 +116,13 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Active Tab Panel */}
+      {/* Active Tab Panel with Suspense and RouteLoadingSkeleton */}
       <main className="transition-opacity duration-200">
-        {activeTab === 'users' && <UserModerationManager />}
-        {activeTab === 'reports' && <ContentReportsQueue />}
-        {activeTab === 'analytics' && <AnalyticsDashboard />}
+        <Suspense fallback={<RouteLoadingSkeleton variant="simple" />}>
+          {activeTab === 'users' && <UserModerationManager />}
+          {activeTab === 'reports' && <ContentReportsQueue />}
+          {activeTab === 'analytics' && <AnalyticsDashboard />}
+        </Suspense>
       </main>
     </div>
   );

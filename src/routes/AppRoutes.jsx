@@ -1,11 +1,13 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import ErrorBoundary from '../components/common/ErrorBoundary';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 import RouteLoadingSkeleton from '../components/common/RouteLoadingSkeleton';
 
-// Auth Pages (lightweight or lazy)
+// Public Landing & Auth Pages
+const LandingPage = lazy(() => import('../pages/LandingPage'));
+const AuthPage = lazy(() => import('../pages/AuthPage'));
 const LoginPage = lazy(() => import('../pages/LoginPage'));
 const RegisterPage = lazy(() => import('../pages/RegisterPage'));
 
@@ -36,8 +38,10 @@ export default function AppRoutes() {
     <ErrorBoundary>
       <Suspense fallback={<RouteLoadingSkeleton />}>
         <Routes>
-          {/* 1. Public Authentication Pages */}
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          {/* 1. Public Front Page & Authentication Pages */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/home" element={<LandingPage />} />
+          <Route path="/auth" element={<AuthPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 

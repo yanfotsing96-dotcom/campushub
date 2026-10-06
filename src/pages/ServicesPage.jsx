@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Briefcase,
@@ -7,9 +8,11 @@ import {
   Car,
   Laptop,
 } from 'lucide-react';
-import LogisticsAndOpportunities from '../components/services/LogisticsAndOpportunities';
-import CampusLifeAndCarpooling from '../components/services/CampusLifeAndCarpooling';
-import BibliographyGenerator from '../components/services/BibliographyGenerator';
+import RouteLoadingSkeleton from '../components/common/RouteLoadingSkeleton';
+
+const LogisticsAndOpportunities = lazy(() => import('../components/services/LogisticsAndOpportunities'));
+const CampusLifeAndCarpooling = lazy(() => import('../components/services/CampusLifeAndCarpooling'));
+const BibliographyGenerator = lazy(() => import('../components/services/BibliographyGenerator'));
 
 const TABS = [
   {
@@ -118,11 +121,13 @@ export default function ServicesPage() {
         </div>
       </div>
 
-      {/* Active Tab Panel */}
+      {/* Active Tab Panel with Suspense and RouteLoadingSkeleton */}
       <main className="transition-opacity duration-200">
-        {activeTab === 'logistics' && <LogisticsAndOpportunities />}
-        {activeTab === 'campuslife' && <CampusLifeAndCarpooling />}
-        {activeTab === 'bibliography' && <BibliographyGenerator />}
+        <Suspense fallback={<RouteLoadingSkeleton variant="simple" />}>
+          {activeTab === 'logistics' && <LogisticsAndOpportunities />}
+          {activeTab === 'campuslife' && <CampusLifeAndCarpooling />}
+          {activeTab === 'bibliography' && <BibliographyGenerator />}
+        </Suspense>
       </main>
     </div>
   );

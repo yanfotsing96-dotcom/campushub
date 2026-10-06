@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Layers,
@@ -8,10 +9,12 @@ import {
   Cpu,
   BrainCircuit,
 } from 'lucide-react';
-import FlashcardReview from '../components/learning/FlashcardReview';
-import CodePlayground from '../components/learning/CodePlayground';
-import AILearningAssistant from '../components/learning/AILearningAssistant';
-import TechnicalTranslator from '../components/learning/TechnicalTranslator';
+import RouteLoadingSkeleton from '../components/common/RouteLoadingSkeleton';
+
+const FlashcardReview = lazy(() => import('../components/learning/FlashcardReview'));
+const CodePlayground = lazy(() => import('../components/learning/CodePlayground'));
+const AILearningAssistant = lazy(() => import('../components/learning/AILearningAssistant'));
+const TechnicalTranslator = lazy(() => import('../components/learning/TechnicalTranslator'));
 
 const TABS = [
   {
@@ -159,12 +162,14 @@ export default function LearningPage() {
         </div>
       </div>
 
-      {/* Active Tab Panel */}
+      {/* Active Tab Panel with Suspense and RouteLoadingSkeleton */}
       <main className="transition-opacity duration-200">
-        {activeTab === 'flashcards' && <FlashcardReview />}
-        {activeTab === 'playground' && <CodePlayground />}
-        {activeTab === 'ai' && <AILearningAssistant />}
-        {activeTab === 'translator' && <TechnicalTranslator />}
+        <Suspense fallback={<RouteLoadingSkeleton variant="simple" />}>
+          {activeTab === 'flashcards' && <FlashcardReview />}
+          {activeTab === 'playground' && <CodePlayground />}
+          {activeTab === 'ai' && <AILearningAssistant />}
+          {activeTab === 'translator' && <TechnicalTranslator />}
+        </Suspense>
       </main>
     </div>
   );

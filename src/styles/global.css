@@ -252,3 +252,25 @@ body.light .button-focus {
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: transform, opacity;
 }
+
+/* Core Web Vitals: Content Visibility & Smooth Scroll Optimization */
+.cv-auto {
+  content-visibility: auto;
+  contain-intrinsic-size: 0 120px;
+}
+
+html {
+  scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+}
+
+/* Reduced Motion Preference Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+

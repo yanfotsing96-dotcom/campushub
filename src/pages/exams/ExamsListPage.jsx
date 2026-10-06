@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, lazy, Suspense } from 'react';
 import {
   FileCheck2,
   Timer,
@@ -11,9 +11,11 @@ import {
 import { useAuth } from '../../hooks/useAuth';
 import { examService } from '../../services/examService';
 import { normalizeRole, ROLES } from '../../constants/rbacConstants';
-import SecureExamRoom from '../../components/exams/SecureExamRoom';
-import AdminExamCreator from '../../components/exams/AdminExamCreator';
 import RoleBadge from '../../components/common/RoleBadge';
+import RouteLoadingSkeleton from '../../components/common/RouteLoadingSkeleton';
+
+const SecureExamRoom = lazy(() => import('../../components/exams/SecureExamRoom'));
+const AdminExamCreator = lazy(() => import('../../components/exams/AdminExamCreator'));
 
 export default function ExamsListPage() {
   const { user } = useAuth();
@@ -52,13 +54,15 @@ export default function ExamsListPage() {
   if (selectedExam) {
     return (
       <div className="page-content py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <SecureExamRoom
-          exam={selectedExam}
-          onExit={() => {
-            setSelectedExam(null);
-            setUpdateCounter((c) => c + 1);
-          }}
-        />
+        <Suspense fallback={<RouteLoadingSkeleton variant="simple" />}>
+          <SecureExamRoom
+            exam={selectedExam}
+            onExit={() => {
+              setSelectedExam(null);
+              setUpdateCounter((c) => c + 1);
+            }}
+          />
+        </Suspense>
       </div>
     );
   }
@@ -145,7 +149,9 @@ export default function ExamsListPage() {
 
       {/* TAB 1: ADMIN CREATOR & MANAGEMENT CONSOLE */}
       {isAdminOrModerator && activeTab === 'admin' && (
-        <AdminExamCreator onExamCreated={() => setUpdateCounter((c) => c + 1)} />
+        <Suspense fallback={<RouteLoadingSkeleton variant="simple" />}>
+          <AdminExamCreator onExamCreated={() => setUpdateCounter((c) => c + 1)} />
+        </Suspense>
       )}
 
       {/* TAB 2: STUDENT AVAILABLE EXAMS */}

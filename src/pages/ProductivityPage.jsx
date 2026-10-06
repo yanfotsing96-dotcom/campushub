@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Clock,
@@ -8,10 +9,12 @@ import {
   Target,
   Flame,
 } from 'lucide-react';
-import PomodoroTimer from '../components/productivity/PomodoroTimer';
-import WhiteboardCollaboratif from '../components/productivity/WhiteboardCollaboratif';
-import RevisionCalendar from '../components/productivity/RevisionCalendar';
-import OfflineModeManager from '../components/productivity/OfflineModeManager';
+import RouteLoadingSkeleton from '../components/common/RouteLoadingSkeleton';
+
+const PomodoroTimer = lazy(() => import('../components/productivity/PomodoroTimer'));
+const WhiteboardCollaboratif = lazy(() => import('../components/productivity/WhiteboardCollaboratif'));
+const RevisionCalendar = lazy(() => import('../components/productivity/RevisionCalendar'));
+const OfflineModeManager = lazy(() => import('../components/productivity/OfflineModeManager'));
 
 const TABS = [
   {
@@ -127,12 +130,14 @@ export default function ProductivityPage() {
         </div>
       </div>
 
-      {/* Active Tab Panel */}
+      {/* Active Tab Panel with Suspense and RouteLoadingSkeleton */}
       <main className="transition-opacity duration-200">
-        {activeTab === 'pomodoro' && <PomodoroTimer />}
-        {activeTab === 'whiteboard' && <WhiteboardCollaboratif />}
-        {activeTab === 'calendar' && <RevisionCalendar />}
-        {activeTab === 'offline' && <OfflineModeManager />}
+        <Suspense fallback={<RouteLoadingSkeleton variant="simple" />}>
+          {activeTab === 'pomodoro' && <PomodoroTimer />}
+          {activeTab === 'whiteboard' && <WhiteboardCollaboratif />}
+          {activeTab === 'calendar' && <RevisionCalendar />}
+          {activeTab === 'offline' && <OfflineModeManager />}
+        </Suspense>
       </main>
     </div>
   );

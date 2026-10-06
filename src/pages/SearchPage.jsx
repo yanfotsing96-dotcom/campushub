@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useDeferredValue, useCallback } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Search,
@@ -15,12 +15,16 @@ import Toast from '../components/common/Toast';
 import EmptyState from '../components/common/EmptyState';
 import Badge from '../components/common/Badge';
 import Button from '../components/common/Button';
+import Pagination from '../components/common/Pagination';
 import { useResources } from '../hooks/useResources';
 import '../styles/SearchPage.css';
+
+const ITEMS_PER_PAGE = 8;
 
 export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
+  const deferredQuery = useDeferredValue(query);
 
   const [filters, setFilters] = useState({
     filiere: '',
@@ -30,6 +34,7 @@ export default function SearchPage() {
   });
   const [previewResource, setPreviewResource] = useState(null);
   const [toastMessage, setToastMessage] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   const { resources, isFavorite, toggleFavorite, recordDownload } = useResources();
 
@@ -67,9 +72,9 @@ export default function SearchPage() {
     return { countsByFiliere: byFiliere, countsByNiveau: byNiveau };
   }, [resources]);
 
-  // Filter and sort resources intelligently
+  // Filter and sort resources intelligently with deferred query for non-blocking UI
   const filteredResults = useMemo(() => {
-    const lowerQuery = query.toLowerCase().trim();
+    const lowerQuery = deferredQuery.toLowerCase().trim();
 
     return resources
       .filter((item) => {
@@ -102,9 +107,23 @@ export default function SearchPage() {
         // Default: most recent
         return (b.id || 0) - (a.id || 0);
       });
-  }, [resources, query, filters]);
+  }, [resources, deferredQuery, filters]);
 
-  const handleToggleFavorite = (res, e) => {
+  // Auto-reset page on filter/search change without effect
+  const filterKey = `${deferredQuery}-${filters.filiere}-${filters.niveau}-${filters.typeDoc}-${filters.tri}`;
+  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
+  if (filterKey !== prevFilterKey) {
+    setPrevFilterKey(filterKey);
+    setCurrentPage(1);
+  }
+
+  const totalPages = Math.ceil(filteredResults.length / ITEMS_PER_PAGE);
+  const paginatedResults = useMemo(() => {
+    const start = (currentPage - 1) * ITEMS_PER_PAGE;
+    return filteredResults.slice(start, start + ITEMS_PER_PAGE);
+  }, [filteredResults, currentPage]);
+
+  const handleToggleFavorite = useCallback((res, e) => {
     if (e) e.stopPropagation();
     const result = toggleFavorite(res.id);
     setToastMessage({
@@ -114,9 +133,9 @@ export default function SearchPage() {
         : `"${res.titre}" a été retiré des favoris.`,
     });
     setTimeout(() => setToastMessage(null), 3000);
-  };
+  }, [toggleFavorite]);
 
-  const handleDownload = (res, e) => {
+  const handleDownload = useCallback((res, e) => {
     if (e) e.stopPropagation();
     recordDownload(res.id);
     setToastMessage({
@@ -124,7 +143,7 @@ export default function SearchPage() {
       text: `Téléchargement de "${res.titre}" enregistré dans l'historique !`,
     });
     setTimeout(() => setToastMessage(null), 3500);
-  };
+  }, [recordDownload]);
 
   // Term highlighter
   const highlightText = (text, term) => {
@@ -295,7 +314,7 @@ export default function SearchPage() {
             onAction={handleResetFilters}
           />
         ) : (
-          filteredResults.map((res) => {
+          paginatedResults.map((res) => {
             const favorited = isFavorite(res.id);
             return (
               <div
@@ -400,6 +419,15 @@ export default function SearchPage() {
           })
         )}
       </div>
+
+      {/* Pagination Controls */}
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={filteredResults.length}
+        pageSize={ITEMS_PER_PAGE}
+        onPageChange={setCurrentPage}
+      />
 
       {/* Document Quick Preview Modal */}
       {previewResource && (

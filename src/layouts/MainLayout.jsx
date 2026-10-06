@@ -1,4 +1,4 @@
-import { useState, useEffect, Suspense } from 'react';
+import { useState, useEffect, Suspense, lazy } from 'react';
 import { Outlet, useLocation, Link } from 'react-router-dom';
 import {
   Menu,
@@ -14,11 +14,12 @@ import {
 import ErrorBoundary from '../components/common/ErrorBoundary';
 import RouteLoadingSkeleton from '../components/common/RouteLoadingSkeleton';
 import AppSidebar from '../components/layout/AppSidebar';
-import GlobalSearchModal from '../components/search/GlobalSearchModal';
-import UniversitySelectorModal from '../components/common/UniversitySelectorModal';
 import GlobalToast from '../components/common/GlobalToast';
 import ThemeToggle from '../components/common/ThemeToggle';
 import LanguageSelector from '../components/common/LanguageSelector';
+
+const GlobalSearchModal = lazy(() => import('../components/search/GlobalSearchModal'));
+const UniversitySelectorModal = lazy(() => import('../components/common/UniversitySelectorModal'));
 import { useCampusHub } from '../hooks/useCampusHub';
 import { useAuth } from '../hooks/useAuth';
 import { useLanguage } from '../hooks/useLanguage';
@@ -319,16 +320,24 @@ export default function MainLayout() {
         </footer>
       </div>
 
-      {/* Global Interactive Utilities */}
+      {/* Global Interactive Utilities (Code-split on demand) */}
       <GlobalToast />
-      <GlobalSearchModal
-        isOpen={globalSearchOpen}
-        onClose={() => setGlobalSearchOpen(false)}
-      />
-      <UniversitySelectorModal
-        isOpen={universityModalOpen}
-        onClose={() => setUniversityModalOpen(false)}
-      />
+      {globalSearchOpen && (
+        <Suspense fallback={null}>
+          <GlobalSearchModal
+            isOpen={globalSearchOpen}
+            onClose={() => setGlobalSearchOpen(false)}
+          />
+        </Suspense>
+      )}
+      {universityModalOpen && (
+        <Suspense fallback={null}>
+          <UniversitySelectorModal
+            isOpen={universityModalOpen}
+            onClose={() => setUniversityModalOpen(false)}
+          />
+        </Suspense>
+      )}
     </div>
   );
 }

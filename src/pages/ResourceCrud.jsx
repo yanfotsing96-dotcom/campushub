@@ -1,9 +1,8 @@
-import { useState, useMemo, useEffect, useCallback } from 'react';
+import { useState, useMemo, useEffect, useCallback, useDeferredValue } from 'react';
 import {
   BookOpen,
   Plus,
   Pencil,
-  Trash2,
   Check,
   X,
   Search,
@@ -16,7 +15,6 @@ import {
   Crown,
   Award,
   Lock,
-  Download,
   CheckCircle2,
   AlertCircle,
 } from 'lucide-react';
@@ -229,13 +227,18 @@ function ResourceCrud() {
   }, []);
 
   // Filtrage et tri mémorisés
+  // Filtrage et tri mémorisés avec requête différée pour éliminer la latence de frappe
+  const deferredSearchQuery = useDeferredValue(searchQuery);
+
   const filteredResources = useMemo(() => {
+    const lower = deferredSearchQuery.toLowerCase();
     return resources
       .filter((res) => {
         const matchesSearch =
-          res.titre.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (res.description && res.description.toLowerCase().includes(searchQuery.toLowerCase())) ||
-          (res.codeUe && res.codeUe.toLowerCase().includes(searchQuery.toLowerCase()));
+          !lower ||
+          res.titre.toLowerCase().includes(lower) ||
+          (res.description && res.description.toLowerCase().includes(lower)) ||
+          (res.codeUe && res.codeUe.toLowerCase().includes(lower));
         const matchesFiliere = filterFiliere === 'all' || res.filiere === filterFiliere;
         const matchesNiveau = filterNiveau === 'all' || res.niveau === filterNiveau;
         return matchesSearch && matchesFiliere && matchesNiveau;
@@ -246,12 +249,15 @@ function ResourceCrud() {
         }
         return b.id - a.id;
       });
-  }, [resources, searchQuery, filterFiliere, filterNiveau, sortBy]);
+  }, [resources, deferredSearchQuery, filterFiliere, filterNiveau, sortBy]);
 
   // Reset page when filters change
-  useEffect(() => {
+  const [prevFilterQuery, setPrevFilterQuery] = useState(`${deferredSearchQuery}|${filterFiliere}|${filterNiveau}|${sortBy}`);
+  const currentFilterQuery = `${deferredSearchQuery}|${filterFiliere}|${filterNiveau}|${sortBy}`;
+  if (prevFilterQuery !== currentFilterQuery) {
+    setPrevFilterQuery(currentFilterQuery);
     setCurrentPage(1);
-  }, [searchQuery, filterFiliere, filterNiveau, sortBy]);
+  }
 
   // Paginated Resources
   const totalPages = Math.ceil(filteredResources.length / ITEMS_PER_PAGE);

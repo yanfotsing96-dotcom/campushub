@@ -1,8 +1,8 @@
 import { CheckCircle2, Info, Zap, X } from 'lucide-react';
-import { useCampusHub } from '../../hooks/useCampusHub';
+import { useCampusToast } from '../../context/CampusHubContext';
 
 export default function GlobalToast() {
-  const { toastNotification, clearToast } = useCampusHub();
+  const { toastNotification, clearToast } = useCampusToast();
 
   if (!toastNotification) return null;
 

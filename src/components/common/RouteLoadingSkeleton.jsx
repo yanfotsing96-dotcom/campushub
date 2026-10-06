@@ -1,15 +1,13 @@
-import React from 'react';
-
 export default function RouteLoadingSkeleton({ variant = 'dashboard' }) {
-  if (variant === 'simple') {
+  if (variant === 'tab' || variant === 'simple') {
     return (
-      <div className="page-content py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-4 animate-pulse">
-        <div className="h-8 w-48 bg-slate-200 dark:bg-slate-800 rounded-xl" />
-        <div className="h-32 w-full bg-slate-200 dark:bg-slate-800 rounded-3xl" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-2">
-          <div className="h-40 bg-slate-200 dark:bg-slate-800 rounded-2xl" />
-          <div className="h-40 bg-slate-200 dark:bg-slate-800 rounded-2xl" />
-          <div className="h-40 bg-slate-200 dark:bg-slate-800 rounded-2xl" />
+      <div className="py-4 space-y-4 animate-pulse smooth-gpu" aria-busy="true" aria-label="Chargement du contenu">
+        <div className="h-6 w-48 bg-slate-200 dark:bg-slate-800 rounded-xl" />
+        <div className="h-28 w-full bg-slate-200/70 dark:bg-slate-800/70 rounded-2xl" />
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 pt-1">
+          <div className="h-36 bg-slate-200/60 dark:bg-slate-800/60 rounded-2xl" />
+          <div className="h-36 bg-slate-200/60 dark:bg-slate-800/60 rounded-2xl" />
+          <div className="h-36 bg-slate-200/60 dark:bg-slate-800/60 rounded-2xl hidden md:block" />
         </div>
       </div>
     );

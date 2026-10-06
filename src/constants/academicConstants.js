@@ -10,6 +10,8 @@ export const STORAGE_KEYS = {
   HISTORY: 'academic_history',
   NOTES: 'academic_notes',
   AUTH_USER: 'academic_user',
+  AUTH_TOKEN: 'campushub_auth_token',
+  AUTH_SESSION: 'campushub_auth_session',
   THEME: 'theme',
   SELECTED_UNIVERSITY: 'campushub_selected_university',
 };

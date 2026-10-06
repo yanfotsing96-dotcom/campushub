@@ -5,6 +5,12 @@ import { normalizeRole, ROLE_LABELS } from '../constants/rbacConstants';
 import { useAuth } from './AuthContext';
 
 const CampusHubContext = createContext(null);
+const CampusToastContext = createContext(null);
+
+export function useCampusToast() {
+  const context = useContext(CampusToastContext);
+  return context || { toastNotification: null, clearToast: () => {} };
+}
 
 const STORAGE_KEY_PRO = 'campushub_user_is_pro';
 const STORAGE_KEY_SUB = 'campushub_pro_subscription';
@@ -259,6 +265,17 @@ export function CampusHubProvider({ children }) {
     subscription,
   ]);
 
+  const clearToast = useCallback(() => {
+    setToastNotification(null);
+  }, []);
+
+  const toastValue = useMemo(() => {
+    return {
+      toastNotification,
+      clearToast,
+    };
+  }, [toastNotification, clearToast]);
+
   const contextValue = useMemo(() => {
     return {
       student,
@@ -272,8 +289,7 @@ export function CampusHubProvider({ children }) {
       switchRole,
       earnXp,
       triggerToast,
-      toastNotification,
-      clearToast: () => setToastNotification(null),
+      clearToast,
     };
   }, [
     student,
@@ -286,12 +302,14 @@ export function CampusHubProvider({ children }) {
     switchRole,
     earnXp,
     triggerToast,
-    toastNotification,
+    clearToast,
   ]);
 
   return (
     <CampusHubContext.Provider value={contextValue}>
-      {children}
+      <CampusToastContext.Provider value={toastValue}>
+        {children}
+      </CampusToastContext.Provider>
     </CampusHubContext.Provider>
   );
 }

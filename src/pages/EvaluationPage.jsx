@@ -1,3 +1,4 @@
+import { lazy, Suspense } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import {
   Star,
@@ -6,9 +7,11 @@ import {
   Award,
   Zap,
 } from 'lucide-react';
-import DocumentRatingComments from '../components/evaluation/DocumentRatingComments';
-import GamificationBadges from '../components/evaluation/GamificationBadges';
-import QualityAndPlagiarismControl from '../components/evaluation/QualityAndPlagiarismControl';
+import RouteLoadingSkeleton from '../components/common/RouteLoadingSkeleton';
+
+const DocumentRatingComments = lazy(() => import('../components/evaluation/DocumentRatingComments'));
+const GamificationBadges = lazy(() => import('../components/evaluation/GamificationBadges'));
+const QualityAndPlagiarismControl = lazy(() => import('../components/evaluation/QualityAndPlagiarismControl'));
 
 const TABS = [
   {
@@ -117,11 +120,13 @@ export default function EvaluationPage() {
         </div>
       </div>
 
-      {/* Active Tab Panel */}
+      {/* Active Tab Panel with Suspense and RouteLoadingSkeleton */}
       <main className="transition-opacity duration-200">
-        {activeTab === 'ratings' && <DocumentRatingComments />}
-        {activeTab === 'gamification' && <GamificationBadges />}
-        {activeTab === 'quality' && <QualityAndPlagiarismControl />}
+        <Suspense fallback={<RouteLoadingSkeleton variant="simple" />}>
+          {activeTab === 'ratings' && <DocumentRatingComments />}
+          {activeTab === 'gamification' && <GamificationBadges />}
+          {activeTab === 'quality' && <QualityAndPlagiarismControl />}
+        </Suspense>
       </main>
     </div>
   );

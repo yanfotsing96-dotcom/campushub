@@ -23,7 +23,7 @@ export function LanguageProvider({ children }) {
     }
   });
 
-  const setLanguage = (newLang) => {
+  const setLanguage = useCallback((newLang) => {
     if (newLang === 'fr' || newLang === 'en') {
       setLanguageState(newLang);
       try {
@@ -32,7 +32,7 @@ export function LanguageProvider({ children }) {
         console.warn('Erreur stockage langue :', err);
       }
     }
-  };
+  }, []);
 
   useEffect(() => {
     document.documentElement.lang = language;
@@ -73,16 +73,18 @@ export function LanguageProvider({ children }) {
     [language]
   );
 
+  const contextValue = useMemo(() => {
+    return {
+      language,
+      setLanguage,
+      currentLanguage,
+      supportedLanguages: SUPPORTED_LANGUAGES,
+      t,
+    };
+  }, [language, setLanguage, currentLanguage, t]);
+
   return (
-    <LanguageContext.Provider
-      value={{
-        language,
-        setLanguage,
-        currentLanguage,
-        supportedLanguages: SUPPORTED_LANGUAGES,
-        t,
-      }}
-    >
+    <LanguageContext.Provider value={contextValue}>
       {children}
     </LanguageContext.Provider>
   );

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   GraduationCap,
@@ -28,7 +28,8 @@ import {
 } from 'lucide-react';
 import ThemeToggle from '../common/ThemeToggle';
 import RoleBadge from '../common/RoleBadge';
-import RoleVerificationModal from '../auth/RoleVerificationModal';
+
+const RoleVerificationModal = lazy(() => import('../auth/RoleVerificationModal'));
 import { useCampusHub } from '../../hooks/useCampusHub';
 import { useResources } from '../../hooks/useResources';
 import { useAuth } from '../../hooks/useAuth';
@@ -550,12 +551,16 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch
         </div>
       </div>
 
-      <RoleVerificationModal
-        targetRole={verificationModalRole}
-        isOpen={!!verificationModalRole}
-        onClose={() => setVerificationModalRole(null)}
-        onSuccess={handleElevatedRoleSuccess}
-      />
+      {verificationModalRole && (
+        <Suspense fallback={null}>
+          <RoleVerificationModal
+            targetRole={verificationModalRole}
+            isOpen={!!verificationModalRole}
+            onClose={() => setVerificationModalRole(null)}
+            onSuccess={handleElevatedRoleSuccess}
+          />
+        </Suspense>
+      )}
     </aside>
   );
 }

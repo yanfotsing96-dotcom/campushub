@@ -1,5 +1,5 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useCallback } from 'react';
+import { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { resourceService } from '../services/resourceService';
 import { favoritesService } from '../services/favoritesService';
 import { historyService } from '../services/historyService';
@@ -61,25 +61,40 @@ export function ResourceProvider({ children }) {
     setFavorites([]);
   }, []);
 
+  const contextValue = useMemo(() => {
+    return {
+      resources,
+      favorites,
+      history,
+      favoritesCount: favorites.length,
+      historyCount: history.length,
+      refreshResources,
+      addResource,
+      updateResource,
+      deleteResource,
+      toggleFavorite,
+      isFavorite,
+      recordDownload,
+      clearHistory,
+      clearFavorites,
+    };
+  }, [
+    resources,
+    favorites,
+    history,
+    refreshResources,
+    addResource,
+    updateResource,
+    deleteResource,
+    toggleFavorite,
+    isFavorite,
+    recordDownload,
+    clearHistory,
+    clearFavorites,
+  ]);
+
   return (
-    <ResourceContext.Provider
-      value={{
-        resources,
-        favorites,
-        history,
-        favoritesCount: favorites.length,
-        historyCount: history.length,
-        refreshResources,
-        addResource,
-        updateResource,
-        deleteResource,
-        toggleFavorite,
-        isFavorite,
-        recordDownload,
-        clearHistory,
-        clearFavorites,
-      }}
-    >
+    <ResourceContext.Provider value={contextValue}>
       {children}
     </ResourceContext.Provider>
   );

@@ -58,14 +58,40 @@ export function AuthProvider({ children }) {
     };
   });
 
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
+  const [sessionToken, setSessionToken] = useState(() => {
+    try {
+      return (
+        storageService.get(STORAGE_KEYS.AUTH_TOKEN, null) ||
+        localStorage.getItem('campushub_auth_token') ||
+        null
+      );
+    } catch {
+      return null;
+    }
+  });
+
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    try {
+      const savedToken =
+        storageService.get(STORAGE_KEYS.AUTH_TOKEN, null) ||
+        localStorage.getItem('campushub_auth_token');
+      const savedSession = storageService.get(STORAGE_KEYS.AUTH_SESSION, null);
+      if (!savedToken) return false;
+      if (savedSession && savedSession.expiresAt && Date.now() > savedSession.expiresAt) {
+        return false;
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  });
 
   // Sync to storage
   useEffect(() => {
-    if (user) {
+    if (user && isAuthenticated) {
       storageService.set(STORAGE_KEYS.AUTH_USER, user);
     }
-  }, [user]);
+  }, [user, isAuthenticated]);
 
   // Normalized Role string
   const currentRole = useMemo(() => {
@@ -191,10 +217,25 @@ export function AuthProvider({ children }) {
           isFullAccess: targetRole === ROLES.ADMIN,
         },
       };
+      const token = `ch_tok_${Math.random().toString(36).substring(2, 10)}_${Date.now()}`;
+      try {
+        storageService.set(STORAGE_KEYS.AUTH_TOKEN, token);
+        storageService.set(STORAGE_KEYS.AUTH_SESSION, {
+          token,
+          userId: updated.id || 'usr_' + Date.now(),
+          role: targetRole,
+          createdAt: Date.now(),
+          expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
+        });
+        localStorage.setItem('campushub_auth_token', token);
+      } catch (e) {
+        console.warn('Erreur stockage token de session :', e);
+      }
+      setSessionToken(token);
       setUser(updated);
       setIsAuthenticated(true);
       storageService.set(STORAGE_KEYS.AUTH_USER, updated);
-      return { user: updated, redirectPath: getDashboardRouteForRole(targetRole) };
+      return { success: true, token, user: updated, redirectPath: getDashboardRouteForRole(targetRole) };
     },
     []
   );
@@ -237,7 +278,8 @@ export function AuthProvider({ children }) {
       niveau,
       universityId,
       bio: formData.bio || `Étudiant inscrit en ${filiereId} (${niveau}) sur la plateforme CampusHub Cameroun.`,
-      avatar: formData.photo ? URL.createObjectURL(formData.photo) : null,
+      avatar: formData.avatar || (formData.photo instanceof Blob ? URL.createObjectURL(formData.photo) : formData.photo) || null,
+      adminJustification: formData.justification || null,
       badges: ['🚀 Nouvel Arrivant', '📚 CampusHub Cameroun', `🎓 Filière ${filiereId}`],
       role: targetRole,
       roleNormalized: targetRole,
@@ -255,10 +297,25 @@ export function AuthProvider({ children }) {
         favoritesCount: 0,
       },
     };
+    const token = `ch_tok_${Math.random().toString(36).substring(2, 10)}_${Date.now()}`;
+    try {
+      storageService.set(STORAGE_KEYS.AUTH_TOKEN, token);
+      storageService.set(STORAGE_KEYS.AUTH_SESSION, {
+        token,
+        userId: newUser.id,
+        role: targetRole,
+        createdAt: Date.now(),
+        expiresAt: Date.now() + 7 * 24 * 60 * 60 * 1000,
+      });
+      localStorage.setItem('campushub_auth_token', token);
+    } catch (e) {
+      console.warn('Erreur stockage token de session :', e);
+    }
+    setSessionToken(token);
     setUser(newUser);
     setIsAuthenticated(true);
     storageService.set(STORAGE_KEYS.AUTH_USER, newUser);
-    return { user: newUser, redirectPath: getDashboardRouteForRole(targetRole) };
+    return { success: true, token, user: newUser, redirectPath: getDashboardRouteForRole(targetRole) };
   }, []);
 
   const updateProfile = useCallback((partialUpdates) => {
@@ -311,13 +368,46 @@ export function AuthProvider({ children }) {
   }, []);
 
   const logout = useCallback(() => {
+    try {
+      storageService.remove(STORAGE_KEYS.AUTH_TOKEN);
+      storageService.remove(STORAGE_KEYS.AUTH_SESSION);
+      localStorage.removeItem('campushub_auth_token');
+      localStorage.removeItem('campushub_auth_session');
+    } catch (err) {
+      console.warn('Erreur lors du nettoyage de session :', err);
+    }
+    setSessionToken(null);
     setIsAuthenticated(false);
   }, []);
+
+  const checkSession = useCallback(() => {
+    try {
+      const token =
+        storageService.get(STORAGE_KEYS.AUTH_TOKEN, null) ||
+        localStorage.getItem('campushub_auth_token');
+      const session = storageService.get(STORAGE_KEYS.AUTH_SESSION, null);
+      if (!token || (session && session.expiresAt && Date.now() > session.expiresAt)) {
+        logout();
+        return false;
+      }
+      return true;
+    } catch {
+      logout();
+      return false;
+    }
+  }, [logout]);
+
+  const getDashboardRoute = useCallback(() => {
+    return getDashboardRouteForRole(currentRole);
+  }, [currentRole]);
 
   const authContextValue = useMemo(() => {
     return {
       user,
       isAuthenticated,
+      token: sessionToken,
+      sessionToken,
+      checkSession,
       role: currentRole,
       roleLabel: ROLE_LABELS[currentRole],
       isStudent: currentRole === ROLES.STUDENT,
@@ -334,12 +424,14 @@ export function AuthProvider({ children }) {
       register,
       updateProfile,
       logout,
-      getDashboardRoute: () => getDashboardRouteForRole(currentRole),
+      getDashboardRoute,
       demoProfiles: DEMO_PROFILES,
     };
   }, [
     user,
     isAuthenticated,
+    sessionToken,
+    checkSession,
     currentRole,
     can,
     hasRole,
@@ -349,6 +441,7 @@ export function AuthProvider({ children }) {
     register,
     updateProfile,
     logout,
+    getDashboardRoute,
   ]);
 
   return (

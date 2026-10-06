@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useDeferredValue } from 'react';
 import {
   BookOpen,
   Search,
@@ -32,10 +32,11 @@ export default function ScopedCoursesManager() {
   const [selectedCourseId, setSelectedCourseId] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const deferredSearchQuery = useDeferredValue(searchQuery);
   const [rawPage, setRawPage] = useState(1);
 
   // Derive filter key to compute page without cascading setState inside useEffect
-  const filterKey = `${activeDepartmentId}-${activeNiveau}-${selectedCourseId}-${selectedType}-${searchQuery}`;
+  const filterKey = `${activeDepartmentId}-${activeNiveau}-${selectedCourseId}-${selectedType}-${deferredSearchQuery}`;
   const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
 
   let currentPage = rawPage;
@@ -74,10 +75,10 @@ export default function ScopedCoursesManager() {
       {
         courseId: selectedCourseId === 'all' ? undefined : selectedCourseId,
         type: selectedType,
-        searchQuery,
+        searchQuery: deferredSearchQuery,
       }
     );
-  }, [user, isAdmin, activeDepartmentId, activeNiveau, selectedCourseId, selectedType, searchQuery]);
+  }, [user, isAdmin, activeDepartmentId, activeNiveau, selectedCourseId, selectedType, deferredSearchQuery]);
 
   // Paginated materials
   const totalPages = Math.ceil(materials.length / MATERIALS_PER_PAGE);

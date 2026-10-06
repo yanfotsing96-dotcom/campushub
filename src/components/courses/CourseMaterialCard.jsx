@@ -1,9 +1,8 @@
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { Video, Code, Download } from 'lucide-react';
 
 const CourseMaterialCard = memo(function CourseMaterialCard({
   mat,
-  userMatricule,
   onDownload,
 }) {
   return (

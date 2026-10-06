@@ -35,23 +35,33 @@ export default function SecureExamPlayer({ exam, onExit }) {
   const [showIntegrityWarning, setShowIntegrityWarning] = useState(false);
 
   const timerRef = useRef(null);
+  const remainingSecondsRef = useRef(remainingSeconds);
+  const answersRef = useRef(answers);
 
-  // 2. Submit Exam Callback
+  useEffect(() => {
+    remainingSecondsRef.current = remainingSeconds;
+  }, [remainingSeconds]);
+
+  useEffect(() => {
+    answersRef.current = answers;
+  }, [answers]);
+
+  // 2. Submit Exam Callback (stable reference)
   const handleFinalSubmit = useCallback(() => {
     if (isSubmitting || result) return;
     setIsSubmitting(true);
 
-    const timeSpent = exam.durationMinutes * 60 - remainingSeconds;
-    const submission = examService.submitExam(exam.id, user, answers, {
+    const timeSpent = exam.durationMinutes * 60 - remainingSecondsRef.current;
+    const submission = examService.submitExam(exam.id, user, answersRef.current, {
       focusLossCount,
       timeTakenSeconds: Math.max(10, timeSpent),
     });
 
     setResult(submission);
     setIsSubmitting(false);
-  }, [isSubmitting, result, exam.durationMinutes, exam.id, remainingSeconds, user, answers, focusLossCount]);
+  }, [isSubmitting, result, exam.durationMinutes, exam.id, user, focusLossCount]);
 
-  // 3. Active Countdown Timer
+  // 3. Active Countdown Timer (stable 1s heartbeat without recreating interval)
   useEffect(() => {
     if (result) return;
 
@@ -69,17 +79,22 @@ export default function SecureExamPlayer({ exam, onExit }) {
     return () => clearInterval(timerRef.current);
   }, [result, handleFinalSubmit]);
 
-  // 4. Autosave every 10 seconds
+  // 4. Autosave every 10 seconds without recreating interval on 1s ticks
   useEffect(() => {
     if (result) return;
 
     const autosaveInterval = setInterval(() => {
-      examService.saveDraftAnswers(exam.id, studentMatricule, answers, remainingSeconds);
+      examService.saveDraftAnswers(
+        exam.id,
+        studentMatricule,
+        answersRef.current,
+        remainingSecondsRef.current
+      );
       setLastAutosave(new Date().toLocaleTimeString());
     }, 10000);
 
     return () => clearInterval(autosaveInterval);
-  }, [exam.id, studentMatricule, answers, remainingSeconds, result]);
+  }, [exam.id, studentMatricule, result]);
 
   // 5. Anti-Cheat Window Blur Listener
   useEffect(() => {
