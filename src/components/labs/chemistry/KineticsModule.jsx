@@ -100,34 +100,43 @@ export default function KineticsModule() {
 
   // Génération du compte-rendu de TP Markdown
   const generatedReport = useMemo(() => {
-    return `# COMPTE-RENDU DE TRAVAUX PRATIQUES : CINÉTIQUE CHIMIQUE
-**Plateforme Académique CampusHub · Pôle Sciences Chimiques (L3-Master)**
-**Date de manipulation :** ${new Date().toLocaleDateString('fr-FR')}
+    const unitKStr = order === 0 ? '\\text{mol}\\cdot\\text{L}^{-1}\\cdot\\text{s}^{-1}' : order === 1 ? '\\text{s}^{-1}' : '\\text{L}\\cdot\\text{mol}^{-1}\\cdot\\text{s}^{-1}';
+    const integratedLaw =
+      order === 0
+        ? '[\\text{A}](t) = [\\text{A}]_0 - k \\times t \\quad ; \\quad t_{1/2} = \\frac{[\\text{A}]_0}{2k}'
+        : order === 1
+        ? '[\\text{A}](t) = [\\text{A}]_0 \\times e^{-kt} \\quad ; \\quad t_{1/2} = \\frac{\\ln(2)}{k}'
+        : '\\frac{1}{[\\text{A}](t)} = \\frac{1}{[\\text{A}]_0} + k \\times t \\quad ; \\quad t_{1/2} = \\frac{1}{k \\times [\\text{A}]_0}';
 
----
+    return `# Compte-Rendu de TP : Cinétique Chimique et Loi d'Arrhenius
 
 ## 1. Système Réactionnel Étudié
-- **Réaction modèle :** **${activePreset.name}**
-- **Équation stœchiométrique :** \`${activePreset.formula}\`
-- **Ordre global de la réaction ($n$) :** **Ordre ${order}**
-- **Présence d'un catalyseur :** ${hasCatalyst ? `✅ Oui (Énergie d'activation abaissée à ${activePreset.catalystEa} kJ/mol)` : `❌ Non (Ea initiale = ${activePreset.ea} kJ/mol)`}
+- Réaction modèle : **${activePreset.name}** (**${activePreset.equation || activePreset.formula}**)
+- Ordre global de la réaction ($n$) : **Ordre ${order}**
+- Catalyseur : **${hasCatalyst ? `Actif (Ea abaissée à ${activePreset.catalystEa} kJ/mol)` : `Absent (Ea = ${activePreset.ea} kJ/mol)`}**
 
-## 2. Paramètres Cinétiques Initiaux
-- Concentration initiale en réactif $[A]_0$ : **${initialA0} mol/L**
-- Température du milieu réactionnel ($T$) : **${temperatureK} K** (${(temperatureK - 273.15).toFixed(1)} °C)
-- Énergie d'activation effective ($E_a$) : **${effectiveEa} kJ/mol**
-- Constante de vitesse calculée ($k$) : **${kRate} ${order === 0 ? 'mol/(L·s)' : order === 1 ? 's⁻¹' : 'L/(mol·s)'}**
+## 2. Paramètres Cinétiques Expérimentaux
 
-## 3. Résultats & Analyse du Temps de Demi-Vie
-- Temps de demi-vie théorique ($t_{1/2}$) : **${halfLifeAnalysis} secondes**
-- À l'instant d'observation $t = ${currentTimeSec}\\text{ s}$ :
-  - Concentration résiduelle $[A](t)$ : **${currentConcentration} mol/L** (${(((initialA0 - currentConcentration) / initialA0) * 100).toFixed(1)} % de conversion)
-  - Vitesse instantanée de disparition ($v$) : **${instantaneousRate.toExponential(3)} mol/(L·s)**
+| Paramètre Cinétique | Symbole | Valeur | Unité |
+| :--- | :---: | :---: | :--- |
+| Concentration initiale | $[\\text{A}]_0$ | **${initialA0}** | $\\text{mol/L}$ |
+| Température du milieu | $T$ | **${temperatureK}** | $\\text{K}$ (${(temperatureK - 273.15).toFixed(1)} °C) |
+| Énergie d'activation | $E_a$ | **${effectiveEa}** | $\\text{kJ/mol}$ |
+| Constante de vitesse | $k$ | **${kRate}** | $${unitKStr}$ |
 
-## 4. Loi Différentielle & Forme Intégrée
-${order === 0 ? '- Ordre 0 : $[A](t) = [A]_0 - k \\cdot t$ (Décroissance linéaire, vitesse constante indép. de la concentration).' : ''}
-${order === 1 ? '- Ordre 1 : $[A](t) = [A]_0 \\cdot e^{-kt}$ et $t_{1/2} = \\frac{\\ln(2)}{k}$ (Le temps de demi-vie est strictement indépendant de la concentration initiale).' : ''}
-${order === 2 ? '- Ordre 2 : $\\frac{1}{[A](t)} = \\frac{1}{[A]_0} + k \\cdot t$ et $t_{1/2} = \\frac{1}{k \\cdot [A]_0}$ (Le temps de demi-vie est inversement proportionnel à la concentration initiale).' : ''}
+## 3. Loi de Vitesse Intégrée et Temps de Demi-Vie
+
+$$v = -\\frac{\\text{d}[\\text{A}]}{\\text{d}t} = k \\times [\\text{A}]^{${order}}$$
+
+$$${integratedLaw}$$
+
+## 4. Résultats Finaux
+
+> **Synthèse cinétique à $t = ${currentTimeSec}\\ \\text{s}$ :**
+> - **Temps de demi-vie ($t_{1/2}$) :** **${halfLifeAnalysis} s**
+> - **Concentration résiduelle ($[\\text{A}](t)$) :** **${currentConcentration} mol/L**
+> - **Taux de conversion :** **${(((initialA0 - currentConcentration) / initialA0) * 100).toFixed(1)} %**
+> - **Vitesse instantanée ($v(t)$) :** **${instantaneousRate.toExponential(3)} mol/(L·s)**
 `;
   }, [activePreset, order, hasCatalyst, initialA0, temperatureK, effectiveEa, kRate, halfLifeAnalysis, currentTimeSec, currentConcentration, instantaneousRate]);
 

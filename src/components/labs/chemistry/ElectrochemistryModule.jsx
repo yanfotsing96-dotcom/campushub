@@ -94,54 +94,46 @@ export default function ElectrochemistryModule() {
   // Génération dynamique du compte-rendu de TP au format Markdown
   const generatedReport = useMemo(() => {
     const spontaneityText = electroAnalysis.isSpontaneous
-      ? '✅ **Spontané (Mode Pile / Générateur)** : $\\Delta E > 0$ et $\\Delta G^\\circ < 0$. La pile fournit spontanément du travail électrique au circuit extérieur.'
-      : '⚠️ **Non-spontané (Mode Électrolyseur / Récepteur)** : $\\Delta E < 0$. La réaction inverse est thermodynamiquement favorisée, une source de tension extérieure est requise.';
+      ? 'Spontané (Mode Pile / Générateur : $\\Delta E > 0$ et $\\Delta G^\\circ < 0$)'
+      : 'Non spontané (Mode Électrolyseur : $\\Delta E < 0$)';
 
-    return `# COMPTE-RENDU DE TRAVAUX PRATIQUES : ÉLECTROCHIMIE & PILES GALVANIQUES
-**Plateforme Académique CampusHub · Pôle Sciences Chimiques (L3-Master)**
-**Unité d'Enseignement :** CHM301 / CHM401 · Électrochimie Fondamentale & Cinétique Électrochimique
-**Date de manipulation :** ${new Date().toLocaleDateString('fr-FR')}
+    return `# Compte-Rendu de TP : Électrochimie et Piles Galvaniques
 
----
+## 1. Description des Demi-Piles
 
-## 1. Description du Système Électrochimique
-- **Demi-pile Anodique (Oxydation à l'électrode négative) :**
-  - Couple Redox : **${anodeCouple.formula}** (${anodeCouple.name})
-  - Potentiel standard $E^\\circ(\\text{Anode}) = ${anodeCouple.e0 > 0 ? `+${anodeCouple.e0}` : anodeCouple.e0}\\text{ V}$ vs ESH
-  - Concentration analytique $[\\text{Red/Anode}] = ${cAnode}\\text{ mol/L}$
+| Compartiment | Couple Redox | Potentiel Standard $E^\\circ$ | Concentration |
+| :--- | :---: | :---: | :---: |
+| **Anode (Oxydation, pôle $-$)** | **${anodeCouple.formula}** (${anodeCouple.name}) | **${anodeCouple.e0 > 0 ? `+${anodeCouple.e0}` : anodeCouple.e0} V** | **${cAnode} mol/L** |
+| **Cathode (Réduction, pôle $+$)** | **${cathodeCouple.formula}** (${cathodeCouple.name}) | **${cathodeCouple.e0 > 0 ? `+${cathodeCouple.e0}` : cathodeCouple.e0} V** | **${cCathode} mol/L** |
 
-- **Demi-pile Cathodique (Réduction à l'électrode positive) :**
-  - Couple Redox : **${cathodeCouple.formula}** (${cathodeCouple.name})
-  - Potentiel standard $E^\\circ(\\text{Cathode}) = ${cathodeCouple.e0 > 0 ? `+${cathodeCouple.e0}` : cathodeCouple.e0}\\text{ V}$ vs ESH
-  - Concentration analytique $[\\text{Ox/Cathode}] = ${cCathode}\\text{ mol/L}$
+- Nombre d'électrons échangés ($n$) : **${electroAnalysis.n}**
+- Quotient réactionnel ($Q = [\\text{Anode}] / [\\text{Cathode}]$) : **${electroAnalysis.qRatio}**
 
-- **Nombre d'électrons échangés ($n$) :** **${electroAnalysis.n}**
-- **Schéma conventionnel de la cellule :**
-  $$(-) \\text{ Anode} \\mid [${cAnode}\\text{ M}] \\parallel [${cCathode}\\text{ M}] \\mid \\text{Cathode} (+)$$
+## 2. Formulation Théorique et Équation de Nernst
+- **Force électromotrice standard ($E^\\circ_{\\text{cell}}$) :**
 
-## 2. Formulation Théorique & Équation de Nernst
-1. **Force électromotrice standard de la cellule ($E^\\circ_{\\text{cell}}$) :**
-   $$E^\\circ_{\\text{cell}} = E^\\circ(\\text{Cathode}) - E^\\circ(\\text{Anode}) = ${cathodeCouple.e0} - (${anodeCouple.e0}) = ${electroAnalysis.e0Cell > 0 ? `+${electroAnalysis.e0Cell}` : electroAnalysis.e0Cell}\\text{ V}$$
+$$E^\\circ_{\\text{cell}} = E^\\circ(\\text{Cathode}) - E^\\circ(\\text{Anode}) = ${cathodeCouple.e0} - (${anodeCouple.e0}) = ${electroAnalysis.e0Cell}\\ \\text{V}$$
 
-2. **Quotient réactionnel instantané ($Q$) :**
-   $$Q = \\frac{[\\text{Anode}]}{[\\text{Cathode}]} = \\frac{${cAnode}}{${cCathode}} = ${electroAnalysis.qRatio}$$
+- **Équation de Nernst à $25\\ ^\\circ\\text{C}$ ($T = 298{,}15\\ \\text{K}$) :**
 
-3. **Équation de Nernst à 25 °C ($T = 298.15\\text{ K}$) :**
-   $$E = E^\\circ_{\\text{cell}} - \\frac{0.0592}{n} \\log_{10}(Q)$$
-   $$E = ${electroAnalysis.e0Cell} - \\frac{0.0592}{${electroAnalysis.n}} \\times \\log_{10}(${electroAnalysis.qRatio}) = \\mathbf{${electroAnalysis.deltaE > 0 ? `+${electroAnalysis.deltaE}` : electroAnalysis.deltaE}\\text{ V}}$$
+$$E = E^\\circ_{\\text{cell}} - \\frac{0{,}0592}{n} \\log_{10}(Q) = ${electroAnalysis.e0Cell} - \\frac{0{,}0592}{${electroAnalysis.n}} \\log_{10}(${electroAnalysis.qRatio}) = ${electroAnalysis.deltaE}\\ \\text{V}$$
 
-## 3. Bilan Thermodynamique & Spontanéité
-- **Variation d'enthalpie libre standard de Gibbs ($\\Delta G^\\circ$) :**
-  $$\\Delta G^\\circ = -n \\cdot F \\cdot E^\\circ_{\\text{cell}} = -(${electroAnalysis.n}) \\times 96485 \\times (${electroAnalysis.e0Cell}) = \\mathbf{${electroAnalysis.deltaG0_kJ}\\text{ kJ/mol}}$$
-- **Diagnostic de fonctionnement :**
-  ${spontaneityText}
+- **Enthalpie libre standard de réaction ($\\Delta G^\\circ$) :**
+
+$$\\Delta G^\\circ = -n \\times F \\times E^\\circ_{\\text{cell}} = ${electroAnalysis.deltaG0_kJ}\\ \\text{kJ/mol}$$
+
+## 3. Résultats Finaux
+
+> **Synthèse électrochimique de la cellule :**
+> - **Force électromotrice théorique ($E$) :** **${electroAnalysis.deltaE > 0 ? `+${electroAnalysis.deltaE}` : electroAnalysis.deltaE} V**
+> - **Différence de potentiel standard ($E^\\circ_{\\text{cell}}$) :** **${electroAnalysis.e0Cell > 0 ? `+${electroAnalysis.e0Cell}` : electroAnalysis.e0Cell} V**
+> - **Variation d'enthalpie libre ($\\Delta G^\\circ$) :** **${electroAnalysis.deltaG0_kJ} kJ/mol**
+> - **Régime :** **${spontaneityText}**
 
 ## 4. Protocole Expérimental de Laboratoire
-1. Préparer deux béchers de 100 mL propres et secs contenant respectivement les solutions ioniques préparées.
-2. Décaper soigneusement les lames métalliques (électrodes) à l'aide de papier émeri fin, rincer à l'eau distillée et essuyer.
-3. Imbiber un pont électrolytique en tube U avec une solution gélifiée d'agar-agar saturée en $\\text{KNO}_3$ ($1\\text{ M}$) pour assurer la fermeture du circuit sans mélange hydrodynamique des compartiments.
-4. Raccorder les électrodes aux bornes d'un multimètre numérique configuré en voltmètre continu (impédance d'entrée $> 10\\text{ M}\\Omega$ pour éviter tout débit de courant perturbateur).
-5. Relever la valeur stabilisée de la tension $E_{\\text{mesurée}}$ et comparer avec la f.é.m. théorique de Nernst $E = ${electroAnalysis.deltaE}\\text{ V}$.
+- Préparer deux béchers de $100\\ \\text{mL}$ contenant les solutions ioniques respectives à **${cAnode} mol/L** et **${cCathode} mol/L**.
+- Décaper les électrodes métalliques au papier émeri fin, puis les rincer à l'eau distillée.
+- Relier les deux demi-piles par un pont salin gélifié saturé en $\\text{KNO}_3$ et mesurer la tension à vide à l'aide d'un voltmètre de haute impédance.
 `;
   }, [anodeCouple, cathodeCouple, cAnode, cCathode, electroAnalysis]);
 

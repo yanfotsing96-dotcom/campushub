@@ -10,6 +10,7 @@ import {
   ZoomOut,
   RotateCcw,
   Sparkles,
+  Loader2,
 } from 'lucide-react';
 import {
   generateAcademicHtmlDocument,
@@ -17,8 +18,8 @@ import {
 } from '../../../services/documentDownloadService';
 
 /**
- * Modal d'Aperçu Haute Fidélité de Mise en Page & Impression PDF
- * Affiche le document exactement comme il sera imprimé / exporté à l'aide d'une balise iframe.
+ * Modal d'Aperçu Haute Fidélité de Mise en Page & Impression PDF A4
+ * Utilise exactement le même HTML/CSS et rendu KaTeX que le fichier PDF téléchargé.
  */
 export default function PdfPreviewModal({
   isOpen,
@@ -32,11 +33,12 @@ export default function PdfPreviewModal({
   const objectRef = useRef(null);
   const [zoomLevel, setZoomLevel] = useState(100);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
   const [previewTag, setPreviewTag] = useState('iframe'); // 'iframe' | 'object'
-  const [selectedFormat, setSelectedFormat] = useState('txt'); // 'txt' | 'md'
+  const [selectedFormat, setSelectedFormat] = useState('pdf'); // 'pdf' | 'md'
 
-  // Génération du document HTML autonome haute fidélité
+  // Génération du document HTML autonome haute fidélité (Markdown + KaTeX + CSS A4)
   const htmlDocument = useMemo(() => {
     return generateAcademicHtmlDocument({
       title,
@@ -46,7 +48,7 @@ export default function PdfPreviewModal({
     });
   }, [title, moduleName, academicLevel, content]);
 
-  // Création et gestion d'une URL Blob pour la balise <object>
+  // Création d'une URL Blob pour la balise <object>
   const blobUrl = useMemo(() => {
     if (!htmlDocument) return '';
     const blob = new Blob([htmlDocument], { type: 'text/html;charset=utf-8' });
@@ -55,33 +57,31 @@ export default function PdfPreviewModal({
 
   if (!isOpen) return null;
 
-  // Déclenchement de l'impression native du navigateur depuis l'iframe ou l'objet
+  // Déclenchement de l'impression native du navigateur (@media print A4 20mm)
   const handlePrint = () => {
-    if (previewTag === 'iframe' && iframeRef.current?.contentWindow) {
+    if (iframeRef.current?.contentWindow) {
       iframeRef.current.contentWindow.focus();
       iframeRef.current.contentWindow.print();
-    } else {
-      const printWin = window.open('', '_blank');
-      if (printWin) {
-        printWin.document.write(htmlDocument);
-        printWin.document.close();
-        printWin.focus();
-        printWin.print();
-      }
     }
   };
 
-  // Téléchargement propre du document structuré vérifié
-  const handleDownload = () => {
-    triggerAcademicDownload({
-      title,
-      moduleName,
-      academicLevel,
-      content,
-      fileFormat: selectedFormat,
-    });
-    setDownloadSuccess(true);
-    setTimeout(() => setDownloadSuccess(false), 2500);
+  // Téléchargement du vrai PDF A4 (.pdf) ou du Markdown brut (.md)
+  const handleDownload = async () => {
+    if (isDownloading) return;
+    setIsDownloading(true);
+    try {
+      await triggerAcademicDownload({
+        title,
+        moduleName,
+        academicLevel,
+        content,
+        fileFormat: selectedFormat,
+      });
+      setDownloadSuccess(true);
+      setTimeout(() => setDownloadSuccess(false), 2500);
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -101,7 +101,7 @@ export default function PdfPreviewModal({
             <div>
               <div className="flex items-center gap-2">
                 <span className="px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono">
-                  APERÇU DOCUMENT & MISE EN PAGE PDF
+                  APERÇU DOCUMENT &amp; MISE EN PAGE PDF A4
                 </span>
                 <span className="text-xs text-slate-400 font-mono">{academicLevel}</span>
               </div>
@@ -134,7 +134,7 @@ export default function PdfPreviewModal({
           <div className="flex flex-wrap items-center gap-3 text-slate-300 font-medium">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-              <span>Mise en page A4 · Marges & formules vérifiées</span>
+              <span>Mise en page A4 (marges 20 mm) · Formules KaTeX rendues</span>
             </div>
 
             {/* Sélecteur de balise d'affichage (iframe vs object) */}
@@ -160,7 +160,7 @@ export default function PdfPreviewModal({
                     ? 'bg-indigo-600 text-white font-bold'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
-                title="Affichage via la balise vectorielle/document <object>"
+                title="Affichage via la balise document <object>"
               >
                 &lt;object&gt;
               </button>
@@ -168,30 +168,30 @@ export default function PdfPreviewModal({
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Format de téléchargement */}
+            {/* Sélecteur de format de téléchargement (.pdf / .md) */}
             <div className="flex items-center bg-slate-900 border border-slate-800 rounded-xl p-0.5 text-[11px]">
               <span className="px-2 text-slate-400 font-mono text-[10px]">Format :</span>
               <button
                 type="button"
-                onClick={() => setSelectedFormat('txt')}
-                className={`px-2 py-1 rounded-lg font-mono transition-colors ${
-                  selectedFormat === 'txt'
+                onClick={() => setSelectedFormat('pdf')}
+                className={`px-2.5 py-1 rounded-lg font-mono transition-colors ${
+                  selectedFormat === 'pdf'
                     ? 'bg-violet-600 text-white font-bold'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
-                title="Fichier texte structuré propre (.txt)"
+                title="Document PDF A4 officiel (.pdf)"
               >
-                .txt
+                .pdf
               </button>
               <button
                 type="button"
                 onClick={() => setSelectedFormat('md')}
-                className={`px-2 py-1 rounded-lg font-mono transition-colors ${
+                className={`px-2.5 py-1 rounded-lg font-mono transition-colors ${
                   selectedFormat === 'md'
                     ? 'bg-violet-600 text-white font-bold'
                     : 'text-slate-400 hover:text-slate-200'
                 }`}
-                title="Document Markdown structuré propre (.md)"
+                title="Document Markdown brut (.md)"
               >
                 .md
               </button>
@@ -230,43 +230,43 @@ export default function PdfPreviewModal({
           </div>
         </div>
 
-        {/* Zone de prévisualisation avec iframe ou object tag intégrée simulant une feuille A4 */}
+        {/* Zone de prévisualisation simulant une feuille A4 */}
         <div className="flex-1 overflow-auto bg-slate-950/90 p-4 sm:p-8 flex justify-center items-start">
           <div
-            className="w-full max-w-[840px] bg-white rounded-xl shadow-2xl border border-slate-300 overflow-hidden transition-transform origin-top"
-            style={{ transform: `scale(${zoomLevel / 100})`, minHeight: '880px' }}
+            className="w-full max-w-[820px] bg-white rounded-xl shadow-2xl border border-slate-300 overflow-hidden transition-transform origin-top"
+            style={{ transform: `scale(${zoomLevel / 100})`, minHeight: '920px' }}
           >
             {previewTag === 'iframe' ? (
               <iframe
                 ref={iframeRef}
-                title="Aperçu PDF du Compte-Rendu (balise iframe)"
+                title="Aperçu PDF A4 du Compte-Rendu"
                 srcDoc={htmlDocument}
-                className="w-full h-[880px] border-none bg-white block"
+                className="w-full h-[920px] border-none bg-white block"
               />
             ) : (
               <object
                 ref={objectRef}
                 data={blobUrl}
                 type="text/html"
-                title="Aperçu PDF du Compte-Rendu (balise object)"
-                className="w-full h-[880px] border-none bg-white block"
+                title="Aperçu PDF A4 du Compte-Rendu (balise object)"
+                className="w-full h-[920px] border-none bg-white block"
               >
                 <iframe
                   ref={iframeRef}
-                  title="Aperçu PDF du Compte-Rendu de secours"
+                  title="Aperçu PDF A4 de secours"
                   srcDoc={htmlDocument}
-                  className="w-full h-[880px] border-none bg-white block"
+                  className="w-full h-[920px] border-none bg-white block"
                 />
               </object>
             )}
           </div>
         </div>
 
-        {/* Pied de page d'actions (Imprimer/PDF, Télécharger, Fermer) */}
+        {/* Pied de page d'actions (Imprimer / PDF, Télécharger, Fermer) */}
         <div className="flex flex-wrap items-center justify-between gap-3 px-6 py-4 border-t border-slate-800 bg-slate-950/80">
           <div className="flex items-center gap-2 text-xs text-slate-400">
             <Sparkles size={14} className="text-violet-400" />
-            <span>La mise en page affichée sera scrupuleusement respectée à l'impression et à l'export.</span>
+            <span>Le fichier téléchargé utilise exactement ce rendu HTML/CSS et KaTeX au format A4.</span>
           </div>
 
           <div className="flex items-center gap-2">
@@ -282,7 +282,7 @@ export default function PdfPreviewModal({
               type="button"
               onClick={handlePrint}
               className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold flex items-center gap-2 transition-all border border-slate-700 hover:border-slate-600 shadow-sm"
-              title="Ouvrir la boîte de dialogue d'impression ou enregistrer en PDF"
+              title="Imprimer avec le CSS @media print (A4, marges 20mm)"
             >
               <Printer size={15} />
               <span>Imprimer / PDF</span>
@@ -291,15 +291,29 @@ export default function PdfPreviewModal({
             <button
               type="button"
               onClick={handleDownload}
+              disabled={isDownloading}
               className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all shadow-lg ${
                 downloadSuccess
                   ? 'bg-emerald-600 text-white shadow-emerald-900/30'
                   : 'bg-violet-600 hover:bg-violet-500 text-white shadow-violet-900/30'
               }`}
-              title="Télécharger le document formaté et structuré"
+              title={`Télécharger le rapport en format .${selectedFormat}`}
             >
-              <Download size={15} />
-              <span>{downloadSuccess ? 'Téléchargé !' : 'Télécharger'}</span>
+              {isDownloading ? (
+                <>
+                  <Loader2 size={15} className="animate-spin" />
+                  <span>Génération...</span>
+                </>
+              ) : (
+                <>
+                  <Download size={15} />
+                  <span>
+                    {downloadSuccess
+                      ? `Téléchargé (.${selectedFormat}) !`
+                      : `Télécharger (.${selectedFormat})`}
+                  </span>
+                </>
+              )}
             </button>
           </div>
         </div>

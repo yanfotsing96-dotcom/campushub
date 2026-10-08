@@ -73,99 +73,135 @@ export default function MolarityModule() {
     return parseChemicalFormula(formulaInput);
   }, [formulaInput]);
 
-  // Génération dynamique du compte-rendu en Markdown structuré
+  // Génération dynamique du compte-rendu en Markdown structuré propre (compatible marked + KaTeX)
   const generatedReport = useMemo(() => {
+    const fmtFr = (val, dec = 2) => Number(val).toFixed(dec).replace('.', ',');
+    const fmtLatex = (val, dec = 2) => Number(val).toFixed(dec).replace('.', '{,}');
+
     if (subTab === 'dilution') {
-      return `# COMPTE-RENDU DE TP : DILUTION DE SOLUTION MÈRE
-**Plateforme Académique CampusHub · Pôle Chimie (L1-L2)**
-**Unité d'Enseignement :** CHM101 / CHM201 · Chimie Générale
-**Date du rapport :** ${new Date().toLocaleDateString('fr-FR')}
+      return `# Compte-Rendu de TP : Dilution d'une solution mère
 
----
+## 1. Principe et Relation Fondamentale
+Lors d'une dilution, la quantité de matière de soluté $n = C \\times V$ se conserve intégralement entre la solution mère et la solution fille :
 
-## 1. Principe & Relation Fondamentale
-Lors d'une dilution, la quantité de matière de soluté se conserve intégralement entre la solution mère et la solution fille :
 $$n_1 = n_2 \\iff C_1 \\times V_1 = C_2 \\times V_2$$
 
 ## 2. Données Expérimentales
-- Concentration de la solution mère ($C_1$) : **${c1} mol/L**
-- Concentration ciblée de la solution fille ($C_2$) : **${c2} mol/L**
-- Volume souhaité de solution fille ($V_2$) : **${v2} mL** (${(v2 / 1000).toFixed(3)} L)
 
-## 3. Résultats & Grandeurs Calculées
-- Facteur de dilution ($F = C_1 / C_2$) : **1 / ${dilutionCalculations.factor}** (${dilutionCalculations.factor}x)
-- Volume de solution mère à prélever ($V_1$) : **${dilutionCalculations.v1} mL**
-- Volume estimé d'eau distillée à ajouter : **${dilutionCalculations.vWater} mL**
+| Paramètre | Symbole | Valeur | Unité |
+| :--- | :---: | :---: | :--- |
+| Concentration de la solution mère | $C_1$ | **${fmtFr(c1, 3)}** | $\\text{mol/L}$ |
+| Concentration ciblée de la solution fille | $C_2$ | **${fmtFr(c2, 3)}** | $\\text{mol/L}$ |
+| Volume souhaité de solution fille | $V_2$ | **${v2}** | $\\text{mL}$ ($${fmtLatex(v2 / 1000, 3)}\\ \\text{L}$) |
+
+- Concentration mère ($C_1$) : **${fmtFr(c1, 3)} mol/L**
+- Concentration fille ($C_2$) : **${fmtFr(c2, 3)} mol/L**
+- Volume jaugé final ($V_2$) : **${v2} mL** (**${fmtFr(v2 / 1000, 3)} L**)
+
+## 3. Calculs et Résultats Finaux
+
+$$V_1 = \\frac{C_2 \\times V_2}{C_1} = \\frac{${fmtLatex(c2, 3)} \\times ${v2}}{${fmtLatex(c1, 3)}} = ${fmtLatex(dilutionCalculations.v1, 2)}\\ \\text{mL}$$
+
+> **Synthèse des résultats finaux :**
+> - **Volume de solution mère à prélever ($V_1$) :** **${fmtFr(dilutionCalculations.v1, 2)} mL**
+> - **Facteur de dilution ($F = C_1 / C_2$) :** **${fmtFr(dilutionCalculations.factor, 2)}**
+> - **Volume d'eau distillée à compléter :** **${fmtFr(dilutionCalculations.vWater, 2)} mL**
 
 ## 4. Protocole de Laboratoire Normalisé
-1. Prélever précisément **${dilutionCalculations.v1} mL** de solution mère à l'aide d'une pipette jaugée munie d'une pro-pipette.
-2. Transvaser dans une fiole jaugée propre et sèche de **${v2} mL**.
-3. Ajouter de l'eau distillée aux deux tiers, agiter doucement par rotation.
-4. Compléter jusqu'au trait de jauge (ménisque affleurant).
-5. Boucher et retourner plusieurs fois pour homogénéiser la solution fille.
+- Prélever exactement **${fmtFr(dilutionCalculations.v1, 2)} mL** de solution mère à l'aide d'une pipette jaugée munie d'une propipette.
+- Introduire le prélèvement dans une fiole jaugée propre de **${v2} mL**.
+- Remplir à l'eau distillée aux deux tiers et homogénéiser par rotation douce.
+- Ajuster au trait de jauge (ménisque tangent), boucher et retourner plusieurs fois.
 `;
     }
 
     if (subTab === 'formula') {
-      const compText = parsedFormulaResult?.composition
+      const compRows = parsedFormulaResult?.composition
         ? parsedFormulaResult.composition
-            .map((c) => `- **${c.element}** : ${c.count} atome(s), ${c.percent.toFixed(2)} % massique (${c.mass.toFixed(3)} g/mol)`)
+            .map(
+              (c) =>
+                `| **${c.element}** | $${c.count}$ | **${fmtFr(c.mass, 3)} g/mol** | **${fmtFr(c.percent, 2)} %** |`
+            )
             .join('\n')
-        : 'Formule non analysée';
+        : '| — | — | — | — |';
 
-      return `# COMPTE-RENDU DE TP : ANALYSE CENTÉSIMALE & MASSE MOLAIRE
-**Plateforme Académique CampusHub · Pôle Chimie**
-**Date du rapport :** ${new Date().toLocaleDateString('fr-FR')}
+      const compList = parsedFormulaResult?.composition
+        ? parsedFormulaResult.composition
+            .map(
+              (c) =>
+                `- Élément **${c.element}** ($${c.count}$ atome(s)) : contribution **${fmtFr(c.mass, 3)} g/mol**, fraction massique **${fmtFr(c.percent, 2)} %**`
+            )
+            .join('\n')
+        : '- Formule non analysée';
 
----
+      return `# Compte-Rendu de TP : Analyse Centésimale et Masse Molaire
 
-## 1. Formule Brute Analysée
-- Formule chimique : **${parsedFormulaResult?.formula || formulaInput}**
-- Masse molaire moléculaire relative ($M$) : **${parsedFormulaResult?.molarMass || '—'} g/mol** (Standard UICPA)
+## 1. Formule Brute Étudiée
+- Formule chimique analysée : **${parsedFormulaResult?.formula || formulaInput}**
+- Masse molaire moléculaire ($M$) : **${parsedFormulaResult?.molarMass ? fmtFr(parsedFormulaResult.molarMass, 2) : '—'} g/mol**
 
-## 2. Composition Élémentaire & Fractions Massiques
-${compText}
+## 2. Composition Élémentaire et Fractions Massiques
 
-## 3. Remarque Pédagogique
-La masse molaire est la somme pondérée des masses atomiques des éléments constitutifs selon la table périodique des éléments standard NIST.
+| Élément | Nombre d'atomes | Masse contribuée | Fraction massique |
+| :--- | :---: | :---: | :---: |
+${compRows}
+
+${compList}
+
+## 3. Résultat Final
+
+$$M(\\text{${parsedFormulaResult?.formula || formulaInput}}) = \\sum_i n_i \\times M_i = ${parsedFormulaResult?.molarMass ? fmtLatex(parsedFormulaResult.molarMass, 2) : '0'}\\ \\text{g/mol}$$
+
+> **Résultat clé :**
+> - **Masse molaire totale ($M$) :** **${parsedFormulaResult?.molarMass ? fmtFr(parsedFormulaResult.molarMass, 2) : '—'} g/mol**
 `;
     }
 
-    // Par défaut : Sous-onglet Préparation & Pesée
-    return `# COMPTE-RENDU DE TP : PRÉPARATION D'UNE SOLUTION ÉTALON
-**Plateforme Académique CampusHub · Pôle Chimie (L1-L2)**
-**Unité d'Enseignement :** CHM101 / CHM201 · Chimie Générale
-**Date du rapport :** ${new Date().toLocaleDateString('fr-FR')}
-
----
+    // Par défaut : Sous-onglet Préparation d'une solution étalon
+    return `# Préparation d'une solution étalon ${effectiveFormula}
 
 ## 1. Objectif du Travail Pratique
-Préparation par dissolution d'une solution étalon de soluté pur à concentration précise dans une fiole jaugée de laboratoire.
+Préparation par dissolution quantitative d'une solution aqueuse étalon de **${effectiveName}** (**${effectiveFormula}**) à concentration molaire précise dans une fiole jaugée de laboratoire.
 
-## 2. Données et Spécifications du Soluté
+## 2. Données Expérimentales et Spécifications
+
+| Paramètre | Symbole | Valeur | Unité |
+| :--- | :---: | :---: | :--- |
+| Soluté étudié | — | **${effectiveFormula}** (${effectiveName}) | ${useCustomMass ? 'Valeur personnalisée' : 'Étalon analytique'} |
+| Masse molaire | $M$ | **${fmtFr(effectiveMolarMass, 2)}** | $\\text{g/mol}$ |
+| Concentration molaire cible | $C$ | **${fmtFr(targetConcentration, 3)}** | $\\text{mol/L}$ |
+| Volume de la fiole jaugée | $V$ | **${targetVolumeMl}** | $\\text{mL}$ ($${fmtLatex(targetVolumeL, 3)}\\ \\text{L}$) |
+
 - Soluté utilisé : **${effectiveFormula}** (${effectiveName})
-- Masse molaire molaire ($M$) : **${effectiveMolarMass} g/mol** ${useCustomMass ? '(Valeur personnalisée)' : '(Table étalon)'}
-- Concentration molaire cible ($C$) : **${targetConcentration.toFixed(3)} mol/L** (${(targetConcentration * 1000).toFixed(1)} mmol/L)
-- Volume jaugé prescrit ($V$) : **${targetVolumeMl} mL** (${targetVolumeL.toFixed(3)} L)
+- Masse molaire ($M$) : **${fmtFr(effectiveMolarMass, 2)} g/mol** ${useCustomMass ? '(Valeur personnalisée)' : '(Table étalon IUPAC)'}
+- Concentration molaire cible ($C$) : **${fmtFr(targetConcentration, 3)} mol/L** (**${fmtFr(targetConcentration * 1000, 1)} mmol/L**)
+- Volume jaugé prescrit ($V$) : **${targetVolumeMl} mL** (**${fmtFr(targetVolumeL, 3)} L**)
 
 ## 3. Formules Théoriques et Calculs
-1. **Quantité de matière requise :**
-   $$n = C \\times V = ${targetConcentration.toFixed(3)} \\text{ mol/L} \\times ${targetVolumeL.toFixed(3)} \\text{ L} = ${molesRequired >= 0.001 ? molesRequired.toFixed(4) : (molesRequired * 1000).toFixed(2)} \\text{ mol}$$
+- **Quantité de matière requise** (relation fondamentale $n = C \\times V$) :
 
-2. **Masse théorique à peser :**
-   $$m = n \\times M = C \\times V \\times M$$
-   $$m = ${targetConcentration.toFixed(3)} \\times ${targetVolumeL.toFixed(3)} \\times ${effectiveMolarMass} = \\mathbf{${massRequiredG.toFixed(4)} \\text{ g}}$$
+$$n = C \\times V = ${fmtLatex(targetConcentration, 3)}\\ \\text{mol/L} \\times ${fmtLatex(targetVolumeL, 3)}\\ \\text{L} = ${fmtLatex(molesRequired, 4)}\\ \\text{mol}$$
 
-3. **Concentration massique résultante :**
-   $$C_m = C \\times M = ${massConcentrationGL.toFixed(2)} \\text{ g/L}$$
+- **Masse théorique de soluté à peser** ($m = n \\times M = C \\times V \\times M$) :
 
-## 4. Protocole Opératoire et Bonnes Pratiques
-1. Tarer la coupelle de pesée propre sur balance de précision (0.1 mg).
-2. Peser exactement **${massRequiredG.toFixed(4)} g** de soluté pur.
-3. Transvaser quantitativement dans un bécher en rinçant soigneusement la coupelle à l'eau distillée.
-4. Dissoudre sous barreau aimanté dans environ ${(targetVolumeMl * 0.4).toFixed(0)} mL d'eau distillée.
-5. Verser dans la fiole jaugée de **${targetVolumeMl} mL** avec un entonnoir rincé.
-6. Ajuster au trait de jauge au compte-gouttes (ménisque tangent), boucher et homogénéiser par retournement.
+$$m = C \\times V \\times M = ${fmtLatex(massRequiredG, 4)}\\ \\text{g}$$
+
+- **Concentration massique résultante** ($C_m = C \\times M$) :
+
+$$C_m = C \\times M = ${fmtLatex(targetConcentration, 3)} \\times ${fmtLatex(effectiveMolarMass, 2)} = ${fmtLatex(massConcentrationGL, 2)}\\ \\text{g/L}$$
+
+## 4. Résultats Finaux
+
+> **Synthèse des résultats clés :**
+> - **Masse exacte de ${effectiveFormula} à peser ($m$) :** **${fmtFr(massRequiredG, 4)} g**
+> - **Quantité de matière dissoute ($n$) :** **${fmtFr(molesRequired, 4)} mol** (**${fmtFr(molesRequired * 1000, 2)} mmol**)
+> - **Concentration massique ($C_m$) :** **${fmtFr(massConcentrationGL, 2)} g/L**
+
+## 5. Protocole Opératoire Normalisé
+- Tarer une coupelle de pesée sèche sur une balance analytique de précision ($0{,}1\\ \\text{mg}$) et peser exactement **${fmtFr(massRequiredG, 4)} g** de **${effectiveFormula}** pur.
+- Introduire le solide dans une fiole jaugée de **${targetVolumeMl} mL** à l'aide d'un entonnoir à solide, puis rincer soigneusement la coupelle et l'entonnoir à l'eau distillée.
+- Remplir la fiole aux deux tiers avec de l'eau distillée (~**${(targetVolumeMl * 0.6).toFixed(0)} mL**) et agiter par rotation jusqu'à dissolution complète.
+- Ajuster le niveau au trait de jauge à la goutte près (bas du ménisque tangent au trait), boucher et homogénéiser par retournements successifs.
 `;
   }, [
     subTab,

@@ -96,31 +96,34 @@ export default function ThermodynamicsModule() {
 
   // Génération du compte-rendu de TP Markdown
   const generatedReport = useMemo(() => {
-    return `# COMPTE-RENDU DE TP : THERMODYNAMIQUE CHIMIQUE & FONCTION DE GIBBS
-**Plateforme Académique CampusHub · Pôle Sciences Chimiques (L3-Master)**
-**Date de manipulation :** ${new Date().toLocaleDateString('fr-FR')}
-
----
+    return `# Compte-Rendu de TP : Thermodynamique Chimique et Énergie de Gibbs
 
 ## 1. Réaction Chimique Étudiée
-- **Intitulé :** **${activeReaction.name}**
-- **Équation stœchiométrique :** \`${activeReaction.formula}\`
-- **Application industrielle / naturelle :** ${activeReaction.context}
+- Intitulé de la réaction : **${activeReaction.name}**
+- Équation bilan : **${activeReaction.equation || activeReaction.formula}**
+- Contexte d'application : ${activeReaction.context}
 
-## 2. Données Thermodynamiques Fondamentales
-- Enthalpie standard de réaction ($\\Delta H^\\circ$) : **${deltaH} kJ/mol** (${deltaH > 0 ? 'Endothermique' : 'Exothermique'})
-- Entropie standard de réaction ($\\Delta S^\\circ$) : **${deltaS} J/(mol·K)**
-- Température de travail ($T$) : **${temperatureK} K** (${(temperatureK - 273.15).toFixed(1)} °C)
+## 2. Données Thermodynamiques Expérimentales
 
-## 3. Énergie Libre de Gibbs & Spontanéité
-- **Formulation :** $\\Delta G^\\circ(T) = \\Delta H^\\circ - T \\cdot \\Delta S^\\circ$
-- **Calcul :** $\\Delta G^\\circ(${temperatureK}\\text{ K}) = ${deltaH} - ${temperatureK} \\times (${deltaS} / 1000) = \\mathbf{${thermoAnalysis.deltaG_kJ}\\text{ kJ/mol}}$
-- **Diagnostic de spontanéité :** ${thermoAnalysis.isSpontaneous ? '✅ Spontanée sous 1 bar ($\\Delta G^\\circ < 0$)' : '❌ Non spontanée sous 1 bar ($\\Delta G^\\circ > 0$)'}
-- **Constante d'équilibre thermodynamique ($K_{\\text{eq}}$) :** **${thermoAnalysis.kEqFormatted}**
-${thermoAnalysis.tInversion ? `- **Température d'inversion ($T_{\\text{inv}} = \\Delta H^\\circ / \\Delta S^\\circ$) :** **${thermoAnalysis.tInversion} K** (${(thermoAnalysis.tInversion - 273.15).toFixed(1)} °C)` : ''}
+| Grandeur Thermodynamique | Symbole | Valeur | Unité |
+| :--- | :---: | :---: | :--- |
+| Enthalpie standard de réaction | $\\Delta H^\\circ$ | **${deltaH}** | $\\text{kJ/mol}$ |
+| Entropie standard de réaction | $\\Delta S^\\circ$ | **${deltaS}** | $\\text{J/(mol}\\cdot\\text{K)}$ |
+| Température d'étude | $T$ | **${temperatureK}** | $\\text{K}$ (${(temperatureK - 273.15).toFixed(1)} °C) |
 
-## 4. Analyse du Quadrant Thermodynamique
-${thermoAnalysis.quadrantDescription}
+## 3. Calcul de l'Enthalpie Libre de Gibbs
+
+$$\\Delta G^\\circ(T) = \\Delta H^\\circ - T \\times \\Delta S^\\circ = ${deltaH} - ${temperatureK} \\times \\frac{${deltaS}}{1000} = ${thermoAnalysis.deltaG_kJ}\\ \\text{kJ/mol}$$
+
+$$K_{\\text{eq}} = \\exp\\left(-\\frac{\\Delta G^\\circ}{R \\times T}\\right)$$
+
+## 4. Résultats Finaux
+
+> **Synthèse thermodynamique à $T = ${temperatureK}\\ \\text{K}$ :**
+> - **Enthalpie libre standard ($\\Delta G^\\circ$) :** **${thermoAnalysis.deltaG_kJ} kJ/mol**
+> - **Constante d'équilibre ($K_{\\text{eq}}$) :** **${thermoAnalysis.kEqFormatted}**
+> - **Spontanéité :** **${thermoAnalysis.isSpontaneous ? 'Réaction spontanée (exergonique, ΔG° < 0)' : 'Réaction non spontanée (endergonique, ΔG° > 0)'}**
+${thermoAnalysis.tInversion ? `> - **Température d'inversion ($T_{\\text{inv}}$) :** **${thermoAnalysis.tInversion} K**` : ''}
 `;
   }, [activeReaction, deltaH, deltaS, temperatureK, thermoAnalysis]);
 

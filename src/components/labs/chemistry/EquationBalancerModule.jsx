@@ -121,57 +121,64 @@ export default function EquationBalancerModule() {
   }, [currentEquation, initialMoles]);
 
   const generatedReport = useMemo(() => {
-    const eqStr = `${currentEquation.reactants.map((r) => `${r.coeff > 1 ? r.coeff : ''} ${r.formula}`).join(' + ')} ➔ ${currentEquation.products.map((p) => `${p.coeff > 1 ? p.coeff : ''} ${p.formula}`).join(' + ')}`;
+    const eqStr = `${currentEquation.reactants
+      .map((r) => `${r.coeff > 1 ? r.coeff : ''}\\ \\text{${r.formula}}`)
+      .join(' + ')} \\longrightarrow ${currentEquation.products
+      .map((p) => `${p.coeff > 1 ? p.coeff : ''}\\ \\text{${p.formula}}`)
+      .join(' + ')}`;
 
     const reactantsInitText = currentEquation.reactants
-      .map((r) => `- Quantité initiale de **${r.formula}** : $n_0(${r.formula}) = ${initialMoles[r.formula] || 0}\\text{ mol}$ (coeff stœchiométrique $\\nu = ${r.coeff}$)`)
+      .map(
+        (r) =>
+          `- Quantité initiale de **${r.formula}** : $n_0(\\text{${r.formula}}) = ${initialMoles[r.formula] || 0}\\ \\text{mol}$ (coefficient $\\nu = ${r.coeff}$)`
+      )
       .join('\n');
 
     const ratiosText = currentEquation.reactants
       .map((r) => {
         const n0 = initialMoles[r.formula] || 0;
         const ratio = r.coeff > 0 ? (n0 / r.coeff).toFixed(3) : 0;
-        return `- Rapport pour **${r.formula}** : $n_0 / \\nu = ${n0} / ${r.coeff} = ${ratio}\\text{ mol}$`;
+        return `- Rapport stœchiométrique pour **${r.formula}** : $x_{\\max}(\\text{${r.formula}}) = \\frac{n_0}{\\nu} = \\frac{${n0}}{${r.coeff}} = ${ratio}\\ \\text{mol}$`;
       })
       .join('\n');
 
     const tableRows = [
       ...stoichiometryAnalysis.finalReactants.map(
-        (r) => `| ${r.formula} (Réactif) | ${r.n0} mol | ${r.n0} - ${r.coeff}x | ${r.nf} mol ${r.isLimiting ? '**(Épuisé - Limitant)**' : '(Excès)'} |`
+        (r) =>
+          `| **${r.formula}** (Réactif) | $${r.n0}\\ \\text{mol}$ | $${r.n0} - ${r.coeff}x$ | **${r.nf} mol** ${r.isLimiting ? '**(Limitant)**' : '(Excès)'} |`
       ),
       ...stoichiometryAnalysis.finalProducts.map(
-        (p) => `| ${p.formula} (Produit) | 0 mol | ${p.coeff}x | **${p.nf} mol** (Formé) |`
+        (p) =>
+          `| **${p.formula}** (Produit) | $0\\ \\text{mol}$ | $${p.coeff}x$ | **${p.nf} mol** (Formé) |`
       ),
     ].join('\n');
 
-    return `# COMPTE-RENDU DE TP : STŒCHIOMÉTRIE & TABLEAU D'AVANCEMENT
-**Plateforme Académique CampusHub · Pôle Chimie (L1-L2)**
-**Unité d'Enseignement :** CHM101 / CHM201 · Réactivité & Conservation
-**Date du rapport :** ${new Date().toLocaleDateString('fr-FR')}
+    return `# Compte-Rendu de TP : Stœchiométrie et Tableau d'Avancement
 
----
+## 1. Équation Chimique Modélisée
 
-## 1. Réaction Chimique Modélisée
-$$\\mathbf{${eqStr}}$$
-- Nom de la réaction : **${currentEquation.name}** (${currentEquation.type})
+$$${eqStr}$$
+
+- Intitulé de la réaction : **${currentEquation.name}** (${currentEquation.type})
 - Enthalpie standard de réaction ($\\Delta H^\\circ$) : **${currentEquation.deltaH} kJ/mol**
 
-## 2. Conditions Initiales du Système ($t = 0$)
+## 2. Conditions Initiales et Réactif Limitant
 ${reactantsInitText}
 
-## 3. Détermination du Réactif Limitant
 ${ratiosText}
-- **Réactif Limitant Identifié :** **${stoichiometryAnalysis.limitingReactant?.formula || 'Aucun'}**
-- **Avancement maximal final ($x_{\\max}$) :** **${stoichiometryAnalysis.xFinal} mol**
 
-## 4. Tableau d'Avancement Réactionnel
-| Espèce Chimique | État Initial ($t = 0$) | En cours ($t$) | État Final ($t_{\\text{final}}$) |
-| :--- | :--- | :--- | :--- |
+## 3. Tableau d'Avancement Réactionnel
+
+| Espèce Chimique | État Initial ($x = 0$) | En cours ($x$) | État Final ($x_{\\max}$) |
+| :--- | :---: | :---: | :--- |
 ${tableRows}
 
-## 5. Bilan de Matière & Conclusions
-- Le réactif limitant **${stoichiometryAnalysis.limitingReactant?.formula}** a été totalement consommé ($n_f = 0$).
-- La conservation des atomes est rigoureusement respectée conformément au principe fondamental de Lavoisier.
+## 4. Résultats Finaux
+
+> **Bilan stœchiométrique final :**
+> - **Réactif limitant identifié :** **${stoichiometryAnalysis.limitingReactant?.formula || 'Aucun'}**
+> - **Avancement maximal ($x_{\\max}$) :** **${stoichiometryAnalysis.xFinal} mol**
+> - **Conservation de la matière :** Vérifiée conformément à la loi de Lavoisier.
 `;
   }, [currentEquation, initialMoles, stoichiometryAnalysis]);
 

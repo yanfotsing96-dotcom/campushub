@@ -83,16 +83,16 @@ export default function PHSimulatorModule() {
     : selectedSystem.name;
 
   const appliedFormula = useMemo(() => {
-    if (solutionType === 'strong_acid') return 'pH = -log₁₀(C)';
-    if (solutionType === 'strong_base') return 'pH = 14 + log₁₀(C)';
-    if (solutionType === 'weak_acid') return 'pH = ½ · (pKa - log₁₀(C))';
-    return 'pH = pKa + log₁₀([A⁻] / [HA])  (Henderson-Hasselbalch)';
+    if (solutionType === 'strong_acid') return '\\text{pH} = -\\log_{10}(C)';
+    if (solutionType === 'strong_base') return '\\text{pH} = 14 + \\log_{10}(C)';
+    if (solutionType === 'weak_acid') return '\\text{pH} = \\frac{1}{2}(\\text{p}K_a - \\log_{10}(C))';
+    return '\\text{pH} = \\text{p}K_a + \\log_{10}\\left(\\frac{[\\text{A}^-]}{[\\text{HA}]}\\right)';
   }, [solutionType]);
 
   const generatedReport = useMemo(() => {
     const typeLabel =
       solutionType === 'buffer'
-        ? 'Solution Tampon (Tampon d\'Henderson)'
+        ? 'Solution Tampon (Henderson-Hasselbalch)'
         : solutionType === 'weak_acid'
         ? 'Solution d\'Acide Faible'
         : solutionType === 'strong_acid'
@@ -101,39 +101,48 @@ export default function PHSimulatorModule() {
 
     const predominDiag =
       phAnalysis.ph < pKaValue
-        ? 'Forme acide protonée [HA] prédominante (pH < pKa)'
+        ? 'Forme acide protonée $[\\text{HA}]$ prédominante ($\\text{pH} < \\text{p}K_a$)'
         : phAnalysis.ph > pKaValue
-        ? 'Forme basique déprotonée [A⁻] prédominante (pH > pKa)'
-        : 'Équimolarité exacte : [HA] = [A⁻] (pH = pKa)';
+        ? 'Forme basique déprotonée $[\\text{A}^-]$ prédominante ($\\text{pH} > \\text{p}K_a$)'
+        : 'Équimolarité exacte : $[\\text{HA}] = [\\text{A}^-]$ ($\\text{pH} = \\text{p}K_a$)';
 
-    return `# COMPTE-RENDU DE TP : ÉQUILIBRES ACIDO-BASIQUES & pH
-**Plateforme Académique CampusHub · Pôle Chimie (L1-L2)**
-**Unité d'Enseignement :** CHM101 / CHM201 · Équilibres en Solution Aqueuse
-**Date du rapport :** ${new Date().toLocaleDateString('fr-FR')}
-
----
+    return `# Compte-Rendu de TP : Équilibres Acido-Basiques et pH
 
 ## 1. Caractéristiques de la Solution Étudiée
-- Type de solution : **${typeLabel}**
-- Système Acide/Base : **${activeSystemName}** ${isCustomCouple ? '(Couple Personnalisé / Valeur Custom)' : ''}
-- Constante d'acidité ($pK_a$) : **${pKaValue}**
+
+| Paramètre | Symbole | Valeur | Unité / Détail |
+| :--- | :---: | :---: | :--- |
+| Type de solution | — | **${typeLabel}** | À $25\\ ^\\circ\\text{C}$ |
+| Système Acide / Base | — | **${activeSystemName}** | ${isCustomCouple ? 'Couple personnalisé' : 'Couple de référence'} |
+| Constante d'acidité | $\\text{p}K_a$ | **${pKaValue}** | $K_a = 10^{-\\text{p}K_a}$ |
+| Concentration analytique | $C$ | **${concentration}** | $\\text{mol/L}$ |
+
+- Système étudié : **${activeSystemName}**
+- Constante d'acidité ($\\text{p}K_a$) : **${pKaValue}**
 - Concentration analytique ($C$) : **${concentration} mol/L**
-${solutionType === 'buffer' ? `- Rapport molaire $[A^-]/[HA]$ : **${ratioBaseToAcid}**\n- Forme acide : **${isCustomCouple ? customAcidName : selectedSystem.formulaAcid}**\n- Forme basique : **${isCustomCouple ? customBaseName : selectedSystem.formulaBase}**` : ''}
+${solutionType === 'buffer' ? `- Rapport molaire $[\\text{A}^-]/[\\text{HA}]$ : **${ratioBaseToAcid}**` : ''}
 
-## 2. Résultats Théoriques & Expérimentaux
-- **pH théorique calculé :** **${phAnalysis.ph}** (${phAnalysis.nature})
-- Formule fondamentale appliquée : **${appliedFormula}**
-- Concentration en ions oxonium $[H_3O^+]$ : **${phAnalysis.h3oFormatted} mol/L**
-- Concentration en ions hydroxyde $[OH^-]$ : **${phAnalysis.ohFormatted} mol/L**
-- Constante d'autoprotolyse vérifiée : $K_e = [H_3O^+][OH^-] = 1.0 \\times 10^{-14}$ (à 25 °C)
+## 2. Relation Théorique et Calculs Ioniques
+Loi fondamentale appliquée :
 
-## 3. Diagramme de Prédominance des Espèces
-- Diagnostic d'état : **${predominDiag}**
-- Zone tampon optimale : $pH \\in [pK_a - 1 ; pK_a + 1]$, soit ici $[${(pKaValue - 1).toFixed(2)} ; ${(pKaValue + 1).toFixed(2)}]$.
+$$${appliedFormula}$$
 
-## 4. Recommandations de Laboratoire
-- Toujours étalonner l'électrode combinée de pH-mètre à l'aide de deux solutions tampons certifiées (pH 4.00 et pH 7.00 ou 10.00).
-- Rincer soigneusement l'électrode à l'eau distillée et sécher délicatement par tamponnement sans frotter la membrane de verre.
+Autoprotolyse de l'eau à $25\\ ^\\circ\\text{C}$ :
+
+$$K_e = [\\text{H}_3\\text{O}^+] \\times [\\text{OH}^-] = 1{,}0 \\times 10^{-14}$$
+
+## 3. Résultats Finaux
+
+> **Synthèse des résultats expérimentaux :**
+> - **pH théorique calculé :** **${phAnalysis.ph}** (**${phAnalysis.nature}**)
+> - **Concentration en ions oxonium ($[\\text{H}_3\\text{O}^+]$) :** **${phAnalysis.h3oFormatted} mol/L**
+> - **Concentration en ions hydroxyde ($[\\text{OH}^-]$) :** **${phAnalysis.ohFormatted} mol/L**
+> - **Espèce prédominante :** ${predominDiag}
+
+## 4. Protocole de Mesure pH-métrique
+- Étalonner l'électrode combinée de verre avec deux solutions tampons certifiées ($\\text{pH}\\ 7{,}00$ et $\\text{pH}\\ 4{,}00$ ou $10{,}00$).
+- Rincer l'électrode à l'eau distillée et l'essuyer délicatement par tamponnement sur papier absorbant.
+- Immerger la sonde dans la solution sous agitation magnétique modérée et relever la valeur stabilisée du $\\text{pH}$.
 `;
   }, [
     solutionType,
@@ -142,9 +151,6 @@ ${solutionType === 'buffer' ? `- Rapport molaire $[A^-]/[HA]$ : **${ratioBaseToA
     pKaValue,
     concentration,
     ratioBaseToAcid,
-    customAcidName,
-    customBaseName,
-    selectedSystem,
     phAnalysis,
     appliedFormula,
   ]);
