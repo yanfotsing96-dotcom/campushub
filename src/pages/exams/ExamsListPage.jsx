@@ -13,12 +13,15 @@ import { examService } from '../../services/examService';
 import { normalizeRole, ROLES } from '../../constants/rbacConstants';
 import RoleBadge from '../../components/common/RoleBadge';
 import RouteLoadingSkeleton from '../../components/common/RouteLoadingSkeleton';
+import { useAcademicFilter } from '../../hooks/useAcademicFilter';
+import DynamicContentGuard from '../../components/auth/DynamicContentGuard';
 
 const SecureExamRoom = lazy(() => import('../../components/exams/SecureExamRoom'));
 const AdminExamCreator = lazy(() => import('../../components/exams/AdminExamCreator'));
 
 export default function ExamsListPage() {
   const { user } = useAuth();
+  const { activeFiliere, activeNiveau } = useAcademicFilter();
   const currentRole = normalizeRole(user?.role);
   const isAdminOrModerator = currentRole === ROLES.ADMIN || currentRole === ROLES.MODERATOR;
 
@@ -86,7 +89,7 @@ export default function ExamsListPage() {
             </h1>
 
             <p className="text-sm md:text-base text-slate-300 leading-relaxed">
-              Compositions chronométrées en temps réel pour la filière <strong>{user?.filiere || 'Informatique'}</strong> ({user?.niveau || 'L2'}). Correction instantanée, sauvegarde automatique et enregistrement sécurisé sous votre matricule <strong>{user?.matricule || 'Officiel'}</strong>.
+              Compositions chronométrées en temps réel pour la filière <strong>{activeFiliere}</strong> ({activeNiveau}). Correction instantanée, sauvegarde automatique et enregistrement sécurisé sous votre matricule <strong>{user?.matricule || 'Officiel'}</strong>.
             </p>
           </div>
 
@@ -102,6 +105,9 @@ export default function ExamsListPage() {
           </div>
         </div>
       </div>
+
+      {/* Dynamic Content Guard Certification Banner */}
+      <DynamicContentGuard />
 
       {/* Admin / Moderator Multi-Mode Switcher */}
       {isAdminOrModerator && (

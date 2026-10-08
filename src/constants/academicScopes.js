@@ -111,11 +111,12 @@ export const DEPARTMENTS = [
 ];
 
 export const ACADEMIC_LEVELS = [
-  { id: 'L1', shortLabel: 'L1', label: 'Licence 1 / 1ère Année', semester: 'Semestre 1 & 2' },
-  { id: 'L2', shortLabel: 'L2', label: 'Licence 2 / 2ème Année', semester: 'Semestre 3 & 4' },
-  { id: 'L3', shortLabel: 'L3', label: 'Licence 3 / 3ème Année', semester: 'Semestre 5 & 6' },
-  { id: 'M1', shortLabel: 'M1', label: 'Master 1 / 4ème Année Ing.', semester: 'Semestre 7 & 8' },
-  { id: 'M2', shortLabel: 'M2', label: 'Master 2 / 5ème Année Ing.', semester: 'Semestre 9 & 10' },
+  { id: 'L1', shortLabel: 'L1', label: 'Licence 1 (L1) / 1ère Année', semester: 'Semestre 1 & 2' },
+  { id: 'L2', shortLabel: 'L2', label: 'Licence 2 (L2) / 2ème Année', semester: 'Semestre 3 & 4' },
+  { id: 'L3', shortLabel: 'L3', label: 'Licence 3 (L3) / 3ème Année', semester: 'Semestre 5 & 6' },
+  { id: 'Master', shortLabel: 'Master', label: 'Master (M1 / M2 / Ingénieur)', semester: 'Semestre 7 à 10' },
+  { id: 'M1', shortLabel: 'M1', label: 'Master 1 (M1) / 4ème Année Ing.', semester: 'Semestre 7 & 8' },
+  { id: 'M2', shortLabel: 'M2', label: 'Master 2 (M2) / 5ème Année Ing.', semester: 'Semestre 9 & 10' },
 ];
 
 /**
@@ -123,6 +124,35 @@ export const ACADEMIC_LEVELS = [
  * Reliées strictement à (filiereId, niveau)
  */
 export const RELATION_COURSES = [
+  // ==================== INFORMATIQUE ====================
+  // INFORMATIQUE - L1
+  {
+    id: 'course-inf101',
+    codeUe: 'INF101',
+    filiereId: 'Informatique',
+    niveau: 'L1',
+    titre: 'Initiation à l\'Algorithmique & Programmation C',
+    credits: 6,
+    enseignant: 'Dr. P. Kamgue',
+    semestre: 'Semestre 1',
+    description: 'Variables, types élémentaires, structures conditionnelles, boucles, fonctions et tableaux 1D/2D en C ANSI.',
+    totalMaterials: 7,
+    activeExams: 1,
+  },
+  {
+    id: 'course-inf102',
+    codeUe: 'INF102',
+    filiereId: 'Informatique',
+    niveau: 'L1',
+    titre: 'Architecture des Ordinateurs & Systèmes Numériques',
+    credits: 5,
+    enseignant: 'Dr. C. Fotso',
+    semestre: 'Semestre 2',
+    description: 'Portes logiques, algèbre de Boole, bascules RS/D, circuits combinatoires et séquentiels, registres CPU.',
+    totalMaterials: 5,
+    activeExams: 0,
+  },
+
   // INFORMATIQUE - L2
   {
     id: 'course-inf201',
@@ -164,21 +194,6 @@ export const RELATION_COURSES = [
     activeExams: 0,
   },
 
-  // INFORMATIQUE - L1
-  {
-    id: 'course-inf101',
-    codeUe: 'INF101',
-    filiereId: 'Informatique',
-    niveau: 'L1',
-    titre: 'Initiation à l\'Algorithmique & Programmation C',
-    credits: 6,
-    enseignant: 'Dr. P. Kamgue',
-    semestre: 'Semestre 1',
-    description: 'Variables, types élémentaires, structures conditionnelles (if/switch), boucles (for/while), fonctions et tableaux 1D/2D en C ANSI.',
-    totalMaterials: 7,
-    activeExams: 1,
-  },
-
   // INFORMATIQUE - L3
   {
     id: 'course-inf301',
@@ -191,6 +206,356 @@ export const RELATION_COURSES = [
     semestre: 'Semestre 5',
     description: 'Modèle entité-association, algèbre relationnelle, normalisation (1FN à BCNF), requêtes SQL complexes, transactions ACID et index B-Tree.',
     totalMaterials: 9,
+    activeExams: 1,
+  },
+  {
+    id: 'course-inf302',
+    codeUe: 'INF302',
+    filiereId: 'Informatique',
+    niveau: 'L3',
+    titre: 'Génie Logiciel : Conception UML & Design Patterns GoF',
+    credits: 5,
+    enseignant: 'Pr. J. Kamga',
+    semestre: 'Semestre 5',
+    description: 'Diagrammes de classes, séquences, cas d\'utilisation UML 2.0, patrons Factory, Singleton, Observer, tests unitaires et intégration continue.',
+    totalMaterials: 7,
+    activeExams: 1,
+  },
+
+  // INFORMATIQUE - MASTER
+  {
+    id: 'course-inf401',
+    codeUe: 'INF401',
+    filiereId: 'Informatique',
+    niveau: 'Master',
+    titre: 'Systèmes Distribués & Architectures Cloud Microservices',
+    credits: 6,
+    enseignant: 'Pr. E. Monkam',
+    semestre: 'Semestre 7',
+    description: 'Consensus distribué (Paxos, Raft), communication gRPC, conteneurisation Docker/K8s et scalabilité horizontale.',
+    totalMaterials: 6,
+    activeExams: 1,
+  },
+
+  // ==================== PHYSIQUE ====================
+  // PHYSIQUE - L1
+  {
+    id: 'course-phy101',
+    codeUe: 'PHY101',
+    filiereId: 'Physique',
+    niveau: 'L1',
+    titre: 'Mécanique du Point Matériel & Cinématique Newtonienne',
+    credits: 6,
+    enseignant: 'Dr. P. Tsafack',
+    semestre: 'Semestre 1',
+    description: 'Lois de Newton, quantité de mouvement, théorème de l\'énergie cinétique, oscillateur harmonique et forces centrales.',
+    totalMaterials: 6,
+    activeExams: 1,
+  },
+  {
+    id: 'course-phy102',
+    codeUe: 'PHY102',
+    filiereId: 'Physique',
+    niveau: 'L1',
+    titre: 'Optique Géométrique & Instruments d\'Optique',
+    credits: 5,
+    enseignant: 'Dr. R. Tene',
+    semestre: 'Semestre 2',
+    description: 'Lois de Snell-Descartes, lentilles minces sphériques, miroirs concaves/convexes, microscope et télescope.',
+    totalMaterials: 5,
+    activeExams: 1,
+  },
+
+  // PHYSIQUE - L2
+  {
+    id: 'course-phy201',
+    codeUe: 'PHY201',
+    filiereId: 'Physique',
+    niveau: 'L2',
+    titre: 'Électromagnétisme & Propagation dans les Milieux Diélectriques',
+    credits: 5,
+    enseignant: 'Dr. E. Nana',
+    semestre: 'Semestre 3',
+    description: 'Équations de Maxwell sous forme locale et intégrale, vecteur de Poynting, ondes guidées et cavités résonnantes.',
+    totalMaterials: 6,
+    activeExams: 1,
+  },
+  {
+    id: 'course-phy202',
+    codeUe: 'PHY202',
+    filiereId: 'Physique',
+    niveau: 'L2',
+    titre: 'Thermodynamique Statistique & Cycles Thermiques',
+    credits: 5,
+    enseignant: 'Pr. C. Fotso',
+    semestre: 'Semestre 4',
+    description: 'Premier et second principes, entropie statistique de Boltzmann, cycles de Carnot, Stirling et Diesel.',
+    totalMaterials: 5,
+    activeExams: 1,
+  },
+
+  // PHYSIQUE - L3
+  {
+    id: 'course-phy301',
+    codeUe: 'PHY301',
+    filiereId: 'Physique',
+    niveau: 'L3',
+    titre: 'Mécanique Quantique Fondamentale & Équation de Schrödinger',
+    credits: 6,
+    enseignant: 'Pr. J. Mvogo',
+    semestre: 'Semestre 5',
+    description: 'Dualité onde-corpuscule, postulats quantiques, puits de potentiel infini, effet tunnel et atome d\'hydrogène.',
+    totalMaterials: 7,
+    activeExams: 1,
+  },
+
+  // PHYSIQUE - MASTER
+  {
+    id: 'course-phy401',
+    codeUe: 'PHY401',
+    filiereId: 'Physique',
+    niveau: 'Master',
+    titre: 'Physique des Solides, Semi-conducteurs & Nanomatériaux',
+    credits: 6,
+    enseignant: 'Dr. G. Kenfack',
+    semestre: 'Semestre 7',
+    description: 'Structure cristalline, théorie des bandes d\'énergie, jonctions P-N, photodiodes et nanomatériaux 2D.',
+    totalMaterials: 5,
+    activeExams: 1,
+  },
+
+  // ==================== CHIMIE ====================
+  // CHIMIE - L1
+  {
+    id: 'course-chm101',
+    codeUe: 'CHM101',
+    filiereId: 'Chimie',
+    niveau: 'L1',
+    titre: 'Chimie Générale & Solutions Aqueuses',
+    credits: 6,
+    enseignant: 'Dr. M. Biya',
+    semestre: 'Semestre 1',
+    description: 'Thermodynamique chimique, équilibres acido-basiques, pH, réactions d\'oxydoréduction et cinétique en solution aqueuse.',
+    totalMaterials: 6,
+    activeExams: 1,
+  },
+  {
+    id: 'course-chm102',
+    codeUe: 'CHM102',
+    filiereId: 'Chimie',
+    niveau: 'L1',
+    titre: 'Structure de la Matière & Liaison Chimique',
+    credits: 5,
+    enseignant: 'Pr. S. Talla',
+    semestre: 'Semestre 2',
+    description: 'Modèle de Bohr, orbitales atomiques s, p, d, théorie VSEPR et orbitales moléculaires LCAO.',
+    totalMaterials: 5,
+    activeExams: 1,
+  },
+
+  // CHIMIE - L2
+  {
+    id: 'course-chm201',
+    codeUe: 'CHM201',
+    filiereId: 'Chimie',
+    niveau: 'L2',
+    titre: 'Chimie Organique Structurale & Réactions de Synthèse',
+    credits: 5,
+    enseignant: 'Pr. A. Nono',
+    semestre: 'Semestre 3',
+    description: 'Mécanismes réactionnels SN1/SN2, éliminations E1/E2, stéréochimie R/S et synthèse de molécules aromatiques.',
+    totalMaterials: 6,
+    activeExams: 1,
+  },
+
+  // CHIMIE - L3
+  {
+    id: 'course-chm301',
+    codeUe: 'CHM301',
+    filiereId: 'Chimie',
+    niveau: 'L3',
+    titre: 'Méthodes Spectroscopiques d\'Analyse (IR, RMN ¹H/¹³C & Masse)',
+    credits: 6,
+    enseignant: 'Dr. E. Mbassi',
+    semestre: 'Semestre 5',
+    description: 'Élucidation structurale de composés organiques inconnus par spectrométrie infrarouge, RMN et impact électronique.',
+    totalMaterials: 6,
+    activeExams: 1,
+  },
+
+  // CHIMIE - MASTER
+  {
+    id: 'course-chm401',
+    codeUe: 'CHM401',
+    filiereId: 'Chimie',
+    niveau: 'Master',
+    titre: 'Chimie Thérapeutique & Synthèse Asymétrique',
+    credits: 6,
+    enseignant: 'Pr. H. Boyom',
+    semestre: 'Semestre 7',
+    description: 'Conception de principes actifs, chiralité, catalyseurs organométalliques et pharmacocinétique.',
+    totalMaterials: 5,
+    activeExams: 1,
+  },
+
+  // ==================== BIOLOGIE ====================
+  // BIOLOGIE - L1
+  {
+    id: 'course-bio101',
+    codeUe: 'BIO101',
+    filiereId: 'Biologie',
+    niveau: 'L1',
+    titre: 'Biologie Moléculaire & Génétique Fondamentale',
+    credits: 6,
+    enseignant: 'Dr. S. Kuate',
+    semestre: 'Semestre 1',
+    description: 'Structure de l\'ADN, réplication semi-conservative, transcription, code génétique, biosynthèse des protéines et lois de Mendel.',
+    totalMaterials: 6,
+    activeExams: 1,
+  },
+  {
+    id: 'course-bio102',
+    codeUe: 'BIO102',
+    filiereId: 'Biologie',
+    niveau: 'L1',
+    titre: 'Biologie Animale & Anatomie Comparée',
+    credits: 5,
+    enseignant: 'Pr. N. Bilong',
+    semestre: 'Semestre 2',
+    description: 'Phylogénie des Métazoaires, morphologie des invertébrés et vertébrés, plans d\'organisation.',
+    totalMaterials: 5,
+    activeExams: 1,
+  },
+
+  // BIOLOGIE - L2
+  {
+    id: 'course-bio201',
+    codeUe: 'BIO201',
+    filiereId: 'Biologie',
+    niveau: 'L2',
+    titre: 'Microbiologie Générale & Métabolisme Bactérien',
+    credits: 5,
+    enseignant: 'Pr. H. Mbiapo',
+    semestre: 'Semestre 3',
+    description: 'Structure de la paroi bactérienne (Gram+/Gram-), métabolisme aérobie/anaérobie, génétique bactérienne et agents antimicrobiens.',
+    totalMaterials: 6,
+    activeExams: 1,
+  },
+
+  // BIOLOGIE - L3
+  {
+    id: 'course-bio301',
+    codeUe: 'BIO301',
+    filiereId: 'Biologie',
+    niveau: 'L3',
+    titre: 'Immunologie Cellulaire & Moléculaire',
+    credits: 6,
+    enseignant: 'Dr. C. Nguemo',
+    semestre: 'Semestre 5',
+    description: 'Immunité innée et adaptative, lymphocytes T et B, système du complément, anticorps et vaccins.',
+    totalMaterials: 6,
+    activeExams: 1,
+  },
+
+  // BIOLOGIE - MASTER
+  {
+    id: 'course-bio401',
+    codeUe: 'BIO401',
+    filiereId: 'Biologie',
+    niveau: 'Master',
+    titre: 'Génie Génétique, Clonage & Bio-informatique Génomique',
+    credits: 6,
+    enseignant: 'Pr. V. Nkouathio',
+    semestre: 'Semestre 7',
+    description: 'CRISPR-Cas9, vecteurs plasmidiques, séquençage NGS, alignement BLAST et phylogénomique.',
+    totalMaterials: 5,
+    activeExams: 1,
+  },
+
+  // ==================== MATHÉMATIQUES ====================
+  // MATHÉMATIQUES - L1
+  {
+    id: 'course-mat101',
+    codeUe: 'MAT101',
+    filiereId: 'Mathématiques',
+    niveau: 'L1',
+    titre: 'Algèbre Linéaire I : Espaces Vectoriels & Systèmes Linéaires',
+    credits: 6,
+    enseignant: 'Dr. G. Fotsing',
+    semestre: 'Semestre 1',
+    description: 'Sous-espaces vectoriels, bases, dimension, pivot de Gauss, applications linéaires et calcul matriciel élémentaire.',
+    totalMaterials: 6,
+    activeExams: 1,
+  },
+  {
+    id: 'course-mat102',
+    codeUe: 'MAT102',
+    filiereId: 'Mathématiques',
+    niveau: 'L1',
+    titre: 'Analyse I : Suites Numériques, Limites & Continuité',
+    credits: 6,
+    enseignant: 'Pr. J. Nguemo',
+    semestre: 'Semestre 2',
+    description: 'Suites de Cauchy, théorème des valeurs intermédiaires, dérivabilité, formule de Taylor-Young et développements limités.',
+    totalMaterials: 6,
+    activeExams: 1,
+  },
+
+  // MATHÉMATIQUES - L2
+  {
+    id: 'course-mat201',
+    codeUe: 'MAT201',
+    filiereId: 'Mathématiques',
+    niveau: 'L2',
+    titre: 'Analyse II : Séries Numériques & Intégrales Multiples',
+    credits: 6,
+    enseignant: 'Pr. J. Nguemo',
+    semestre: 'Semestre 3',
+    description: 'Critères de convergence (D\'Alembert, Cauchy), séries entières et de Fourier, intégrales doubles et triples, théorèmes de Green-Riemann.',
+    totalMaterials: 7,
+    activeExams: 1,
+  },
+  {
+    id: 'course-mat202',
+    codeUe: 'MAT202',
+    filiereId: 'Mathématiques',
+    niveau: 'L2',
+    titre: 'Algèbre Bilinéaire, Produit Scalaire & Réduction d\'Endomorphismes',
+    credits: 5,
+    enseignant: 'Dr. T. Kenmogne',
+    semestre: 'Semestre 4',
+    description: 'Valeurs propres, vecteurs propres, polynôme caractéristique, diagonalisation, formes quadratiques et procédé de Gram-Schmidt.',
+    totalMaterials: 6,
+    activeExams: 1,
+  },
+
+  // MATHÉMATIQUES - L3
+  {
+    id: 'course-mat301',
+    codeUe: 'MAT301',
+    filiereId: 'Mathématiques',
+    niveau: 'L3',
+    titre: 'Topologie Générale & Espaces Métriques',
+    credits: 6,
+    enseignant: 'Pr. H. Nzengue',
+    semestre: 'Semestre 5',
+    description: 'Ouverts, fermés, compacité (théorème de Heine-Borel), connexité, complétude et espaces de Hilbert.',
+    totalMaterials: 6,
+    activeExams: 1,
+  },
+
+  // MATHÉMATIQUES - MASTER
+  {
+    id: 'course-mat401',
+    codeUe: 'MAT401',
+    filiereId: 'Mathématiques',
+    niveau: 'Master',
+    titre: 'Théorie de la Mesure & Intégration de Lebesgue',
+    credits: 6,
+    enseignant: 'Pr. P. Njock',
+    semestre: 'Semestre 7',
+    description: 'Tribus de Borel, mesures positives, lemme de Fatou, convergence dominée, espaces L^p et théorème de Fubini.',
+    totalMaterials: 5,
     activeExams: 1,
   },
 
@@ -223,90 +588,5 @@ export const RELATION_COURSES = [
     totalMaterials: 6,
     activeExams: 1,
   },
-
-  // MATHÉMATIQUES - L2
-  {
-    id: 'course-mat201',
-    codeUe: 'MAT201',
-    filiereId: 'Mathématiques',
-    niveau: 'L2',
-    titre: 'Analyse II : Séries Numériques & Intégrales Multiples',
-    credits: 6,
-    enseignant: 'Pr. J. Nguemo',
-    semestre: 'Semestre 3',
-    description: 'Critères de convergence (D\'Alembert, Cauchy), séries entières et de Fourier, intégrales doubles et triples, théorèmes de Green-Riemann.',
-    totalMaterials: 6,
-    activeExams: 1,
-  },
-
-  // PHYSIQUE - L2
-  {
-    id: 'course-phy201',
-    codeUe: 'PHY201',
-    filiereId: 'Physique',
-    niveau: 'L2',
-    titre: 'Électromagnétisme & Propagation dans les Milieux Diélectriques',
-    credits: 5,
-    enseignant: 'Dr. E. Nana',
-    semestre: 'Semestre 3',
-    description: 'Équations de Maxwell sous forme locale et intégrale, vecteur de Poynting, ondes guidées et cavités résonnantes.',
-    totalMaterials: 4,
-    activeExams: 1,
-  },
-
-  // CHIMIE - L1 & L2
-  {
-    id: 'course-chm101',
-    codeUe: 'CHM101',
-    filiereId: 'Chimie',
-    niveau: 'L1',
-    titre: 'Chimie Générale & Solutions Aqueuses',
-    credits: 6,
-    enseignant: 'Dr. M. Biya',
-    semestre: 'Semestre 1',
-    description: 'Thermodynamique chimique, équilibres acido-basiques, pH, réactions d\'oxydoréduction et cinétique en solution aqueuse.',
-    totalMaterials: 5,
-    activeExams: 1,
-  },
-  {
-    id: 'course-chm201',
-    codeUe: 'CHM201',
-    filiereId: 'Chimie',
-    niveau: 'L2',
-    titre: 'Chimie Organique Structurale & Réactions de Synthèse',
-    credits: 5,
-    enseignant: 'Pr. A. Nono',
-    semestre: 'Semestre 3',
-    description: 'Mécanismes réactionnels SN1/SN2, éliminations E1/E2, stéréochimie R/S et synthèse de molécules aromatiques.',
-    totalMaterials: 6,
-    activeExams: 0,
-  },
-
-  // BIOLOGIE - L1 & L2
-  {
-    id: 'course-bio101',
-    codeUe: 'BIO101',
-    filiereId: 'Biologie',
-    niveau: 'L1',
-    titre: 'Biologie Moléculaire & Génétique Fondamentale',
-    credits: 6,
-    enseignant: 'Dr. S. Kuate',
-    semestre: 'Semestre 1',
-    description: 'Structure de l\'ADN, réplication semi-conservative, transcription, code génétique, biosynthèse des protéines et lois de Mendel.',
-    totalMaterials: 6,
-    activeExams: 1,
-  },
-  {
-    id: 'course-bio201',
-    codeUe: 'BIO201',
-    filiereId: 'Biologie',
-    niveau: 'L2',
-    titre: 'Microbiologie Générale & Métabolisme Bactérien',
-    credits: 5,
-    enseignant: 'Pr. H. Mbiapo',
-    semestre: 'Semestre 3',
-    description: 'Structure de la paroi bactérienne (Gram+/Gram-), métabolisme aérobie/anaérobie, génétique bactérienne et agents antimicrobiens.',
-    totalMaterials: 5,
-    activeExams: 0,
-  },
 ];
+

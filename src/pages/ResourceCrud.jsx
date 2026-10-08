@@ -24,12 +24,20 @@ import Pagination from '../components/common/Pagination';
 
 import { useResources } from '../hooks/useResources';
 import { usePermissions } from '../hooks/usePermissions';
+import { useAcademicFilter } from '../hooks/useAcademicFilter';
+import DynamicContentGuard from '../components/auth/DynamicContentGuard';
 import { ROLES, ROLE_LABELS } from '../constants/rbacConstants';
 
 const ITEMS_PER_PAGE = 8;
 
 function ResourceCrud() {
   const { resources, addResource, updateResource, deleteResource, recordDownload } = useResources();
+  const {
+    isStudentScoped,
+    activeFiliere,
+    activeNiveau,
+    isResourceAllowed,
+  } = useAcademicFilter();
   const {
     user,
     role,
@@ -234,13 +242,20 @@ function ResourceCrud() {
     const lower = deferredSearchQuery.toLowerCase();
     return resources
       .filter((res) => {
+        // Interception stricte du profil étudiant (Dynamic Content Guard)
+        if (isStudentScoped && !isResourceAllowed(res)) {
+          return false;
+        }
+
         const matchesSearch =
           !lower ||
           res.titre.toLowerCase().includes(lower) ||
           (res.description && res.description.toLowerCase().includes(lower)) ||
           (res.codeUe && res.codeUe.toLowerCase().includes(lower));
-        const matchesFiliere = filterFiliere === 'all' || res.filiere === filterFiliere;
-        const matchesNiveau = filterNiveau === 'all' || res.niveau === filterNiveau;
+
+        const matchesFiliere = isStudentScoped ? true : (filterFiliere === 'all' || res.filiere === filterFiliere);
+        const matchesNiveau = isStudentScoped ? true : (filterNiveau === 'all' || res.niveau === filterNiveau);
+
         return matchesSearch && matchesFiliere && matchesNiveau;
       })
       .sort((a, b) => {
@@ -249,7 +264,7 @@ function ResourceCrud() {
         }
         return b.id - a.id;
       });
-  }, [resources, deferredSearchQuery, filterFiliere, filterNiveau, sortBy]);
+  }, [resources, deferredSearchQuery, isStudentScoped, isResourceAllowed, filterFiliere, filterNiveau, sortBy]);
 
   // Reset page when filters change
   const [prevFilterQuery, setPrevFilterQuery] = useState(`${deferredSearchQuery}|${filterFiliere}|${filterNiveau}|${sortBy}`);
@@ -563,7 +578,10 @@ function ResourceCrud() {
       )}
 
       {/* 7. Barre d'outils et filtres de recherche */}
-      <section className="crud-list-section">
+      <section className="crud-list-section space-y-4">
+        {/* Dynamic Content Guard Certification Banner */}
+        <DynamicContentGuard />
+
         <div className="section-toolbar">
           <div className="section-toolbar-left">
             <h3>
@@ -572,7 +590,7 @@ function ResourceCrud() {
             </h3>
           </div>
 
-          <div className="section-toolbar-right">
+          <div className="section-toolbar-right flex flex-wrap items-center gap-2">
             <div className="search-box">
               <Search size={15} className="search-box-icon" />
               <input
@@ -583,36 +601,45 @@ function ResourceCrud() {
               />
             </div>
 
-            <select
-              className="filter-select"
-              value={filterFiliere}
-              onChange={(e) => setFilterFiliere(e.target.value)}
-              aria-label="Filtrer par filière"
-            >
-              <option value="all">Toutes les filières</option>
-              <option value="Informatique">Informatique & Génie Logiciel</option>
-              <option value="IA-Data">IA & Data Science</option>
-              <option value="Cyber-Reseaux">Systèmes, Réseaux & Cyber</option>
-              <option value="Mathématiques">Mathématiques & Modélisation</option>
-              <option value="Physique">Physique & Électronique</option>
-              <option value="Chimie">Chimie & Matériaux</option>
-              <option value="Biologie">Biosciences & Santé</option>
-              <option value="Genie-Civil">Génie Civil & Environnement</option>
-            </select>
+            {isStudentScoped ? (
+              <div className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 dark:bg-indigo-950/80 text-indigo-700 dark:text-indigo-300 border border-indigo-200 dark:border-indigo-800 text-xs font-bold whitespace-nowrap shadow-xs">
+                <Lock size={13} className="text-indigo-500" />
+                <span>Cloisonné : {activeFiliere} ({activeNiveau})</span>
+              </div>
+            ) : (
+              <>
+                <select
+                  className="filter-select"
+                  value={filterFiliere}
+                  onChange={(e) => setFilterFiliere(e.target.value)}
+                  aria-label="Filtrer par filière"
+                >
+                  <option value="all">Toutes les filières</option>
+                  <option value="Informatique">Informatique & Génie Logiciel</option>
+                  <option value="IA-Data">IA & Data Science</option>
+                  <option value="Cyber-Reseaux">Systèmes, Réseaux & Cyber</option>
+                  <option value="Mathématiques">Mathématiques & Modélisation</option>
+                  <option value="Physique">Physique & Électronique</option>
+                  <option value="Chimie">Chimie & Matériaux</option>
+                  <option value="Biologie">Biosciences & Santé</option>
+                  <option value="Genie-Civil">Génie Civil & Environnement</option>
+                </select>
 
-            <select
-              className="filter-select"
-              value={filterNiveau}
-              onChange={(e) => setFilterNiveau(e.target.value)}
-              aria-label="Filtrer par niveau"
-            >
-              <option value="all">Tous les niveaux</option>
-              <option value="L1">Licence 1 (L1)</option>
-              <option value="L2">Licence 2 (L2)</option>
-              <option value="L3">Licence 3 (L3)</option>
-              <option value="M1">Master 1 (M1)</option>
-              <option value="M2">Master 2 (M2)</option>
-            </select>
+                <select
+                  className="filter-select"
+                  value={filterNiveau}
+                  onChange={(e) => setFilterNiveau(e.target.value)}
+                  aria-label="Filtrer par niveau"
+                >
+                  <option value="all">Tous les niveaux</option>
+                  <option value="L1">Licence 1 (L1)</option>
+                  <option value="L2">Licence 2 (L2)</option>
+                  <option value="L3">Licence 3 (L3)</option>
+                  <option value="M1">Master 1 (M1)</option>
+                  <option value="M2">Master 2 (M2)</option>
+                </select>
+              </>
+            )}
 
             <select
               className="filter-select"

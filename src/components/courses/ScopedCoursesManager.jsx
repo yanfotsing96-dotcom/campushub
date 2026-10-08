@@ -11,6 +11,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
+import { useAcademicFilter } from '../../hooks/useAcademicFilter';
 import { departmentScopeService } from '../../services/departmentScopeService';
 import { DEPARTMENTS, ACADEMIC_LEVELS } from '../../constants/academicScopes';
 import { ROLES, normalizeRole } from '../../constants/rbacConstants';
@@ -21,14 +22,17 @@ const MATERIALS_PER_PAGE = 6;
 
 export default function ScopedCoursesManager() {
   const { user } = useAuth();
+  const { isStudentScoped, activeFiliere, activeNiveau: studentNiveau } = useAcademicFilter();
   const currentRole = normalizeRole(user?.role);
   const isAdmin = currentRole === ROLES.ADMIN;
   const isStudent = currentRole === ROLES.STUDENT;
 
-  const [activeDepartmentId, setActiveDepartmentId] = useState(
-    user?.filiereId || user?.filiere || 'Informatique'
-  );
-  const [activeNiveau, setActiveNiveau] = useState(user?.niveau || 'L2');
+  const [adminDepartmentId, setAdminDepartmentId] = useState(activeFiliere);
+  const [adminNiveau, setAdminNiveau] = useState(studentNiveau);
+
+  const activeDepartmentId = isStudentScoped ? activeFiliere : (adminDepartmentId || activeFiliere);
+  const activeNiveau = isStudentScoped ? studentNiveau : (adminNiveau || studentNiveau);
+
   const [selectedCourseId, setSelectedCourseId] = useState('all');
   const [selectedType, setSelectedType] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -177,7 +181,7 @@ export default function ScopedCoursesManager() {
             <select
               value={activeDepartmentId}
               onChange={(e) => {
-                setActiveDepartmentId(e.target.value);
+                setAdminDepartmentId(e.target.value);
                 setSelectedCourseId('all');
               }}
               className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-semibold text-xs"
@@ -191,7 +195,7 @@ export default function ScopedCoursesManager() {
 
             <select
               value={activeNiveau}
-              onChange={(e) => setActiveNiveau(e.target.value)}
+              onChange={(e) => setAdminNiveau(e.target.value)}
               className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-semibold text-xs"
             >
               {ACADEMIC_LEVELS.map((lvl) => (

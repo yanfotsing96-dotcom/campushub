@@ -315,6 +315,14 @@ export function AuthProvider({ children }) {
     setUser(newUser);
     setIsAuthenticated(true);
     storageService.set(STORAGE_KEYS.AUTH_USER, newUser);
+    try {
+      localStorage.setItem('campushub_user_filiere', filiereId);
+      localStorage.setItem('campushub_user_niveau', niveau);
+      localStorage.setItem('campushub_user_role', roleLabel);
+      window.dispatchEvent(new CustomEvent('campushub:auth_changed', { detail: newUser }));
+    } catch (e) {
+      console.warn('Storage notification error:', e);
+    }
     return { success: true, token, user: newUser, redirectPath: getDashboardRouteForRole(targetRole) };
   }, []);
 

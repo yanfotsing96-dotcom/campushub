@@ -1,12 +1,19 @@
 import { X } from 'lucide-react';
 import RegisterForm from './RegisterForm';
+import { useAuth } from '../../hooks/useAuth';
 
 export default function RegisterModal({ isOpen, onClose, onRegisterSuccess }) {
+  const { register } = useAuth();
   if (!isOpen) return null;
 
   const handleRegister = (formData) => {
-    if (onRegisterSuccess) {
-      onRegisterSuccess(formData);
+    try {
+      const res = register ? register(formData) : null;
+      if (onRegisterSuccess) {
+        onRegisterSuccess(res?.user || formData);
+      }
+    } catch (e) {
+      console.warn('Registration failed:', e);
     }
     onClose();
   };

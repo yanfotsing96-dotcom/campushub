@@ -12,7 +12,7 @@ import {
 import RouteLoadingSkeleton from '../components/common/RouteLoadingSkeleton';
 
 const FlashcardReview = lazy(() => import('../components/learning/FlashcardReview'));
-const CodePlayground = lazy(() => import('../components/learning/CodePlayground'));
+const ContextualLabContainer = lazy(() => import('../components/labs/ContextualLabContainer'));
 const AILearningAssistant = lazy(() => import('../components/learning/AILearningAssistant'));
 const TechnicalTranslator = lazy(() => import('../components/learning/TechnicalTranslator'));
 
@@ -27,10 +27,10 @@ const TABS = [
   },
   {
     id: 'playground',
-    label: '2. Playground Code C / Py',
-    shortLabel: 'Playground C / Py',
+    label: '2. Laboratoire & Bac à Sable',
+    shortLabel: 'Laboratoire',
     icon: Terminal,
-    description: 'Éditeur & console d\'exécution en direct',
+    description: 'Module technique dédié selon votre filière',
     color: 'emerald',
   },
   {
@@ -166,7 +166,7 @@ export default function LearningPage() {
       <main className="transition-opacity duration-200">
         <Suspense fallback={<RouteLoadingSkeleton variant="simple" />}>
           {activeTab === 'flashcards' && <FlashcardReview />}
-          {activeTab === 'playground' && <CodePlayground />}
+          {activeTab === 'playground' && <ContextualLabContainer />}
           {activeTab === 'ai' && <AILearningAssistant />}
           {activeTab === 'translator' && <TechnicalTranslator />}
         </Suspense>

@@ -15,6 +15,7 @@ import { examService } from '../../services/examService';
 import RoleBadge from '../../components/common/RoleBadge';
 import ScopedCoursesManager from '../../components/courses/ScopedCoursesManager';
 import DynamicPoleTechBlock from '../../components/tech/DynamicPoleTechBlock';
+import DynamicContentGuard from '../../components/auth/DynamicContentGuard';
 
 export default function StudentScopedDashboard() {
   const { user } = useAuth();
@@ -103,6 +104,9 @@ export default function StudentScopedDashboard() {
         {/* Decorative ambient light */}
         <div className="absolute -right-10 -bottom-10 w-72 h-72 rounded-full bg-indigo-500/15 blur-3xl pointer-events-none" />
       </div>
+
+      {/* Dynamic Academic Isolation Guard Certification */}
+      <DynamicContentGuard />
 
       {/* 2. Enrolled Courses Chips of the Semester */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 shadow-xs space-y-3">

@@ -10,6 +10,7 @@ const STORAGE_MATERIALS_KEY = 'campushub_scoped_materials';
 
 // Initial course materials linked relationally to courses
 const INITIAL_COURSE_MATERIALS = [
+  // ==================== INFORMATIQUE ====================
   {
     id: 'mat-101',
     courseId: 'course-inf201',
@@ -65,60 +66,60 @@ const INITIAL_COURSE_MATERIALS = [
   },
   {
     id: 'mat-104',
-    courseId: 'course-inf205',
-    codeUe: 'INF205',
+    courseId: 'course-inf101',
+    codeUe: 'INF101',
     filiereId: 'Informatique',
-    niveau: 'L2',
-    titre: 'Fiche d\'Exercices : Décodage des Instructions x86-64 & Calcul de Cache Hit/Miss',
-    type: 'exercise',
-    format: 'PDF / TD',
-    size: '1.5 Mo',
-    pages: 14,
-    enseignant: 'Dr. C. Fotso',
-    url: '#download-td-cache',
-    downloads: 194,
-    description: 'Exercices d\'examen sur les politiques de remplacement LRU, calcul du temps moyen d\'accès mémoire (AMAT) et registres RAX, RBX, RCX.',
-    publishedAt: '2026-03-18',
-    verified: true,
-  },
-  // Document for IA-Data (Partitioned from Informatique)
-  {
-    id: 'mat-201',
-    courseId: 'course-iad201',
-    codeUe: 'IAD201',
-    filiereId: 'IA-Data',
-    niveau: 'L2',
-    titre: 'Notebook Python : Régression Logistique & Optimisation SGD from Scratch',
-    type: 'code',
-    format: 'IPYNB',
-    size: '4.2 Mo',
-    enseignant: 'Dr. R. Mvogo',
-    url: '#download-ipynb-sgd',
-    downloads: 120,
-    description: 'Calcul matriciel avec NumPy, tracé de la frontière de décision avec Matplotlib.',
-    publishedAt: '2026-03-05',
-    verified: true,
-  },
-  // Document for Mathématiques (Partitioned)
-  {
-    id: 'mat-301',
-    courseId: 'course-mat201',
-    codeUe: 'MAT201',
-    filiereId: 'Mathématiques',
-    niveau: 'L2',
-    titre: 'Annales Corrigées : Séries Numériques & Séries Entières (2020-2025)',
+    niveau: 'L1',
+    titre: 'Polycopié de Cours : Algorithmique Fondamentale & Programmation C ANSI',
     type: 'pdf',
     format: 'PDF',
-    size: '5.1 Mo',
-    pages: 64,
-    enseignant: 'Pr. J. Nguemo',
-    url: '#download-pdf-maths',
-    downloads: 215,
-    description: 'Corrigés détaillés avec développement en série de Taylor et calculs de rayons de convergence.',
-    publishedAt: '2026-02-28',
+    size: '2.4 Mo',
+    pages: 42,
+    enseignant: 'Dr. P. Kamgue',
+    url: '#download-pdf-inf101',
+    downloads: 380,
+    description: 'Variables, types, structures conditionnelles, boucles et tableaux en langage C.',
+    publishedAt: '2026-02-15',
     verified: true,
   },
-  // Document for Physique
+  {
+    id: 'mat-105',
+    courseId: 'course-inf301',
+    codeUe: 'INF301',
+    filiereId: 'Informatique',
+    niveau: 'L3',
+    titre: 'Annales & Corrigés : Optimisation de Requêtes SQL & Index B-Tree',
+    type: 'pdf',
+    format: 'PDF',
+    size: '3.1 Mo',
+    pages: 38,
+    enseignant: 'Dr. M. Tchoupé',
+    url: '#download-pdf-inf301',
+    downloads: 290,
+    description: 'Plans d\'exécution EXPLAIN, jointures Hash/Merge, normalisation BCNF et transactions ACID.',
+    publishedAt: '2026-03-02',
+    verified: true,
+  },
+  {
+    id: 'mat-106',
+    courseId: 'course-inf401',
+    codeUe: 'INF401',
+    filiereId: 'Informatique',
+    niveau: 'Master',
+    titre: 'Polycopié de Recherche : Architectures Cloud & Algorithmes de Consensus Distribué',
+    type: 'pdf',
+    format: 'PDF',
+    size: '4.5 Mo',
+    pages: 58,
+    enseignant: 'Pr. E. Monkam',
+    url: '#download-pdf-inf401',
+    downloads: 145,
+    description: 'Algorithmes Raft et Paxos, sharding, réplication multi-régions et résilience aux pannes byzantines.',
+    publishedAt: '2026-03-08',
+    verified: true,
+  },
+
+  // ==================== PHYSIQUE ====================
   {
     id: 'mat-401',
     courseId: 'course-phy201',
@@ -137,7 +138,62 @@ const INITIAL_COURSE_MATERIALS = [
     publishedAt: '2026-03-01',
     verified: true,
   },
-  // Document for Chimie
+  {
+    id: 'mat-402',
+    courseId: 'course-phy101',
+    codeUe: 'PHY101',
+    filiereId: 'Physique',
+    niveau: 'L1',
+    titre: 'Fiche d\'Exercices : Mécanique du Point & Dynamique Newtonienne',
+    type: 'exercise',
+    format: 'PDF',
+    size: '1.9 Mo',
+    pages: 24,
+    enseignant: 'Dr. P. Tsafack',
+    url: '#download-pdf-phy101',
+    downloads: 210,
+    description: 'Systèmes oscillants amortis, pendule pesant et frottement visqueux.',
+    publishedAt: '2026-02-18',
+    verified: true,
+  },
+  {
+    id: 'mat-403',
+    courseId: 'course-phy301',
+    codeUe: 'PHY301',
+    filiereId: 'Physique',
+    niveau: 'L3',
+    titre: 'Cours Magistral : Postulats de la Mécanique Quantique & Effet Tunnel',
+    type: 'pdf',
+    format: 'PDF',
+    size: '3.5 Mo',
+    pages: 46,
+    enseignant: 'Pr. J. Mvogo',
+    url: '#download-pdf-phy301',
+    downloads: 165,
+    description: 'Équation de Schrödinger indépendante du temps, puits de potentiel fini et oscillateur harmonique quantique.',
+    publishedAt: '2026-03-11',
+    verified: true,
+  },
+  {
+    id: 'mat-404',
+    courseId: 'course-phy401',
+    codeUe: 'PHY401',
+    filiereId: 'Physique',
+    niveau: 'Master',
+    titre: 'Monographie : Physique des Semi-conducteurs & Hétérostructures',
+    type: 'pdf',
+    format: 'PDF',
+    size: '4.8 Mo',
+    pages: 62,
+    enseignant: 'Dr. G. Kenfack',
+    url: '#download-pdf-phy401',
+    downloads: 120,
+    description: 'Zone de Brillouin, masse effective, transport de porteurs et diodes électroluminescentes.',
+    publishedAt: '2026-02-28',
+    verified: true,
+  },
+
+  // ==================== CHIMIE ====================
   {
     id: 'mat-501',
     courseId: 'course-chm101',
@@ -156,7 +212,62 @@ const INITIAL_COURSE_MATERIALS = [
     publishedAt: '2026-03-04',
     verified: true,
   },
-  // Document for Biologie
+  {
+    id: 'mat-502',
+    courseId: 'course-chm201',
+    codeUe: 'CHM201',
+    filiereId: 'Chimie',
+    niveau: 'L2',
+    titre: 'Polycopié : Mécanismes Réactionnels en Chimie Organique (SN, E, Addition)',
+    type: 'pdf',
+    format: 'PDF',
+    size: '3.6 Mo',
+    pages: 52,
+    enseignant: 'Pr. A. Nono',
+    url: '#download-pdf-chm201',
+    downloads: 195,
+    description: 'Stéréochimie R/S, inversion de Walden, régiosélectivité de Markovnikov et synthèses aromatiques.',
+    publishedAt: '2026-03-09',
+    verified: true,
+  },
+  {
+    id: 'mat-503',
+    courseId: 'course-chm301',
+    codeUe: 'CHM301',
+    filiereId: 'Chimie',
+    niveau: 'L3',
+    titre: 'Guide d\'Analyse Spectroscopique RMN ¹H et ¹³C avec Tables de Déplacements',
+    type: 'pdf',
+    format: 'PDF',
+    size: '4.2 Mo',
+    pages: 44,
+    enseignant: 'Dr. E. Mbassi',
+    url: '#download-pdf-chm301',
+    downloads: 140,
+    description: 'Couplages spin-spin, constantes J, intégration et spectres IR corrélés.',
+    publishedAt: '2026-03-12',
+    verified: true,
+  },
+  {
+    id: 'mat-504',
+    courseId: 'course-chm401',
+    codeUe: 'CHM401',
+    filiereId: 'Chimie',
+    niveau: 'Master',
+    titre: 'Synthèse Asymétrique & Catalyse Énantiomérique Avancée',
+    type: 'pdf',
+    format: 'PDF',
+    size: '4.6 Mo',
+    pages: 56,
+    enseignant: 'Pr. H. Boyom',
+    url: '#download-pdf-chm401',
+    downloads: 98,
+    description: 'Auxiliaires chiraux d\'Evans, hydrogénation de Noyori et époxydation de Sharpless.',
+    publishedAt: '2026-02-25',
+    verified: true,
+  },
+
+  // ==================== BIOLOGIE ====================
   {
     id: 'mat-601',
     courseId: 'course-bio101',
@@ -175,7 +286,179 @@ const INITIAL_COURSE_MATERIALS = [
     publishedAt: '2026-03-08',
     verified: true,
   },
+  {
+    id: 'mat-602',
+    courseId: 'course-bio201',
+    codeUe: 'BIO201',
+    filiereId: 'Biologie',
+    niveau: 'L2',
+    titre: 'Manuel de Microbiologie : Croissance Bactérienne & Tests Biochimiques',
+    type: 'pdf',
+    format: 'PDF',
+    size: '3.7 Mo',
+    pages: 48,
+    enseignant: 'Pr. H. Mbiapo',
+    url: '#download-pdf-bio201',
+    downloads: 220,
+    description: 'Galerie API 20E, catalase, oxydase, antibiogramme par diffusion sur gélose de Mueller-Hinton.',
+    publishedAt: '2026-03-06',
+    verified: true,
+  },
+  {
+    id: 'mat-603',
+    courseId: 'course-bio301',
+    codeUe: 'BIO301',
+    filiereId: 'Biologie',
+    niveau: 'L3',
+    titre: 'Immunologie Moléculaire : Structure des Immunoglobulines & Récepteurs TCR',
+    type: 'pdf',
+    format: 'PDF',
+    size: '4.1 Mo',
+    pages: 50,
+    enseignant: 'Dr. C. Nguemo',
+    url: '#download-pdf-bio301',
+    downloads: 175,
+    description: 'Recombinaison V(D)J, commutation isotypique, présentation par le CMH I et II.',
+    publishedAt: '2026-03-14',
+    verified: true,
+  },
+  {
+    id: 'mat-604',
+    courseId: 'course-bio401',
+    codeUe: 'BIO401',
+    filiereId: 'Biologie',
+    niveau: 'Master',
+    titre: 'Génie Génétique & Outils CRISPR-Cas9 en Biotechnologies',
+    type: 'pdf',
+    format: 'PDF',
+    size: '5.2 Mo',
+    pages: 64,
+    enseignant: 'Pr. V. Nkouathio',
+    url: '#download-pdf-bio401',
+    downloads: 130,
+    description: 'ARN guide, réparation par NHEJ/HDR, knock-out génique et clonage sans cicatrice.',
+    publishedAt: '2026-03-01',
+    verified: true,
+  },
+
+  // ==================== MATHÉMATIQUES ====================
+  {
+    id: 'mat-301',
+    courseId: 'course-mat201',
+    codeUe: 'MAT201',
+    filiereId: 'Mathématiques',
+    niveau: 'L2',
+    titre: 'Annales Corrigées : Séries Numériques & Séries Entières (2020-2025)',
+    type: 'pdf',
+    format: 'PDF',
+    size: '5.1 Mo',
+    pages: 64,
+    enseignant: 'Pr. J. Nguemo',
+    url: '#download-pdf-maths',
+    downloads: 215,
+    description: 'Corrigés détaillés avec développement en série de Taylor et calculs de rayons de convergence.',
+    publishedAt: '2026-02-28',
+    verified: true,
+  },
+  {
+    id: 'mat-302',
+    courseId: 'course-mat101',
+    codeUe: 'MAT101',
+    filiereId: 'Mathématiques',
+    niveau: 'L1',
+    titre: 'Recueil de TD : Algèbre Linéaire & Calcul Matriciel',
+    type: 'exercise',
+    format: 'PDF',
+    size: '2.8 Mo',
+    pages: 32,
+    enseignant: 'Dr. G. Fotsing',
+    url: '#download-pdf-mat101',
+    downloads: 260,
+    description: 'Espaces vectoriels de dimension finie, théorème du rang et pivot de Gauss.',
+    publishedAt: '2026-02-14',
+    verified: true,
+  },
+  {
+    id: 'mat-303',
+    courseId: 'course-mat301',
+    codeUe: 'MAT301',
+    filiereId: 'Mathématiques',
+    niveau: 'L3',
+    titre: 'Polycopié : Topologie des Espaces Métriques & Espaces de Hilbert',
+    type: 'pdf',
+    format: 'PDF',
+    size: '4.3 Mo',
+    pages: 55,
+    enseignant: 'Pr. H. Nzengue',
+    url: '#download-pdf-mat301',
+    downloads: 180,
+    description: 'Compacité, complétude, théorème du point fixe de Banach et projections orthogonales.',
+    publishedAt: '2026-03-05',
+    verified: true,
+  },
+  {
+    id: 'mat-304',
+    courseId: 'course-mat401',
+    codeUe: 'MAT401',
+    filiereId: 'Mathématiques',
+    niveau: 'Master',
+    titre: 'Théorie de l\'Intégration de Lebesgue & Espaces L^p',
+    type: 'pdf',
+    format: 'PDF',
+    size: '5.0 Mo',
+    pages: 60,
+    enseignant: 'Pr. P. Njock',
+    url: '#download-pdf-mat401',
+    downloads: 110,
+    description: 'Mesures de Radon, théorème de Radon-Nikodym, dualité L^p-L^q et convolution.',
+    publishedAt: '2026-02-27',
+    verified: true,
+  },
+
+  // Document for IA-Data
+  {
+    id: 'mat-201',
+    courseId: 'course-iad201',
+    codeUe: 'IAD201',
+    filiereId: 'IA-Data',
+    niveau: 'L2',
+    titre: 'Notebook Python : Régression Logistique & Optimisation SGD from Scratch',
+    type: 'code',
+    format: 'IPYNB',
+    size: '4.2 Mo',
+    enseignant: 'Dr. R. Mvogo',
+    url: '#download-ipynb-sgd',
+    downloads: 120,
+    description: 'Calcul matriciel avec NumPy, tracé de la frontière de décision avec Matplotlib.',
+    publishedAt: '2026-03-05',
+    verified: true,
+  },
 ];
+
+function normalizeMatchFiliere(f1, f2) {
+  if (!f1 || !f2) return false;
+  const n1 = String(f1).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  const n2 = String(f2).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim();
+  if (n1 === n2) return true;
+  if ((n1.includes('info') || n1.includes('code')) && (n2.includes('info') || n2.includes('code'))) return true;
+  if (n1.includes('phys') && n2.includes('phys')) return true;
+  if (n1.includes('chim') && n2.includes('chim')) return true;
+  if (n1.includes('bio') && n2.includes('bio')) return true;
+  if (n1.includes('math') && n2.includes('math')) return true;
+  return false;
+}
+
+function matchLevelHelper(l1, l2) {
+  if (!l1 || !l2) return true;
+  const s1 = String(l1).toUpperCase().trim();
+  const s2 = String(l2).toUpperCase().trim();
+  if (s1 === s2) return true;
+  if ((s1 === 'MASTER' || s1 === 'M1' || s1 === 'M2') && (s2 === 'MASTER' || s2 === 'M1' || s2 === 'M2')) return true;
+  if ((s1 === 'L1' || s1 === 'LICENCE 1') && (s2 === 'L1' || s2 === 'LICENCE 1')) return true;
+  if ((s1 === 'L2' || s1 === 'LICENCE 2') && (s2 === 'L2' || s2 === 'LICENCE 2')) return true;
+  if ((s1 === 'L3' || s1 === 'LICENCE 3') && (s2 === 'L3' || s2 === 'LICENCE 3')) return true;
+  return false;
+}
 
 class DepartmentScopeService {
   constructor() {
@@ -251,8 +534,8 @@ class DepartmentScopeService {
     const effectiveNiveau = role === ROLES.ADMIN ? (niveau || userNiveau) : userNiveau;
 
     return RELATION_COURSES.filter((c) => {
-      const matchFiliere = !effectiveFiliere || c.filiereId.toLowerCase() === effectiveFiliere.toLowerCase();
-      const matchNiveau = !effectiveNiveau || c.niveau === effectiveNiveau;
+      const matchFiliere = !effectiveFiliere || normalizeMatchFiliere(c.filiereId, effectiveFiliere);
+      const matchNiveau = !effectiveNiveau || matchLevelHelper(c.niveau, effectiveNiveau);
       return matchFiliere && matchNiveau;
     });
   }
@@ -268,8 +551,8 @@ class DepartmentScopeService {
     return this.materials.filter((m) => {
       // Cloisonnement strict si non-admin
       if (role !== ROLES.ADMIN) {
-        if (m.filiereId.toLowerCase() !== userFiliere.toLowerCase()) return false;
-        if (m.niveau !== userNiveau) return false;
+        if (!normalizeMatchFiliere(m.filiereId, userFiliere)) return false;
+        if (!matchLevelHelper(m.niveau, userNiveau)) return false;
       }
 
       // Filtre optionnel par cours (ex: INF201)

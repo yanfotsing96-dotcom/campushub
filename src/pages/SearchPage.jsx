@@ -17,6 +17,8 @@ import Badge from '../components/common/Badge';
 import Button from '../components/common/Button';
 import Pagination from '../components/common/Pagination';
 import { useResources } from '../hooks/useResources';
+import { useAcademicFilter } from '../hooks/useAcademicFilter';
+import DynamicContentGuard from '../components/auth/DynamicContentGuard';
 import '../styles/SearchPage.css';
 
 const ITEMS_PER_PAGE = 8;
@@ -25,6 +27,11 @@ export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
   const deferredQuery = useDeferredValue(query);
+
+  const {
+    isStudentScoped,
+    isResourceAllowed,
+  } = useAcademicFilter();
 
   const [filters, setFilters] = useState({
     filiere: '',
@@ -78,6 +85,11 @@ export default function SearchPage() {
 
     return resources
       .filter((item) => {
+        // Interception stricte du profil étudiant (Dynamic Content Guard)
+        if (isStudentScoped && !isResourceAllowed(item)) {
+          return false;
+        }
+
         // Multi-field intelligent matching
         const matchQuery =
           !lowerQuery ||
@@ -88,8 +100,14 @@ export default function SearchPage() {
           item.filiere?.toLowerCase().includes(lowerQuery) ||
           item.niveau?.toLowerCase().includes(lowerQuery);
 
-        const matchFiliere = !filters.filiere || item.filiere === filters.filiere;
-        const matchNiveau = !filters.niveau || item.niveau === filters.niveau;
+        const matchFiliere = isStudentScoped
+          ? true
+          : (!filters.filiere || item.filiere === filters.filiere);
+
+        const matchNiveau = isStudentScoped
+          ? true
+          : (!filters.niveau || item.niveau === filters.niveau);
+
         const matchType =
           !filters.typeDoc ||
           filters.typeDoc === 'all' ||
@@ -107,7 +125,7 @@ export default function SearchPage() {
         // Default: most recent
         return (b.id || 0) - (a.id || 0);
       });
-  }, [resources, deferredQuery, filters]);
+  }, [resources, deferredQuery, isStudentScoped, isResourceAllowed, filters]);
 
   // Auto-reset page on filter/search change without effect
   const filterKey = `${deferredQuery}-${filters.filiere}-${filters.niveau}-${filters.typeDoc}-${filters.tri}`;
@@ -163,7 +181,7 @@ export default function SearchPage() {
   return (
     <div className="search-page-container">
       {/* Page Header */}
-      <div style={{ marginBottom: '24px' }}>
+      <div style={{ marginBottom: '20px' }}>
         <h2 style={{ fontSize: '1.75rem', fontWeight: 800, margin: '0 0 6px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
           <Search size={28} color="var(--primary, #6366f1)" />
           <span>Recherche Globale & Filtres Intelligents</span>
@@ -171,6 +189,11 @@ export default function SearchPage() {
         <p style={{ color: 'var(--text-muted, #64748b)', margin: 0, fontSize: '0.9375rem' }}>
           Moteur de recherche unifié : filtrez par niveau (L1, L2, L3, M1), discipline académique, enseignant ou code UE.
         </p>
+      </div>
+
+      {/* Dynamic Content Guard Certification Banner */}
+      <div style={{ marginBottom: '20px' }}>
+        <DynamicContentGuard />
       </div>
 
       {/* Main Search Input */}
