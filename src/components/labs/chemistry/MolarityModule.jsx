@@ -251,10 +251,10 @@ Préparation par dissolution d'une solution étalon de soluté pur à concentrat
             type="button"
             onClick={() => setIsReportModalOpen(true)}
             className="px-3.5 py-2 rounded-xl bg-violet-600/20 hover:bg-violet-600/30 text-violet-300 border border-violet-500/40 text-xs font-bold flex items-center gap-2 transition-all shadow-lg shadow-violet-950/30 hover:shadow-violet-900/40"
-            title="Générer le rapport complet au format Markdown"
+            title="Consulter le compte-rendu de laboratoire"
           >
             <FileText size={15} className="text-violet-400" />
-            <span>Compte-Rendu TP (.md)</span>
+            <span>Compte-Rendu TP</span>
           </button>
         </div>
       </div>
@@ -758,6 +758,7 @@ Préparation par dissolution d'une solution étalon de soluté pur à concentrat
                         </div>
                       </div>
                     ))}
+                  </div>
                 </div>
               </div>
             ) : (

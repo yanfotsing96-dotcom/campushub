@@ -1,9 +1,11 @@
 import { useState, useMemo } from 'react';
-import { Flame } from 'lucide-react';
+import { Flame, FileText } from 'lucide-react';
 import { THERMODYNAMIC_REACTIONS } from './chemistryData';
+import TPReportModal from './TPReportModal';
 
 export default function ThermodynamicsModule() {
   const [selectedReactionId, setSelectedReactionId] = useState(THERMODYNAMIC_REACTIONS[0].id);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   const activeReaction = useMemo(() => {
     return (
@@ -92,6 +94,36 @@ export default function ThermodynamicsModule() {
     return points;
   }, [deltaH, deltaS]);
 
+  // Génération du compte-rendu de TP Markdown
+  const generatedReport = useMemo(() => {
+    return `# COMPTE-RENDU DE TP : THERMODYNAMIQUE CHIMIQUE & FONCTION DE GIBBS
+**Plateforme Académique CampusHub · Pôle Sciences Chimiques (L3-Master)**
+**Date de manipulation :** ${new Date().toLocaleDateString('fr-FR')}
+
+---
+
+## 1. Réaction Chimique Étudiée
+- **Intitulé :** **${activeReaction.name}**
+- **Équation stœchiométrique :** \`${activeReaction.formula}\`
+- **Application industrielle / naturelle :** ${activeReaction.context}
+
+## 2. Données Thermodynamiques Fondamentales
+- Enthalpie standard de réaction ($\\Delta H^\\circ$) : **${deltaH} kJ/mol** (${deltaH > 0 ? 'Endothermique' : 'Exothermique'})
+- Entropie standard de réaction ($\\Delta S^\\circ$) : **${deltaS} J/(mol·K)**
+- Température de travail ($T$) : **${temperatureK} K** (${(temperatureK - 273.15).toFixed(1)} °C)
+
+## 3. Énergie Libre de Gibbs & Spontanéité
+- **Formulation :** $\\Delta G^\\circ(T) = \\Delta H^\\circ - T \\cdot \\Delta S^\\circ$
+- **Calcul :** $\\Delta G^\\circ(${temperatureK}\\text{ K}) = ${deltaH} - ${temperatureK} \\times (${deltaS} / 1000) = \\mathbf{${thermoAnalysis.deltaG_kJ}\\text{ kJ/mol}}$
+- **Diagnostic de spontanéité :** ${thermoAnalysis.isSpontaneous ? '✅ Spontanée sous 1 bar ($\\Delta G^\\circ < 0$)' : '❌ Non spontanée sous 1 bar ($\\Delta G^\\circ > 0$)'}
+- **Constante d'équilibre thermodynamique ($K_{\\text{eq}}$) :** **${thermoAnalysis.kEqFormatted}**
+${thermoAnalysis.tInversion ? `- **Température d'inversion ($T_{\\text{inv}} = \\Delta H^\\circ / \\Delta S^\\circ$) :** **${thermoAnalysis.tInversion} K** (${(thermoAnalysis.tInversion - 273.15).toFixed(1)} °C)` : ''}
+
+## 4. Analyse du Quadrant Thermodynamique
+${thermoAnalysis.quadrantDescription}
+`;
+  }, [activeReaction, deltaH, deltaS, temperatureK, thermoAnalysis]);
+
   return (
     <div className="space-y-6 text-left">
       {/* Header */}
@@ -113,9 +145,21 @@ export default function ThermodynamicsModule() {
           </div>
         </div>
 
-        {/* Formule clef de Gibbs */}
-        <div className="px-4 py-2 rounded-xl bg-slate-950 border border-violet-500/30 text-xs font-mono text-violet-300 shadow-inner">
-          ΔG°(T) = ΔH° − T · ΔS°
+        {/* Formule clef de Gibbs & Bouton Export TP */}
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:block px-4 py-2 rounded-xl bg-slate-950 border border-violet-500/30 text-xs font-mono text-violet-300 shadow-inner">
+            ΔG°(T) = ΔH° − T · ΔS°
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsReportModalOpen(true)}
+            className="px-3.5 py-2 rounded-xl bg-violet-600/20 hover:bg-violet-600/30 text-violet-300 border border-violet-500/40 text-xs font-bold flex items-center gap-2 transition-all shadow-lg shadow-violet-950/30 hover:shadow-violet-900/40"
+            title="Consulter le compte-rendu de laboratoire"
+          >
+            <FileText size={15} className="text-violet-400" />
+            <span>Compte-Rendu TP</span>
+          </button>
         </div>
       </div>
 
@@ -351,6 +395,16 @@ export default function ThermodynamicsModule() {
           </div>
         </div>
       </div>
+
+      {/* Modal d'Exportation de Compte-Rendu de TP */}
+      <TPReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        title="Compte-Rendu de Travaux Pratiques : Thermodynamique & Gibbs"
+        moduleName="Thermodynamique Chimique & Équilibres"
+        academicLevel="Licence 3 · Master 1"
+        reportContent={generatedReport}
+      />
     </div>
   );
 }

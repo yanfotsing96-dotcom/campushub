@@ -224,13 +224,88 @@ ${tableRows}
             type="button"
             onClick={() => setIsReportModalOpen(true)}
             className="px-3.5 py-2 rounded-xl bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 border border-indigo-500/40 text-xs font-bold flex items-center gap-2 transition-all shadow-lg shadow-indigo-950/30 hover:shadow-indigo-900/40"
-            title="Générer le rapport complet au format Markdown"
+            title="Consulter le compte-rendu de laboratoire"
           >
             <FileText size={15} className="text-indigo-400" />
-            <span>Compte-Rendu TP (.md)</span>
+            <span>Compte-Rendu TP</span>
           </button>
         </div>
       </div>
+
+      {/* Configuration Mode Réaction Sur-Mesure */}
+      {isCustomReaction && (
+        <div className="p-4 rounded-xl bg-slate-900/80 border border-indigo-500/30 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-7 gap-3 text-xs">
+          <div>
+            <label className="text-slate-400 block mb-1">Réactif 1</label>
+            <input
+              type="text"
+              value={customR1Name}
+              onChange={(e) => setCustomR1Name(e.target.value)}
+              className="w-full px-2 py-1 bg-slate-950 border border-slate-700 rounded text-white font-mono"
+            />
+          </div>
+          <div>
+            <label className="text-slate-400 block mb-1">Coeff R1</label>
+            <input
+              type="number"
+              min="1"
+              max="10"
+              value={customR1Coeff}
+              onChange={(e) => setCustomR1Coeff(parseInt(e.target.value, 10) || 1)}
+              className="w-full px-2 py-1 bg-slate-950 border border-slate-700 rounded text-white font-mono"
+            />
+          </div>
+          <div>
+            <label className="text-slate-400 block mb-1">Réactif 2</label>
+            <input
+              type="text"
+              value={customR2Name}
+              onChange={(e) => setCustomR2Name(e.target.value)}
+              className="w-full px-2 py-1 bg-slate-950 border border-slate-700 rounded text-white font-mono"
+            />
+          </div>
+          <div>
+            <label className="text-slate-400 block mb-1">Coeff R2</label>
+            <input
+              type="number"
+              min="1"
+              max="10"
+              value={customR2Coeff}
+              onChange={(e) => setCustomR2Coeff(parseInt(e.target.value, 10) || 1)}
+              className="w-full px-2 py-1 bg-slate-950 border border-slate-700 rounded text-white font-mono"
+            />
+          </div>
+          <div>
+            <label className="text-slate-400 block mb-1">Produit 1</label>
+            <input
+              type="text"
+              value={customP1Name}
+              onChange={(e) => setCustomP1Name(e.target.value)}
+              className="w-full px-2 py-1 bg-slate-950 border border-slate-700 rounded text-white font-mono"
+            />
+          </div>
+          <div>
+            <label className="text-slate-400 block mb-1">Coeff P1</label>
+            <input
+              type="number"
+              min="1"
+              max="10"
+              value={customP1Coeff}
+              onChange={(e) => setCustomP1Coeff(parseInt(e.target.value, 10) || 1)}
+              className="w-full px-2 py-1 bg-slate-950 border border-slate-700 rounded text-white font-mono"
+            />
+          </div>
+          <div>
+            <label className="text-slate-400 block mb-1">ΔH° (kJ/mol)</label>
+            <input
+              type="number"
+              value={customDeltaH}
+              onChange={(e) => setCustomDeltaH(parseFloat(e.target.value) || 0)}
+              className="w-full px-2 py-1 bg-slate-950 border border-slate-700 rounded text-white font-mono"
+            />
+          </div>
+        </div>
+      )}
 
       {/* Affichage de l'équation équilibrée */}
       <div className="p-6 rounded-2xl bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 border border-indigo-500/30 shadow-xl">
@@ -463,6 +538,16 @@ ${tableRows}
           </div>
         </div>
       </div>
+
+      {/* Modal d'Exportation de Compte-Rendu de TP */}
+      <TPReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        title="Compte-Rendu de TP : Équilibreur d'Équations & Stœchiométrie"
+        moduleName="Stœchiométrie & Bilan de Matière"
+        academicLevel="Licence 1 · Licence 2"
+        reportContent={generatedReport}
+      />
     </div>
   );
 }

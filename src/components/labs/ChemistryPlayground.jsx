@@ -27,6 +27,7 @@ import PHSimulatorModule from './chemistry/PHSimulatorModule';
 import ThermodynamicsModule from './chemistry/ThermodynamicsModule';
 import KineticsModule from './chemistry/KineticsModule';
 import ElectrochemistryModule from './chemistry/ElectrochemistryModule';
+import ChemistryExamTrainerModule from './chemistry/ChemistryExamTrainerModule';
 
 /**
  * Navigation items groupés par niveau académique
@@ -107,6 +108,20 @@ const NAVIGATION_SECTIONS = [
         badge: 'L3-M2',
         badgeColor: 'bg-violet-500/20 text-violet-300 border-violet-500/30',
         description: 'Piles Daniell, potentiels standards IUPAC & Nernst',
+      },
+    ],
+  },
+  {
+    group: 'Évaluation & Concours',
+    items: [
+      {
+        id: 'exam_trainer',
+        name: 'Mode Entraînement / Examen',
+        shortName: 'Quiz & Examens',
+        icon: GraduationCap,
+        badge: 'Interactif',
+        badgeColor: 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30',
+        description: 'Problèmes types L1 à Master, validation immédiate & corrigés détaillés',
       },
     ],
   },
@@ -417,6 +432,8 @@ export default function ChemistryPlayground() {
             {activeModule === 'kinetics' && <KineticsModule />}
 
             {activeModule === 'electrochemistry' && <ElectrochemistryModule />}
+
+            {activeModule === 'exam_trainer' && <ChemistryExamTrainerModule />}
           </div>
         </main>
       </div>

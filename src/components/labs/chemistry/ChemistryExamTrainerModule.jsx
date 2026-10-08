@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import {
   GraduationCap,
-  Sparkles,
   CheckCircle2,
   XCircle,
   HelpCircle,
@@ -13,6 +12,12 @@ import {
   ChevronRight,
   Calculator,
   Lightbulb,
+  Copy,
+  Check,
+  Shuffle,
+  FileText,
+  Sparkles,
+  Bookmark,
 } from 'lucide-react';
 
 /**
@@ -46,7 +51,7 @@ const EXAM_PROBLEMS = [
       },
       {
         step: 'Conclusion & Pratique de Laboratoire',
-        detail: 'L\'étudiant pèse 9.36 g dans une coupelle, dissout dans ~100 mL d\'eau distillée puis ajuste au trait de jauge d\'une fiole de 250 mL.',
+        detail: 'L\'étudiant pèse 9.36 g dans une coupelle de pesée, dissout dans ~100 mL d\'eau distillée puis ajuste au trait de jauge d\'une fiole de 250 mL.',
       },
     ],
   },
@@ -78,6 +83,64 @@ const EXAM_PROBLEMS = [
     ],
   },
   {
+    id: 'prob-titration-acid-base',
+    level: 'L1 · L2',
+    levelBadge: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+    category: 'Titrages & Dosages',
+    title: 'Titrage d\'un Acide Inconnu par la Soude (Équivalence)',
+    statement:
+      'On titre une prise d\'essai de V_A = 20.0 mL d\'une solution d\'acide chlorhydrique (HCl) de concentration inconnue C_A par une solution étalon d\'hydroxyde de sodium (NaOH) à C_B = 0.0500 mol/L. Le virage de l\'indicateur coloré et le saut de pH indiquent un volume équivalent V_eq = 14.40 mL. Calculez la concentration C_A (en mol/L) de la solution acide.',
+    unit: 'mol/L',
+    targetAnswer: 0.036,
+    tolerance: 0.001,
+    hint: 'À l\'équivalence stœchiométrique 1:1 : n_A = n_B  ⟹  C_A × V_A = C_B × V_eq.',
+    stepByStep: [
+      {
+        step: '1. Équation bilan du dosage',
+        detail: 'H₃O⁺(aq) + HO⁻(aq) ➔ 2 H₂O(l). La réaction est quantitative et univoque.',
+      },
+      {
+        step: '2. Relation à l\'équivalence',
+        detail: 'C_A · V_A = C_B · V_eq  ⟹  C_A = (C_B · V_eq) / V_A',
+      },
+      {
+        step: '3. Application numérique',
+        detail: 'C_A = (0.0500 mol/L × 14.40 mL) / 20.0 mL = 0.720 / 20.0 = 0.0360 mol/L.',
+      },
+      {
+        step: 'Remarque de TP',
+        detail: 'La concentration recherchée est donc de 3.60 × 10⁻² mol/L (soit 36.0 mmol/L).',
+      },
+    ],
+  },
+  {
+    id: 'prob-beer-lambert',
+    level: 'L1 · L2',
+    levelBadge: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+    category: 'Spectrophotométrie',
+    title: 'Dosage par Spectrophotométrie (Loi de Beer-Lambert)',
+    statement:
+      'Une solution aqueuse de permanganate de potassium (KMnO₄) est analysée à sa longueur d\'onde maximale λ = 525 nm dans une cuve de largeur optique l = 1.00 cm. L\'absorbance mesurée est A = 0.645. Sachant que le coefficient d\'extinction molaire est ε = 2200 L/(mol·cm), déterminez la concentration C (en mmol/L) de permanganate.',
+    unit: 'mmol/L',
+    targetAnswer: 0.293,
+    tolerance: 0.008,
+    hint: 'Loi de Beer-Lambert : A = ε × l × C. N\'oubliez pas de convertir le résultat en mmol/L (× 1000).',
+    stepByStep: [
+      {
+        step: '1. Expression de la concentration C en mol/L',
+        detail: 'A = ε · l · C  ⟹  C = A / (ε · l)',
+      },
+      {
+        step: '2. Application numérique',
+        detail: 'C = 0.645 / (2200 × 1.00) = 2.9318 × 10⁻⁴ mol/L.',
+      },
+      {
+        step: '3. Conversion en millimoles par litre (mmol/L)',
+        detail: 'C = 2.9318 × 10⁻⁴ × 10³ = 0.293 mmol/L.',
+      },
+    ],
+  },
+  {
     id: 'prob-stoich-1',
     level: 'L1 · L2',
     levelBadge: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
@@ -101,6 +164,33 @@ const EXAM_PROBLEMS = [
       {
         step: '3. Bilan final pour le produit CO₂',
         detail: 'n_f(CO₂) = 3 × x_max = 3 × 2.00 mol = 6.00 mol.',
+      },
+    ],
+  },
+  {
+    id: 'prob-yield-limiting',
+    level: 'L1 · L2',
+    levelBadge: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+    category: 'Stœchiométrie & Avancement',
+    title: 'Synthèse de l\'Aspirine & Rendement Massique',
+    statement:
+      'Lors d\'une séance de TP de chimie organique, un binôme fait réagir m₁ = 6.90 g d\'acide salicylique (M₁ = 138.12 g/mol) avec un excès d\'anhydride acétique pour synthétiser de l\'acide acétylsalicylique (Aspirine, M₂ = 180.16 g/mol). Après recristallisation et séchage, ils recueillent m_exp = 7.20 g d\'aspirine pure. Calculez le rendement massique de la réaction (en pourcentage %).',
+    unit: '%',
+    targetAnswer: 80.0,
+    tolerance: 1.0,
+    hint: 'La stœchiométrie est de 1 pour 1. Masse théorique maximale m_th = n₁ × M₂. Rendement η = (m_exp / m_th) × 100.',
+    stepByStep: [
+      {
+        step: '1. Quantité de matière initiale en acide salicylique',
+        detail: 'n₁ = m₁ / M₁ = 6.90 g / 138.12 g/mol = 0.0500 mol (50 mmol).',
+      },
+      {
+        step: '2. Masse théorique maximale d\'aspirine (m_th)',
+        detail: 'm_th = n₁ × M₂ = 0.0500 mol × 180.16 g/mol = 9.008 g.',
+      },
+      {
+        step: '3. Calcul du rendement massique (η)',
+        detail: 'η = (m_exp / m_th) × 100 = (7.20 / 9.008) × 100 = 79.93 % ≈ 80.0 %.',
       },
     ],
   },
@@ -132,6 +222,33 @@ const EXAM_PROBLEMS = [
       {
         step: 'Remarque pédagogique',
         detail: 'La solution est légèrement au-dessus du pKa car la base conjuguée est en excès molaire modéré.',
+      },
+    ],
+  },
+  {
+    id: 'prob-solubility-ksp',
+    level: 'L1 · L2',
+    levelBadge: 'bg-indigo-500/20 text-indigo-300 border-indigo-500/30',
+    category: 'Équilibres Hétérogènes',
+    title: 'Produit de Solubilité (Ks) & Solubilité de AgCl',
+    statement:
+      'À 25 °C, le produit de solubilité du chlorure d\'argent AgCl(s) dans l\'eau pure est Ks = 1.77 × 10⁻¹⁰. Calculez la solubilité molaire s de AgCl en micromoles par litre (μmol/L).',
+    unit: 'μmol/L',
+    targetAnswer: 13.3,
+    tolerance: 0.3,
+    hint: 'AgCl(s) ⇌ Ag⁺(aq) + Cl⁻(aq). Ks = s × s = s². Donc s = √Ks. Multipliez par 10⁶ pour obtenir des μmol/L.',
+    stepByStep: [
+      {
+        step: '1. Équilibre de dissolution',
+        detail: 'AgCl(s) ⇌ Ag⁺(aq) + Cl⁻(aq). À saturation, [Ag⁺] = s et [Cl⁻] = s.',
+      },
+      {
+        step: '2. Expression du produit de solubilité',
+        detail: 'Ks = [Ag⁺] · [Cl⁻] = s²  ⟹  s = √(1.77 × 10⁻¹⁰) = 1.3304 × 10⁻⁵ mol/L.',
+      },
+      {
+        step: '3. Conversion en micromoles/L (μmol/L)',
+        detail: 's = 1.3304 × 10⁻⁵ × 10⁶ = 13.3 μmol/L.',
       },
     ],
   },
@@ -220,14 +337,44 @@ const EXAM_PROBLEMS = [
       },
     ],
   },
+  {
+    id: 'prob-arrhenius-ea',
+    level: 'L3 · Master',
+    levelBadge: 'bg-violet-500/20 text-violet-300 border-violet-500/30',
+    category: 'Cinétique Chimique',
+    title: 'Énergie d\'Activation d\'Arrhenius à Deux Températures',
+    statement:
+      'La constante de vitesse k d\'une réaction d\'isomérisation vaut k₁ = 0.012 s⁻¹ à T₁ = 300 K, et k₂ = 0.096 s⁻¹ à T₂ = 330 K. À l\'aide de la constante des gaz parfaits R = 8.314 J/(mol·K), déterminez l\'énergie d\'activation Ea (en kJ/mol) de cette réaction.',
+    unit: 'kJ/mol',
+    targetAnswer: 57.0,
+    tolerance: 1.5,
+    hint: 'Loi d\'Arrhenius sous forme intégrée : ln(k₂ / k₁) = (Ea / R) × (1/T₁ - 1/T₂).',
+    stepByStep: [
+      {
+        step: '1. Formule différentielle d\'Arrhenius',
+        detail: 'ln(k₂ / k₁) = (Ea / R) · [(T₂ - T₁) / (T₁ · T₂)]  ⟹  Ea = R · ln(k₂ / k₁) / (1/T₁ - 1/T₂)',
+      },
+      {
+        step: '2. Calcul des termes intermédiaires',
+        detail: 'ln(0.096 / 0.012) = ln(8) ≈ 2.0794. Terme thermique : 1/300 - 1/330 = (330 - 300) / 99000 = 30 / 99000 = 3.0303 × 10⁻⁴ K⁻¹.',
+      },
+      {
+        step: '3. Calcul de Ea en Joules puis kJ/mol',
+        detail: 'Ea = 8.314 × 2.0794 / 3.0303 × 10⁻⁴ = 57 047 J/mol = 57.05 kJ/mol.',
+      },
+    ],
+  },
 ];
 
 export default function ChemistryExamTrainerModule() {
   const [selectedLevelFilter, setSelectedLevelFilter] = useState('ALL'); // 'ALL' | 'L1-L2' | 'L3-Master'
+  const [selectedCategoryFilter, setSelectedCategoryFilter] = useState('ALL');
   const [activeProblemIndex, setActiveProblemIndex] = useState(0);
   const [userAnswerInput, setUserAnswerInput] = useState('');
   const [showHint, setShowHint] = useState(false);
   const [showSolution, setShowSolution] = useState(false);
+  const [showCheatsheet, setShowCheatsheet] = useState(false);
+  const [copiedProblem, setCopiedProblem] = useState(false);
   const [evaluationResult, setEvaluationResult] = useState(null); // { isCorrect: bool, diff: number } | null
 
   // Suivi de score de session
@@ -237,18 +384,28 @@ export default function ChemistryExamTrainerModule() {
     history: {},
   });
 
-  // Filtrage des problèmes
-  const filteredProblems = useMemo(() => {
-    if (selectedLevelFilter === 'L1-L2') {
-      return EXAM_PROBLEMS.filter((p) => p.level.includes('L1'));
-    }
-    if (selectedLevelFilter === 'L3-Master') {
-      return EXAM_PROBLEMS.filter((p) => p.level.includes('L3') || p.level.includes('Master'));
-    }
-    return EXAM_PROBLEMS;
-  }, [selectedLevelFilter]);
+  // Liste des catégories uniques
+  const allCategories = useMemo(() => {
+    const set = new Set(EXAM_PROBLEMS.map((p) => p.category));
+    return ['ALL', ...Array.from(set)];
+  }, []);
 
-  const currentProblem = filteredProblems[activeProblemIndex] || filteredProblems[0];
+  // Filtrage combiné niveau + catégorie
+  const filteredProblems = useMemo(() => {
+    return EXAM_PROBLEMS.filter((p) => {
+      const matchLevel =
+        selectedLevelFilter === 'ALL' ||
+        (selectedLevelFilter === 'L1-L2' && p.level.includes('L1')) ||
+        (selectedLevelFilter === 'L3-Master' && (p.level.includes('L3') || p.level.includes('Master')));
+
+      const matchCategory =
+        selectedCategoryFilter === 'ALL' || p.category === selectedCategoryFilter;
+
+      return matchLevel && matchCategory;
+    });
+  }, [selectedLevelFilter, selectedCategoryFilter]);
+
+  const currentProblem = filteredProblems[activeProblemIndex] || filteredProblems[0] || EXAM_PROBLEMS[0];
 
   // Gestion du changement de problème
   const handleSelectProblem = (index) => {
@@ -257,6 +414,16 @@ export default function ChemistryExamTrainerModule() {
     setShowHint(false);
     setShowSolution(false);
     setEvaluationResult(null);
+  };
+
+  // Sélection aléatoire d'un problème
+  const handleRandomProblem = () => {
+    if (filteredProblems.length <= 1) return;
+    let nextIdx;
+    do {
+      nextIdx = Math.floor(Math.random() * filteredProblems.length);
+    } while (nextIdx === activeProblemIndex);
+    handleSelectProblem(nextIdx);
   };
 
   // Validation de la réponse de l'étudiant
@@ -292,6 +459,40 @@ export default function ChemistryExamTrainerModule() {
     }
   };
 
+  // Copier l'énoncé et la solution dans un texte structuré propre
+  const handleCopyProblemText = async () => {
+    const text = `${currentProblem.title.toUpperCase()} (${currentProblem.level})
+${'='.repeat(currentProblem.title.length + 10)}
+Discipline : ${currentProblem.category}
+Date : ${new Date().toLocaleDateString('fr-FR')}
+
+■ ÉNONCÉ DE L'EXERCICE :
+------------------------
+${currentProblem.statement}
+
+■ INDICE MÉTHODOLOGIQUE :
+-------------------------
+${currentProblem.hint}
+
+■ RÉSOLUTION DÉTAILLÉE PAS À PAS :
+----------------------------------
+${currentProblem.stepByStep.map((s) => `• ${s.step} :\n  ${s.detail}`).join('\n\n')}
+
+VALEUR CIBLE FINALE : ${currentProblem.targetAnswer} ${currentProblem.unit} (Tolérance : ±${currentProblem.tolerance} ${currentProblem.unit})
+`;
+
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      }
+      setCopiedProblem(true);
+      setTimeout(() => setCopiedProblem(false), 2000);
+    } catch {
+      setCopiedProblem(true);
+      setTimeout(() => setCopiedProblem(false), 2000);
+    }
+  };
+
   const successRate =
     scoreStats.answeredCount > 0
       ? Math.round((scoreStats.correctCount / scoreStats.answeredCount) * 100)
@@ -318,91 +519,162 @@ export default function ChemistryExamTrainerModule() {
           </div>
         </div>
 
-        {/* Compteur de Score & Progression */}
-        <div className="flex items-center gap-3 p-2 rounded-2xl bg-slate-950/80 border border-slate-800 font-mono text-xs">
-          <div className="flex items-center gap-2 px-3 py-1 rounded-xl bg-slate-900 border border-slate-800">
-            <Trophy size={15} className="text-amber-400" />
-            <span className="text-slate-400">Réussite :</span>
-            <strong className="text-white">{scoreStats.correctCount} / {scoreStats.answeredCount}</strong>
+        {/* Actions Rapides & Compteur de Score */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Bouton Formulaire / Aide-Mémoire */}
+          <button
+            type="button"
+            onClick={() => setShowCheatsheet(!showCheatsheet)}
+            className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center gap-1.5 transition-all ${
+              showCheatsheet
+                ? 'bg-violet-600 border-violet-500 text-white'
+                : 'bg-slate-950 border-slate-800 text-slate-300 hover:text-white hover:border-slate-700'
+            }`}
+          >
+            <Bookmark size={14} className={showCheatsheet ? 'text-white' : 'text-violet-400'} />
+            <span>Formules Clés</span>
+          </button>
+
+          {/* Bouton Problème Aléatoire */}
+          <button
+            type="button"
+            onClick={handleRandomProblem}
+            className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 transition-all"
+            title="Tirer un problème au sort"
+          >
+            <Shuffle size={14} className="text-cyan-400" />
+            <span>Aléatoire</span>
+          </button>
+
+          {/* Compteur de Score */}
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 font-mono text-xs">
+            <Trophy size={14} className="text-amber-400" />
+            <span className="text-slate-400">Score :</span>
+            <strong className="text-white">{scoreStats.correctCount}/{scoreStats.answeredCount}</strong>
             <span className="text-emerald-400 font-bold">({successRate}%)</span>
-          </div>
 
-          <button
-            type="button"
-            onClick={() => {
-              setScoreStats({ answeredCount: 0, correctCount: 0, history: {} });
-              setEvaluationResult(null);
-            }}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-            title="Réinitialiser les scores"
-          >
-            <RotateCcw size={14} />
-          </button>
+            <button
+              type="button"
+              onClick={() => {
+                setScoreStats({ answeredCount: 0, correctCount: 0, history: {} });
+                setEvaluationResult(null);
+              }}
+              className="p-1 rounded text-slate-500 hover:text-white hover:bg-slate-800 transition-colors ml-1"
+              title="Réinitialiser les scores"
+            >
+              <RotateCcw size={12} />
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Barre de Filtre par Niveau Académique */}
+      {/* Tiroir d'Aide-Mémoire Formules Fondamentales */}
+      {showCheatsheet && (
+        <div className="p-5 rounded-2xl bg-gradient-to-r from-violet-950/40 via-slate-900 to-indigo-950/40 border border-violet-500/30 backdrop-blur-xl animate-in fade-in duration-200 space-y-3">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+            <div className="flex items-center gap-2 text-xs font-bold text-violet-300 uppercase tracking-wider">
+              <Sparkles size={14} />
+              <span>Aide-Mémoire des Formules Fondamentales (Examen & Concours)</span>
+            </div>
+            <span className="text-[11px] font-mono text-slate-400">Rappels Express</span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 text-xs font-mono">
+            <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
+              <div className="text-indigo-400 font-bold font-sans">Solutions & Titrages</div>
+              <div className="text-white text-xs">m = C · V · M</div>
+              <div className="text-slate-400 text-[11px]">C₁V₁ = C₂V₂</div>
+              <div className="text-slate-400 text-[11px]">C_A·V_A = C_B·V_eq</div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
+              <div className="text-cyan-400 font-bold font-sans">pH & Henderson</div>
+              <div className="text-white text-xs">pH = pKa + log([A⁻]/[HA])</div>
+              <div className="text-slate-400 text-[11px]">[H₃O⁺] = 10^(-pH)</div>
+              <div className="text-slate-400 text-[11px]">Ke = 10⁻¹⁴ à 25 °C</div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
+              <div className="text-rose-400 font-bold font-sans">Thermodynamique Gibbs</div>
+              <div className="text-white text-xs">ΔG°(T) = ΔH° - T·ΔS°</div>
+              <div className="text-slate-400 text-[11px]">T_inv = ΔH° / ΔS°</div>
+              <div className="text-slate-400 text-[11px]">ΔG° = -RT·ln(K_eq)</div>
+            </div>
+
+            <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
+              <div className="text-emerald-400 font-bold font-sans">Électrochimie & Nernst</div>
+              <div className="text-white text-xs">E = E° - (0.0592/n)·log(Q)</div>
+              <div className="text-slate-400 text-[11px]">ΔG° = -n·F·E°_cell</div>
+              <div className="text-slate-400 text-[11px]">F = 96 485 C/mol</div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Barres de Filtres Combinés : Niveau & Catégorie */}
       <div className="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-2xl bg-slate-900/50 border border-slate-800">
-        <div className="flex items-center gap-2 text-xs text-slate-400">
-          <Filter size={14} className="text-violet-400" />
-          <span className="font-medium">Niveau académique cible :</span>
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="flex items-center gap-1.5 text-xs text-slate-400 mr-1">
+            <Filter size={14} className="text-violet-400" />
+            <span className="font-medium">Niveau :</span>
+          </div>
+
+          <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-950 border border-slate-800 text-xs font-semibold">
+            {[
+              { id: 'ALL', label: 'Tous Niveaux' },
+              { id: 'L1-L2', label: 'L1 · L2 Fondamental' },
+              { id: 'L3-Master', label: 'L3 · Master Avancé' },
+            ].map((lvl) => (
+              <button
+                key={lvl.id}
+                type="button"
+                onClick={() => {
+                  setSelectedLevelFilter(lvl.id);
+                  setActiveProblemIndex(0);
+                }}
+                className={`px-3 py-1 rounded-lg transition-all ${
+                  selectedLevelFilter === lvl.id
+                    ? 'bg-violet-600 text-white shadow-sm'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                {lvl.label}
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-950 border border-slate-800 text-xs font-semibold">
-          <button
-            type="button"
-            onClick={() => {
-              setSelectedLevelFilter('ALL');
+        {/* Filtre par Catégorie */}
+        <div className="flex items-center gap-2 text-xs">
+          <span className="text-slate-400 hidden sm:inline">Discipline :</span>
+          <select
+            value={selectedCategoryFilter}
+            onChange={(e) => {
+              setSelectedCategoryFilter(e.target.value);
               setActiveProblemIndex(0);
             }}
-            className={`px-3 py-1 rounded-lg transition-all ${
-              selectedLevelFilter === 'ALL'
-                ? 'bg-violet-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-white'
-            }`}
+            className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-white text-xs font-semibold focus:border-violet-500 focus:outline-none"
           >
-            Tous ({EXAM_PROBLEMS.length})
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setSelectedLevelFilter('L1-L2');
-              setActiveProblemIndex(0);
-            }}
-            className={`px-3 py-1 rounded-lg transition-all ${
-              selectedLevelFilter === 'L1-L2'
-                ? 'bg-indigo-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            L1 · L2 Fondamentaux
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setSelectedLevelFilter('L3-Master');
-              setActiveProblemIndex(0);
-            }}
-            className={`px-3 py-1 rounded-lg transition-all ${
-              selectedLevelFilter === 'L3-Master'
-                ? 'bg-violet-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-white'
-            }`}
-          >
-            L3 · Master Avancé
-          </button>
+            <option value="ALL">Toutes les disciplines ({EXAM_PROBLEMS.length})</option>
+            {allCategories.filter((c) => c !== 'ALL').map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
 
-      {/* Corps Principal : Liste des Problèmes + Panneau d'Exécution */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* Colonne Gauche : Liste des Problèmes */}
-        <div className="lg:col-span-4 space-y-2">
-          <div className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1 font-mono">
-            Série d'Exercices Disponibles
+      {/* Grille Principale : Liste des Problèmes à Gauche + Zone Active à Droite */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Colonne Gauche : Liste des Exercices */}
+        <div className="lg:col-span-4 space-y-3">
+          <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-slate-400 px-1 font-mono">
+            <span>Série d'Exercices ({filteredProblems.length})</span>
+            <span className="text-[10px] text-violet-400">Clic pour sélectionner</span>
           </div>
 
-          <div className="space-y-2 max-h-[600px] overflow-y-auto pr-1">
+          <div className="space-y-2 max-h-[620px] overflow-y-auto pr-1">
             {filteredProblems.map((prob, idx) => {
               const isSelected = idx === activeProblemIndex;
               const status = scoreStats.history[prob.id];
@@ -453,7 +725,7 @@ export default function ChemistryExamTrainerModule() {
         <div className="lg:col-span-8 space-y-5">
           {/* Carte de l'Énoncé du Problème */}
           <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800/90 shadow-2xl backdrop-blur-xl space-y-5">
-            {/* Header Problème */}
+            {/* Header Problème avec Action Copier */}
             <div className="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-3">
               <div className="space-y-0.5">
                 <div className="flex items-center gap-2">
@@ -471,8 +743,29 @@ export default function ChemistryExamTrainerModule() {
                 </h3>
               </div>
 
-              <div className="text-xs text-slate-400 font-mono">
-                Exercice {activeProblemIndex + 1} / {filteredProblems.length}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleCopyProblemText}
+                  className="px-2.5 py-1.5 rounded-xl bg-slate-950 border border-slate-800 hover:border-slate-700 text-slate-400 hover:text-white text-xs font-medium flex items-center gap-1.5 transition-all"
+                  title="Copier l'exercice & sa correction"
+                >
+                  {copiedProblem ? (
+                    <>
+                      <Check size={13} className="text-emerald-400" />
+                      <span className="text-emerald-400 font-bold">Copié !</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={13} />
+                      <span>Copier</span>
+                    </>
+                  )}
+                </button>
+
+                <div className="text-xs text-slate-400 font-mono">
+                  {activeProblemIndex + 1} / {filteredProblems.length}
+                </div>
               </div>
             </div>
 
@@ -502,9 +795,14 @@ export default function ChemistryExamTrainerModule() {
 
             {/* Formulaire de Saisie & Validation */}
             <form onSubmit={handleValidateAnswer} className="space-y-3 pt-2">
-              <label className="block text-xs font-semibold text-slate-300">
-                Votre Réponse Numérique Calculée :
-              </label>
+              <div className="flex items-center justify-between">
+                <label className="block text-xs font-semibold text-slate-300">
+                  Votre Réponse Numérique Calculée :
+                </label>
+                <span className="text-[11px] text-slate-500 font-mono">
+                  Tolérance acceptée : ±{currentProblem.tolerance} {currentProblem.unit}
+                </span>
+              </div>
 
               <div className="flex flex-col sm:flex-row gap-3">
                 <div className="relative flex-1">
@@ -562,7 +860,7 @@ export default function ChemistryExamTrainerModule() {
 
                 <p className="text-[11px] text-slate-300">
                   Votre valeur : <strong className="font-mono">{evaluationResult.submitted} {currentProblem.unit}</strong>{' '}
-                  (Écart : <span className="font-mono">{evaluationResult.diff}</span>, tolérance acceptée : ±{currentProblem.tolerance}).
+                  (Écart : <span className="font-mono">{evaluationResult.diff}</span>, tolérance acceptée : ±{currentProblem.tolerance} {currentProblem.unit}).
                 </p>
               </div>
             )}
@@ -596,14 +894,23 @@ export default function ChemistryExamTrainerModule() {
               </div>
 
               {/* Bouton pour passer à l'exercice suivant */}
-              <div className="pt-2 flex justify-end">
+              <div className="pt-2 flex justify-between items-center">
+                <button
+                  type="button"
+                  onClick={handleCopyProblemText}
+                  className="px-3.5 py-2 rounded-xl bg-slate-950 hover:bg-slate-800 text-slate-300 text-xs font-semibold flex items-center gap-2 transition-all border border-slate-800"
+                >
+                  <FileText size={14} className="text-violet-400" />
+                  <span>{copiedProblem ? 'Copié dans le presse-papier !' : 'Copier l\'exercice complet'}</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => {
                     const nextIdx = (activeProblemIndex + 1) % filteredProblems.length;
                     handleSelectProblem(nextIdx);
                   }}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-white text-xs font-semibold flex items-center gap-2 transition-all border border-slate-700"
+                  className="px-4 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-semibold flex items-center gap-2 transition-all shadow-lg shadow-violet-900/30"
                 >
                   <span>Problème Suivant</span>
                   <ArrowRight size={14} />

@@ -2,8 +2,11 @@ import { useState, useMemo } from 'react';
 import {
   Zap,
   BatteryCharging,
+  FileText,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { REDOX_COUPLES } from './chemistryData';
+import TPReportModal from './TPReportModal';
 
 export default function ElectrochemistryModule() {
   // Sélection des deux demi-piles (Par défaut Daniell : Zn/Zn2+ à l'anode et Cu2+/Cu à la cathode)
@@ -14,13 +17,48 @@ export default function ElectrochemistryModule() {
   const [cAnode, setCAnode] = useState(0.1); // [Zn2+]
   const [cCathode, setCCathode] = useState(1.0); // [Cu2+]
 
+  // Modal Compte-Rendu TP
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
+
+  // Mode Couples Personnalisés / Constantes Custom (TD & TP)
+  const [isCustomCell, setIsCustomCell] = useState(false);
+  const [customAnodeName, setCustomAnodeName] = useState('Couple Anodique Custom');
+  const [customAnodeFormula, setCustomAnodeFormula] = useState('M²⁺/M');
+  const [customAnodeE0, setCustomAnodeE0] = useState(-0.763);
+  const [customAnodeN, setCustomAnodeN] = useState(2);
+
+  const [customCathodeName, setCustomCathodeName] = useState('Couple Cathodique Custom');
+  const [customCathodeFormula, setCustomCathodeFormula] = useState('X²⁺/X');
+  const [customCathodeE0, setCustomCathodeE0] = useState(0.337);
+  const [customCathodeN, setCustomCathodeN] = useState(2);
+
   const anodeCouple = useMemo(() => {
+    if (isCustomCell) {
+      return {
+        id: 'custom_anode',
+        name: customAnodeName,
+        formula: customAnodeFormula,
+        e0: customAnodeE0,
+        n: Math.max(1, customAnodeN),
+        type: 'anode',
+      };
+    }
     return REDOX_COUPLES.find((c) => c.id === anodeCoupleId) || REDOX_COUPLES[13];
-  }, [anodeCoupleId]);
+  }, [isCustomCell, customAnodeName, customAnodeFormula, customAnodeE0, customAnodeN, anodeCoupleId]);
 
   const cathodeCouple = useMemo(() => {
+    if (isCustomCell) {
+      return {
+        id: 'custom_cathode',
+        name: customCathodeName,
+        formula: customCathodeFormula,
+        e0: customCathodeE0,
+        n: Math.max(1, customCathodeN),
+        type: 'cathode',
+      };
+    }
     return REDOX_COUPLES.find((c) => c.id === cathodeCoupleId) || REDOX_COUPLES[7];
-  }, [cathodeCoupleId]);
+  }, [isCustomCell, customCathodeName, customCathodeFormula, customCathodeE0, customCathodeN, cathodeCoupleId]);
 
   const F = 96485; // Constante de Faraday en C/mol
 
@@ -53,6 +91,60 @@ export default function ElectrochemistryModule() {
     };
   }, [anodeCouple, cathodeCouple, cAnode, cCathode]);
 
+  // Génération dynamique du compte-rendu de TP au format Markdown
+  const generatedReport = useMemo(() => {
+    const spontaneityText = electroAnalysis.isSpontaneous
+      ? '✅ **Spontané (Mode Pile / Générateur)** : $\\Delta E > 0$ et $\\Delta G^\\circ < 0$. La pile fournit spontanément du travail électrique au circuit extérieur.'
+      : '⚠️ **Non-spontané (Mode Électrolyseur / Récepteur)** : $\\Delta E < 0$. La réaction inverse est thermodynamiquement favorisée, une source de tension extérieure est requise.';
+
+    return `# COMPTE-RENDU DE TRAVAUX PRATIQUES : ÉLECTROCHIMIE & PILES GALVANIQUES
+**Plateforme Académique CampusHub · Pôle Sciences Chimiques (L3-Master)**
+**Unité d'Enseignement :** CHM301 / CHM401 · Électrochimie Fondamentale & Cinétique Électrochimique
+**Date de manipulation :** ${new Date().toLocaleDateString('fr-FR')}
+
+---
+
+## 1. Description du Système Électrochimique
+- **Demi-pile Anodique (Oxydation à l'électrode négative) :**
+  - Couple Redox : **${anodeCouple.formula}** (${anodeCouple.name})
+  - Potentiel standard $E^\\circ(\\text{Anode}) = ${anodeCouple.e0 > 0 ? `+${anodeCouple.e0}` : anodeCouple.e0}\\text{ V}$ vs ESH
+  - Concentration analytique $[\\text{Red/Anode}] = ${cAnode}\\text{ mol/L}$
+
+- **Demi-pile Cathodique (Réduction à l'électrode positive) :**
+  - Couple Redox : **${cathodeCouple.formula}** (${cathodeCouple.name})
+  - Potentiel standard $E^\\circ(\\text{Cathode}) = ${cathodeCouple.e0 > 0 ? `+${cathodeCouple.e0}` : cathodeCouple.e0}\\text{ V}$ vs ESH
+  - Concentration analytique $[\\text{Ox/Cathode}] = ${cCathode}\\text{ mol/L}$
+
+- **Nombre d'électrons échangés ($n$) :** **${electroAnalysis.n}**
+- **Schéma conventionnel de la cellule :**
+  $$(-) \\text{ Anode} \\mid [${cAnode}\\text{ M}] \\parallel [${cCathode}\\text{ M}] \\mid \\text{Cathode} (+)$$
+
+## 2. Formulation Théorique & Équation de Nernst
+1. **Force électromotrice standard de la cellule ($E^\\circ_{\\text{cell}}$) :**
+   $$E^\\circ_{\\text{cell}} = E^\\circ(\\text{Cathode}) - E^\\circ(\\text{Anode}) = ${cathodeCouple.e0} - (${anodeCouple.e0}) = ${electroAnalysis.e0Cell > 0 ? `+${electroAnalysis.e0Cell}` : electroAnalysis.e0Cell}\\text{ V}$$
+
+2. **Quotient réactionnel instantané ($Q$) :**
+   $$Q = \\frac{[\\text{Anode}]}{[\\text{Cathode}]} = \\frac{${cAnode}}{${cCathode}} = ${electroAnalysis.qRatio}$$
+
+3. **Équation de Nernst à 25 °C ($T = 298.15\\text{ K}$) :**
+   $$E = E^\\circ_{\\text{cell}} - \\frac{0.0592}{n} \\log_{10}(Q)$$
+   $$E = ${electroAnalysis.e0Cell} - \\frac{0.0592}{${electroAnalysis.n}} \\times \\log_{10}(${electroAnalysis.qRatio}) = \\mathbf{${electroAnalysis.deltaE > 0 ? `+${electroAnalysis.deltaE}` : electroAnalysis.deltaE}\\text{ V}}$$
+
+## 3. Bilan Thermodynamique & Spontanéité
+- **Variation d'enthalpie libre standard de Gibbs ($\\Delta G^\\circ$) :**
+  $$\\Delta G^\\circ = -n \\cdot F \\cdot E^\\circ_{\\text{cell}} = -(${electroAnalysis.n}) \\times 96485 \\times (${electroAnalysis.e0Cell}) = \\mathbf{${electroAnalysis.deltaG0_kJ}\\text{ kJ/mol}}$$
+- **Diagnostic de fonctionnement :**
+  ${spontaneityText}
+
+## 4. Protocole Expérimental de Laboratoire
+1. Préparer deux béchers de 100 mL propres et secs contenant respectivement les solutions ioniques préparées.
+2. Décaper soigneusement les lames métalliques (électrodes) à l'aide de papier émeri fin, rincer à l'eau distillée et essuyer.
+3. Imbiber un pont électrolytique en tube U avec une solution gélifiée d'agar-agar saturée en $\\text{KNO}_3$ ($1\\text{ M}$) pour assurer la fermeture du circuit sans mélange hydrodynamique des compartiments.
+4. Raccorder les électrodes aux bornes d'un multimètre numérique configuré en voltmètre continu (impédance d'entrée $> 10\\text{ M}\\Omega$ pour éviter tout débit de courant perturbateur).
+5. Relever la valeur stabilisée de la tension $E_{\\text{mesurée}}$ et comparer avec la f.é.m. théorique de Nernst $E = ${electroAnalysis.deltaE}\\text{ V}$.
+`;
+  }, [anodeCouple, cathodeCouple, cAnode, cCathode, electroAnalysis]);
+
   return (
     <div className="space-y-6 text-left">
       {/* Header */}
@@ -74,16 +166,28 @@ export default function ElectrochemistryModule() {
           </div>
         </div>
 
-        {/* Badge f.e.m. en direct */}
-        <div className="px-4 py-2 rounded-xl bg-slate-950 border border-indigo-500/40 text-xs font-mono flex items-center gap-2">
-          <span className="text-slate-400">f.é.m. en direct (E) :</span>
-          <span
-            className={`font-bold text-sm ${
-              electroAnalysis.isSpontaneous ? 'text-emerald-400' : 'text-rose-400'
-            }`}
+        {/* Actions & Badge f.e.m. en direct */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="px-4 py-2 rounded-xl bg-slate-950 border border-indigo-500/40 text-xs font-mono flex items-center gap-2">
+            <span className="text-slate-400">f.é.m. en direct (E) :</span>
+            <span
+              className={`font-bold text-sm ${
+                electroAnalysis.isSpontaneous ? 'text-emerald-400' : 'text-rose-400'
+              }`}
+            >
+              {electroAnalysis.deltaE > 0 ? `+${electroAnalysis.deltaE}` : electroAnalysis.deltaE} V
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsReportModalOpen(true)}
+            className="px-3.5 py-2 rounded-xl bg-violet-600/20 hover:bg-violet-600/30 text-violet-300 border border-violet-500/40 text-xs font-bold flex items-center gap-2 transition-all shadow-lg shadow-violet-950/30 hover:shadow-violet-900/40"
+            title="Consulter le compte-rendu de laboratoire"
           >
-            {electroAnalysis.deltaE > 0 ? `+${electroAnalysis.deltaE}` : electroAnalysis.deltaE} V
-          </span>
+            <FileText size={15} className="text-violet-400" />
+            <span>Compte-Rendu TP</span>
+          </button>
         </div>
       </div>
 
@@ -171,6 +275,139 @@ export default function ElectrochemistryModule() {
             </text>
           </svg>
         </div>
+      </div>
+
+      {/* Mode Couples Redox Personnalisés / Constantes Custom (TD & TP) */}
+      <div className="p-4 rounded-2xl bg-slate-900/70 border border-slate-800 backdrop-blur-xl space-y-3">
+        <div className="flex items-center justify-between">
+          <label className="flex items-center gap-2.5 cursor-pointer text-xs font-semibold text-slate-200">
+            <input
+              type="checkbox"
+              checked={isCustomCell}
+              onChange={(e) => setIsCustomCell(e.target.checked)}
+              className="w-4 h-4 rounded border-slate-700 text-violet-600 focus:ring-violet-500 bg-slate-950 cursor-pointer"
+            />
+            <span className="flex items-center gap-1.5">
+              <SlidersHorizontal size={14} className="text-violet-400" />
+              <span>Mode Couples Redox & Constantes Custom (TD & TP)</span>
+            </span>
+          </label>
+          {isCustomCell && (
+            <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-violet-500/20 text-violet-300 border border-violet-500/30">
+              Paramètres Libres Actifs
+            </span>
+          )}
+        </div>
+
+        {isCustomCell && (
+          <div className="pt-3 border-t border-slate-800 grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in duration-150">
+            {/* Custom Anode */}
+            <div className="p-3.5 rounded-xl bg-slate-950/80 border border-rose-500/30 space-y-2.5 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-rose-400 text-[11px] uppercase tracking-wider">
+                  Demi-Pile Anodique Custom
+                </span>
+                <span className="text-[10px] font-mono text-slate-400">Pôle Négatif (-)</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="text-[10px] text-slate-400 block mb-1">Formule (Ox/Red)</label>
+                  <input
+                    type="text"
+                    value={customAnodeFormula}
+                    onChange={(e) => setCustomAnodeFormula(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white font-mono text-xs focus:border-rose-500 focus:outline-none"
+                    placeholder="Zn²⁺/Zn"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-400 block mb-1">Désignation Espèce</label>
+                  <input
+                    type="text"
+                    value={customAnodeName}
+                    onChange={(e) => setCustomAnodeName(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs focus:border-rose-500 focus:outline-none"
+                    placeholder="Zinc métal"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-400 block mb-1">E° standard (V)</label>
+                  <input
+                    type="number"
+                    step="0.001"
+                    value={customAnodeE0}
+                    onChange={(e) => setCustomAnodeE0(parseFloat(e.target.value) || 0)}
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-rose-500/50 text-white font-mono text-xs focus:border-rose-400 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-400 block mb-1">Électrons n</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="6"
+                    value={customAnodeN}
+                    onChange={(e) => setCustomAnodeN(parseInt(e.target.value, 10) || 1)}
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white font-mono text-xs focus:border-rose-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Custom Cathode */}
+            <div className="p-3.5 rounded-xl bg-slate-950/80 border border-cyan-500/30 space-y-2.5 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="font-bold text-cyan-400 text-[11px] uppercase tracking-wider">
+                  Demi-Pile Cathodique Custom
+                </span>
+                <span className="text-[10px] font-mono text-slate-400">Pôle Positif (+)</span>
+              </div>
+              <div className="grid grid-cols-2 gap-2.5">
+                <div>
+                  <label className="text-[10px] text-slate-400 block mb-1">Formule (Ox/Red)</label>
+                  <input
+                    type="text"
+                    value={customCathodeFormula}
+                    onChange={(e) => setCustomCathodeFormula(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white font-mono text-xs focus:border-cyan-500 focus:outline-none"
+                    placeholder="Cu²⁺/Cu"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-400 block mb-1">Désignation Espèce</label>
+                  <input
+                    type="text"
+                    value={customCathodeName}
+                    onChange={(e) => setCustomCathodeName(e.target.value)}
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white text-xs focus:border-cyan-500 focus:outline-none"
+                    placeholder="Cuivre métal"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-400 block mb-1">E° standard (V)</label>
+                  <input
+                    type="number"
+                    step="0.001"
+                    value={customCathodeE0}
+                    onChange={(e) => setCustomCathodeE0(parseFloat(e.target.value) || 0)}
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-cyan-500/50 text-white font-mono text-xs focus:border-cyan-400 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="text-[10px] text-slate-400 block mb-1">Électrons n</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="6"
+                    value={customCathodeN}
+                    onChange={(e) => setCustomCathodeN(parseInt(e.target.value, 10) || 1)}
+                    className="w-full px-2.5 py-1.5 rounded-lg bg-slate-900 border border-slate-700 text-white font-mono text-xs focus:border-cyan-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Paramètres des Demi-Piles & Équation de Nernst */}
@@ -319,6 +556,16 @@ export default function ElectrochemistryModule() {
           </div>
         </div>
       </div>
+
+      {/* Modal d'Exportation de Compte-Rendu de TP */}
+      <TPReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        title="Compte-Rendu de Travaux Pratiques : Électrochimie & Nernst"
+        moduleName="Piles Galvaniques & Potentiels Redox"
+        academicLevel="Licence 3 · Master 1"
+        reportContent={generatedReport}
+      />
     </div>
   );
 }

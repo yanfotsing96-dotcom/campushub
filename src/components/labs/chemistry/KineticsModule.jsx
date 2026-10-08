@@ -2,11 +2,14 @@ import { useState, useMemo, useCallback } from 'react';
 import {
   Activity,
   Zap,
+  FileText,
 } from 'lucide-react';
 import { KINETIC_PRESETS } from './chemistryData';
+import TPReportModal from './TPReportModal';
 
 export default function KineticsModule() {
   const [selectedPresetId, setSelectedPresetId] = useState(KINETIC_PRESETS[0].id);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   const activePreset = useMemo(() => {
     return KINETIC_PRESETS.find((p) => p.id === selectedPresetId) || KINETIC_PRESETS[0];
@@ -95,6 +98,39 @@ export default function KineticsModule() {
     return points;
   }, [maxTime, getConcentrationAtTime]);
 
+  // Génération du compte-rendu de TP Markdown
+  const generatedReport = useMemo(() => {
+    return `# COMPTE-RENDU DE TRAVAUX PRATIQUES : CINÉTIQUE CHIMIQUE
+**Plateforme Académique CampusHub · Pôle Sciences Chimiques (L3-Master)**
+**Date de manipulation :** ${new Date().toLocaleDateString('fr-FR')}
+
+---
+
+## 1. Système Réactionnel Étudié
+- **Réaction modèle :** **${activePreset.name}**
+- **Équation stœchiométrique :** \`${activePreset.formula}\`
+- **Ordre global de la réaction ($n$) :** **Ordre ${order}**
+- **Présence d'un catalyseur :** ${hasCatalyst ? `✅ Oui (Énergie d'activation abaissée à ${activePreset.catalystEa} kJ/mol)` : `❌ Non (Ea initiale = ${activePreset.ea} kJ/mol)`}
+
+## 2. Paramètres Cinétiques Initiaux
+- Concentration initiale en réactif $[A]_0$ : **${initialA0} mol/L**
+- Température du milieu réactionnel ($T$) : **${temperatureK} K** (${(temperatureK - 273.15).toFixed(1)} °C)
+- Énergie d'activation effective ($E_a$) : **${effectiveEa} kJ/mol**
+- Constante de vitesse calculée ($k$) : **${kRate} ${order === 0 ? 'mol/(L·s)' : order === 1 ? 's⁻¹' : 'L/(mol·s)'}**
+
+## 3. Résultats & Analyse du Temps de Demi-Vie
+- Temps de demi-vie théorique ($t_{1/2}$) : **${halfLifeAnalysis} secondes**
+- À l'instant d'observation $t = ${currentTimeSec}\\text{ s}$ :
+  - Concentration résiduelle $[A](t)$ : **${currentConcentration} mol/L** (${(((initialA0 - currentConcentration) / initialA0) * 100).toFixed(1)} % de conversion)
+  - Vitesse instantanée de disparition ($v$) : **${instantaneousRate.toExponential(3)} mol/(L·s)**
+
+## 4. Loi Différentielle & Forme Intégrée
+${order === 0 ? '- Ordre 0 : $[A](t) = [A]_0 - k \\cdot t$ (Décroissance linéaire, vitesse constante indép. de la concentration).' : ''}
+${order === 1 ? '- Ordre 1 : $[A](t) = [A]_0 \\cdot e^{-kt}$ et $t_{1/2} = \\frac{\\ln(2)}{k}$ (Le temps de demi-vie est strictement indépendant de la concentration initiale).' : ''}
+${order === 2 ? '- Ordre 2 : $\\frac{1}{[A](t)} = \\frac{1}{[A]_0} + k \\cdot t$ et $t_{1/2} = \\frac{1}{k \\cdot [A]_0}$ (Le temps de demi-vie est inversement proportionnel à la concentration initiale).' : ''}
+`;
+  }, [activePreset, order, hasCatalyst, initialA0, temperatureK, effectiveEa, kRate, halfLifeAnalysis, currentTimeSec, currentConcentration, instantaneousRate]);
+
   return (
     <div className="space-y-6 text-left">
       {/* Header */}
@@ -116,22 +152,34 @@ export default function KineticsModule() {
           </div>
         </div>
 
-        {/* Sélecteur d'Ordre de Réaction */}
-        <div className="flex items-center p-1 rounded-xl bg-slate-950 border border-slate-800">
-          {[0, 1, 2].map((ord) => (
-            <button
-              key={ord}
-              type="button"
-              onClick={() => setOrder(ord)}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold font-mono transition-all ${
-                order === ord
-                  ? 'bg-violet-600 text-white shadow-md'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Ordre {ord}
-            </button>
-          ))}
+        {/* Sélecteur d'Ordre de Réaction & Bouton Export TP */}
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center p-1 rounded-xl bg-slate-950 border border-slate-800">
+            {[0, 1, 2].map((ord) => (
+              <button
+                key={ord}
+                type="button"
+                onClick={() => setOrder(ord)}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold font-mono transition-all ${
+                  order === ord
+                    ? 'bg-violet-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-white'
+                }`}
+              >
+                Ordre {ord}
+              </button>
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsReportModalOpen(true)}
+            className="px-3.5 py-2 rounded-xl bg-violet-600/20 hover:bg-violet-600/30 text-violet-300 border border-violet-500/40 text-xs font-bold flex items-center gap-2 transition-all shadow-lg shadow-violet-950/30 hover:shadow-violet-900/40"
+            title="Consulter le compte-rendu de laboratoire"
+          >
+            <FileText size={15} className="text-violet-400" />
+            <span>Compte-Rendu TP</span>
+          </button>
         </div>
       </div>
 
@@ -367,6 +415,16 @@ export default function KineticsModule() {
           </div>
         </div>
       </div>
+
+      {/* Modal d'Exportation de Compte-Rendu de TP */}
+      <TPReportModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        title="Compte-Rendu de Travaux Pratiques : Cinétique Chimique"
+        moduleName="Cinétique Chimique & Lois de Vitesse"
+        academicLevel="Licence 3 · Master 1"
+        reportContent={generatedReport}
+      />
     </div>
   );
 }

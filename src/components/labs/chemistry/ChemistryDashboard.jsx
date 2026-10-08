@@ -9,6 +9,9 @@ import {
   Sparkles,
   BookOpen,
   Atom,
+  GraduationCap,
+  FileText,
+  SlidersHorizontal,
 } from 'lucide-react';
 
 export default function ChemistryDashboard({ onSelectModule }) {
@@ -130,6 +133,83 @@ export default function ChemistryDashboard({ onSelectModule }) {
               <div className="text-xs font-semibold text-white mt-0.5">Interactif & Temps Réel</div>
               <div className="text-[10px] text-slate-400">Standard IUPAC / NIST</div>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bannière Interactive : Mode Entraînement / Concours & Outils Pratiques */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Carte Entraînement Examen */}
+        <div
+          onClick={() => onSelectModule('exam_trainer')}
+          className="group cursor-pointer rounded-2xl bg-gradient-to-br from-violet-950/40 via-slate-900 to-indigo-950/40 border border-violet-500/40 hover:border-violet-400 p-5 backdrop-blur-xl shadow-lg transition-all duration-300 hover:-translate-y-1 hover:shadow-violet-900/20 flex flex-col justify-between"
+        >
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                Mode Quiz & Examen
+              </span>
+              <div className="w-8 h-8 rounded-lg bg-violet-600/20 border border-violet-500/30 flex items-center justify-center text-violet-300 group-hover:scale-110 transition-transform">
+                <GraduationCap size={16} />
+              </div>
+            </div>
+            <h3 className="text-base font-bold text-white group-hover:text-violet-200 transition-colors">
+              Problèmes Types d'Examen
+            </h3>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Auto-évaluation interactive avec calcul de concentrations inconnues, réactifs limitants, pH tampons et Nernst. Corrigés pas à pas détaillés.
+            </p>
+          </div>
+
+          <div className="pt-3 mt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-semibold text-violet-300 group-hover:text-violet-200">
+            <span>Démarrer l'entraînement</span>
+            <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+          </div>
+        </div>
+
+        {/* Carte Export Compte-Rendu TP */}
+        <div className="rounded-2xl bg-slate-900/60 border border-slate-800/80 p-5 backdrop-blur-xl flex flex-col justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                Génération Automatisée
+              </span>
+              <div className="w-8 h-8 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-300">
+                <FileText size={16} />
+              </div>
+            </div>
+            <h3 className="text-base font-bold text-white">
+              Export Compte-Rendu TP
+            </h3>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Consultez et téléchargez un rapport de TP structuré et mis en page depuis chaque module (Molarité, Équilibreur, pH, Électrochimie).
+            </p>
+          </div>
+          <div className="pt-3 mt-3 border-t border-slate-800/80 text-[11px] text-slate-400 font-mono">
+            Rendu visuel clair & export PDF / Texte
+          </div>
+        </div>
+
+        {/* Carte Valeurs Custom TD/TP */}
+        <div className="rounded-2xl bg-slate-900/60 border border-slate-800/80 p-5 backdrop-blur-xl flex flex-col justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold uppercase tracking-wider bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                Flexibilité Pédagogique
+              </span>
+              <div className="w-8 h-8 rounded-lg bg-cyan-600/20 border border-cyan-500/30 flex items-center justify-center text-cyan-300">
+                <SlidersHorizontal size={16} />
+              </div>
+            </div>
+            <h3 className="text-base font-bold text-white">
+              Données Personnalisées & TD
+            </h3>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Saisissez vos propres constantes (pKa sur-mesure, couples redox custom, stœchiométries personnalisées) pour résoudre vos énoncés de travaux dirigés.
+            </p>
+          </div>
+          <div className="pt-3 mt-3 border-t border-slate-800/80 text-[11px] text-slate-400 font-mono">
+            Toggles "Mode Custom" intégrés
           </div>
         </div>
       </div>

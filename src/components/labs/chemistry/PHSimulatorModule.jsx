@@ -3,7 +3,6 @@ import {
   Activity,
   Droplets,
   FileText,
-  Sliders,
 } from 'lucide-react';
 import { ACID_BASE_SYSTEMS } from './chemistryData';
 import TPReportModal from './TPReportModal';
@@ -237,10 +236,10 @@ ${solutionType === 'buffer' ? `- Rapport molaire $[A^-]/[HA]$ : **${ratioBaseToA
             type="button"
             onClick={() => setIsReportModalOpen(true)}
             className="px-3.5 py-2 rounded-xl bg-violet-600/20 hover:bg-violet-600/30 text-violet-300 border border-violet-500/40 text-xs font-bold flex items-center gap-2 transition-all shadow-lg shadow-violet-950/30 hover:shadow-violet-900/40"
-            title="Générer le rapport complet au format Markdown"
+            title="Consulter le compte-rendu de laboratoire"
           >
             <FileText size={15} className="text-violet-400" />
-            <span>Compte-Rendu TP (.md)</span>
+            <span>Compte-Rendu TP</span>
           </button>
         </div>
       </div>
