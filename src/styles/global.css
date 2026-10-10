@@ -274,3 +274,45 @@ html {
   }
 }
 
+/* Dedicated Print Media Styles for CampusHub Academic Reports */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  /* Hide app navigation, sidebars, buttons, overlays and modals controls */
+  nav,
+  aside,
+  header:not(.report-header),
+  .no-print,
+  button,
+  .print-hidden {
+    display: none !important;
+  }
+
+  /* Isolate printable academic sheets for flawless A4 printing */
+  .academic-report-sheet,
+  .printable-report-area {
+    width: 100% !important;
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    border: none !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    page-break-inside: auto !important;
+  }
+
+  .report-body thead th,
+  .report-body tbody tr:nth-child(even) td,
+  .report-body .math-block,
+  .report-body blockquote,
+  .report-body .result-box {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}
+
+
