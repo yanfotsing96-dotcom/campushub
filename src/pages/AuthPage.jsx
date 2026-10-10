@@ -486,10 +486,27 @@ export default function AuthPage({ initialMode = 'login' }) {
               {/* 2. INSCRIPTION (REGISTER FORM AVEC UPLOAD, VALIDATION, RBAC) */}
               {/* ========================================================= */}
               {mode === 'register' && (
-                <RegisterForm
-                  onSubmit={handleRegisterSubmit}
-                  showHeaderMotto={false}
-                />
+                <div className="space-y-4">
+                  <div className="p-3 rounded-2xl bg-indigo-950/60 border border-indigo-500/40 text-xs text-indigo-200 flex items-center justify-between gap-3 text-left">
+                    <div className="flex items-center gap-2">
+                      <Sparkles size={16} className="text-amber-400 shrink-0" />
+                      <span>
+                        <strong>Nouveau :</strong> Inscription ultra-synchronisée par Faculté (Sciences ou FALSH).
+                      </span>
+                    </div>
+                    <Link
+                      to="/register"
+                      className="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs whitespace-nowrap shadow-xs"
+                    >
+                      Ouvrir le Hub UY1
+                    </Link>
+                  </div>
+
+                  <RegisterForm
+                    onSubmit={handleRegisterSubmit}
+                    showHeaderMotto={false}
+                  />
+                </div>
               )}
 
               {/* TOGGLE BOTTOM LINK */}

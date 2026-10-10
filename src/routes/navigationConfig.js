@@ -14,6 +14,7 @@ import {
   HelpCircle,
   LayoutDashboard,
   FileCheck2,
+  BookOpen,
 } from 'lucide-react';
 
 export const NAVIGATION_ITEMS = [
@@ -42,6 +43,12 @@ export const NAVIGATION_ITEMS = [
     icon: Cpu,
     isTechCore: true,
     description: 'Playground C/Py/SQL, algorithmes et annales nationales',
+  },
+  {
+    path: '/falsh-hub',
+    label: 'Pôle FALSH & Lettres',
+    icon: BookOpen,
+    description: 'Méthodologie dissertation, figures de style & normes APA/MLA',
   },
   {
     path: '/search',

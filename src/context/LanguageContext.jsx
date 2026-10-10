@@ -48,6 +48,9 @@ export function LanguageProvider({ children }) {
   // Translation resolver with dot notation (e.g. 'nav.resources')
   const t = useCallback(
     (keyPath, fallback = '') => {
+      if (!keyPath || typeof keyPath !== 'string') {
+        return fallback || '';
+      }
       const keys = keyPath.split('.');
       let current = TRANSLATIONS[language];
 

@@ -2,7 +2,6 @@ import { useState, useMemo } from 'react';
 import {
   Atom,
   RotateCcw,
-  Download,
   Sparkles,
   SlidersHorizontal,
   GraduationCap,

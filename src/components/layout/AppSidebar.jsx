@@ -44,6 +44,7 @@ const NAVIGATION_GROUPS = [
     titleKey: 'nav.dashboard',
     items: [
       { path: '/dashboard', labelKey: 'nav.dashboard', defaultLabel: 'Tableau de Bord Filière', icon: LayoutDashboard, isPrimary: true },
+      { path: '/workspace', defaultLabel: 'Espace de Travail & Rôles', icon: GraduationCap },
       { path: '/exams', labelKey: 'nav.exams', defaultLabel: 'Compositions en Ligne', icon: FileCheck2, hasExamBadge: true },
     ],
   },
@@ -52,6 +53,7 @@ const NAVIGATION_GROUPS = [
     titleKey: 'nav.coreTechFlagship',
     items: [
       { path: '/tech-hub', labelKey: 'nav.techHub', defaultLabel: 'Pôle Informatique & Code', icon: Cpu, isFlagshipTech: true },
+      { path: '/falsh-hub', labelKey: 'nav.falshHub', defaultLabel: 'Pôle FALSH & Lettres', icon: BookOpen },
     ],
   },
   {
@@ -446,7 +448,9 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch
 
               {visibleItems.map((item) => {
                 const Icon = item.isFlagshipTech && pole.icon ? pole.icon : item.icon;
-                const label = item.isFlagshipTech ? pole.shortTitle : t(item.labelKey, item.defaultLabel);
+                const label = item.isFlagshipTech
+                  ? pole.shortTitle
+                  : (item.labelKey ? t(item.labelKey, item.defaultLabel) : (item.defaultLabel || ''));
                 return (
                   <NavLink
                     key={item.path}

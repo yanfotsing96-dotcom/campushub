@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import {
   GraduationCap,
   CheckCircle2,
@@ -489,17 +489,19 @@ export default function PhysicsExamTrainerModule({
   onNavigateToModule,
 }) {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [prevInitialCategory, setPrevInitialCategory] = useState(initialCategory);
   const [selectedLevel, setSelectedLevel] = useState('all'); // 'all' | 'fondamentaux' | 'avance'
   const [userAnswers, setUserAnswers] = useState({}); // { [problemId]: optionId }
   const [revealedSolutions, setRevealedSolutions] = useState({}); // { [problemId]: boolean }
   const [activeHintId, setActiveHintId] = useState(null);
 
   // Synchronisation si initialCategory change
-  useEffect(() => {
+  if (initialCategory !== prevInitialCategory) {
+    setPrevInitialCategory(initialCategory);
     if (initialCategory && initialCategory !== 'all') {
       setSelectedCategory(initialCategory);
     }
-  }, [initialCategory]);
+  }
 
   const categories = useMemo(() => {
     return [

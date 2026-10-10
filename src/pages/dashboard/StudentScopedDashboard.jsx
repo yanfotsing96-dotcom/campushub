@@ -81,6 +81,14 @@ export default function StudentScopedDashboard() {
                 <CheckCircle2 size={12} />
                 <span>Inscrit 2025-2026</span>
               </span>
+              <Link
+                to="/workspace"
+                className="px-3 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold transition-colors flex items-center gap-1 shadow-sm"
+              >
+                <BookOpen size={12} />
+                <span>Espace de Travail & Rôles</span>
+                <ArrowRight size={11} />
+              </Link>
             </div>
           </div>
 

@@ -96,7 +96,7 @@ export default function TPExportModal({
   const dynamicPdfFilename = buildReportFilename(moduleShortName, 'pdf');
 
   // Construction dynamique du Markdown textuel propre avec balisage mathématique KaTeX
-  const generateCleanMarkdown = () => {
+  const markdownContent = useMemo(() => {
     if (!moduleData) return '';
     const lines = [
       `# COMPTE-RENDU DE TRAVAUX PRATIQUES : ${(moduleData.title || '').toUpperCase()}`,
@@ -181,22 +181,17 @@ export default function TPExportModal({
     );
 
     return lines.join('\n');
-  };
-
-  const markdownContent = useMemo(
-    () => generateCleanMarkdown(),
-    [
-      moduleData,
-      currentParams,
-      computedResults,
-      studentName,
-      matricule,
-      academicLevel,
-      institution,
-      notes,
-      dateStr,
-    ]
-  );
+  }, [
+    moduleData,
+    institution,
+    academicLevel,
+    dateStr,
+    studentName,
+    matricule,
+    currentParams,
+    computedResults,
+    notes,
+  ]);
 
   // Déclencheur du téléchargement PDF natif A4 côté client
   const handleDownloadPdf = async () => {

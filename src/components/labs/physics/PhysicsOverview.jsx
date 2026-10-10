@@ -12,7 +12,6 @@ import {
   FileCheck2,
   GraduationCap,
   Trophy,
-  FileText,
 } from 'lucide-react';
 import { PHYSICS_MODULES } from './physicsData';
 

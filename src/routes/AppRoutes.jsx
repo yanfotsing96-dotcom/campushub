@@ -13,9 +13,11 @@ const RegisterPage = lazy(() => import('../pages/RegisterPage'));
 
 // Core Academic Pages (Code-split chunks)
 const StudentScopedDashboard = lazy(() => import('../pages/dashboard/StudentScopedDashboard'));
+const WorkspacePage = lazy(() => import('../pages/WorkspacePage'));
 const ExamsListPage = lazy(() => import('../pages/exams/ExamsListPage'));
 const ResourceCrud = lazy(() => import('../pages/ResourceCrud'));
 const TechHubPage = lazy(() => import('../pages/TechHubPage'));
+const FalshHubPage = lazy(() => import('../pages/FalshHubPage'));
 const SearchPage = lazy(() => import('../pages/SearchPage'));
 const LearningPage = lazy(() => import('../pages/LearningPage'));
 const ProductivityPage = lazy(() => import('../pages/ProductivityPage'));
@@ -55,12 +57,14 @@ export default function AppRoutes() {
           >
             {/* Scoped Dashboard & Enrolled Courses */}
             <Route path="/dashboard" element={<StudentScopedDashboard />} />
+            <Route path="/workspace" element={<WorkspacePage />} />
             <Route path="/courses" element={<StudentScopedDashboard />} />
             <Route path="/exams" element={<ExamsListPage />} />
 
             {/* National Catalogue & Search */}
             <Route path="/ressources" element={<ResourceCrud />} />
             <Route path="/tech-hub" element={<TechHubPage />} />
+            <Route path="/falsh-hub" element={<FalshHubPage />} />
             <Route path="/search" element={<SearchPage />} />
             <Route path="/learning" element={<LearningPage />} />
             <Route path="/productivity" element={<ProductivityPage />} />

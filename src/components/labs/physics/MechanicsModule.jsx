@@ -4,7 +4,6 @@ import {
   RotateCcw,
   Play,
   Pause,
-  Download,
   Sparkles,
   Activity,
   Gauge,
