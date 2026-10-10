@@ -10,6 +10,9 @@ import {
   Sparkles,
   BookOpen,
   FileCheck2,
+  GraduationCap,
+  Trophy,
+  FileText,
 } from 'lucide-react';
 import { PHYSICS_MODULES } from './physicsData';
 
@@ -35,14 +38,14 @@ export default function PhysicsOverview({ onSelectModule }) {
       {/* SaaS Hero Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-slate-900/90 to-slate-950 border border-slate-800 shadow-2xl p-6 sm:p-8 backdrop-blur-xl">
         {/* Lueur d'arrière-plan violet / indigo */}
-        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-violet-600/10 via-indigo-600/10 to-transparent blur-3xl pointer-events-none rounded-full" />
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-br from-violet-600/15 via-indigo-600/15 to-transparent blur-3xl pointer-events-none rounded-full" />
         <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-indigo-500/10 blur-2xl pointer-events-none rounded-full" />
 
         <div className="relative z-10 max-w-3xl space-y-4">
           <div className="flex flex-wrap items-center gap-2 text-xs">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full font-mono font-bold uppercase tracking-wider bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">
               <Sparkles size={12} className="text-indigo-400" />
-              <span>CampusHub · PhysicsLab Hub v2.5</span>
+              <span>CampusHub · PhysicsLab Hub v3.0</span>
             </span>
 
             <span className="text-slate-400">·</span>
@@ -57,7 +60,7 @@ export default function PhysicsOverview({ onSelectModule }) {
           </h1>
 
           <p className="text-sm sm:text-base text-slate-300/90 leading-relaxed">
-            Plateforme interactive certifiée MINESUP pour les étudiants de L1 à Master 2. Expérimentez en direct sur les paramètres fondamentaux, visualisez les équations maîtresses en temps réel et exportez vos comptes-rendus de TP formattés sans code parasite.
+            Plateforme interactive certifiée MINESUP pour les étudiants de L1 à Master 2. Expérimentez en direct sur les paramètres fondamentaux, visualisez les équations maîtresses en temps réel, entraînez-vous aux examens et téléchargez vos comptes-rendus de TP au format PDF A4 officiel.
           </p>
 
           {/* Quick Metrics Bar */}
@@ -76,17 +79,50 @@ export default function PhysicsOverview({ onSelectModule }) {
 
             <div className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800/80">
               <span className="text-slate-400 text-[11px] block">Graphismes Virtuels</span>
-              <span className="text-xl font-bold font-mono text-violet-400">SVG Dynamique</span>
-              <span className="text-[10px] text-slate-500 block">Oscillo, P-V, Rayons</span>
+              <span className="text-xl font-bold font-mono text-violet-400">SVG Temps Réel</span>
+              <span className="text-[10px] text-slate-500 block">Oscillo, P-V, Maxwell</span>
             </div>
 
             <div className="p-3 rounded-2xl bg-slate-950/60 border border-slate-800/80">
               <span className="text-slate-400 text-[11px] block">Rapport Académique</span>
-              <span className="text-xl font-bold font-mono text-emerald-400">Blob UTF-8</span>
-              <span className="text-[10px] text-slate-500 block">Export Markdown .md</span>
+              <span className="text-xl font-bold font-mono text-emerald-400">PDF A4 Natif</span>
+              <span className="text-[10px] text-slate-500 block">jsPDF + html2canvas</span>
             </div>
           </div>
         </div>
+      </div>
+
+      {/* Bannière d'accès direct au Mode Examen & Auto-Évaluation */}
+      <div className="p-6 rounded-3xl bg-gradient-to-r from-violet-950/50 via-slate-900 to-indigo-950/40 border border-violet-500/30 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-start sm:items-center gap-4">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-violet-600 to-indigo-600 text-white flex items-center justify-center shrink-0 shadow-lg shadow-violet-600/30">
+            <GraduationCap size={24} />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-violet-500/20 text-violet-300 border border-violet-500/30">
+                NOUVEAU · Mode Examen
+              </span>
+              <span className="text-xs text-slate-400">Banque d'Annales & QCM Universitaires</span>
+            </div>
+            <h3 className="text-base sm:text-lg font-bold text-white mt-0.5">
+              Centre d'Auto-Évaluation & Problèmes Types d'Examen (L1 à M2)
+            </h3>
+            <p className="text-xs text-slate-300/80 mt-1 max-w-2xl">
+              Mesurez votre maîtrise des lois fondamentales avec correction instantanée, score global, calculs pas à pas et explications théoriques détaillées.
+            </p>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => onSelectModule('exam_trainer')}
+          className="px-5 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg shadow-violet-600/25 transition-all flex items-center justify-center gap-2 shrink-0 self-start md:self-auto"
+        >
+          <Trophy size={15} />
+          <span>Lancer l'Auto-Évaluation (10 QCM)</span>
+          <ArrowRight size={14} />
+        </button>
       </div>
 
       {/* Barre de filtrage par cycle d'études */}
@@ -123,79 +159,66 @@ export default function PhysicsOverview({ onSelectModule }) {
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            Fondamentaux (L1 - L2)
+            L1 - L2 Fondamentaux (3)
           </button>
           <button
             type="button"
             onClick={() => setFilterSection('avance')}
             className={`px-3 py-1.5 rounded-xl font-semibold transition-all ${
               filterSection === 'avance'
-                ? 'bg-indigo-600 text-white shadow-md'
+                ? 'bg-violet-600 text-white shadow-md'
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            Avancé (L3 - Master)
+            L3 - Master Avancé (3)
           </button>
         </div>
       </div>
 
-      {/* Grille de cartes de laboratoires SaaS interactives */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+      {/* Grille des 6 Bancs d'Essais Virtuels */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredModules.map((module) => {
-          const IconComp = iconMap[module.iconName] || Activity;
-          const isFondamental = module.sectionId === 'fondamentaux';
+          const IconComponent = iconMap[module.iconName] || Activity;
 
           return (
             <div
               key={module.id}
-              className="group relative rounded-3xl bg-slate-900/80 border border-slate-800 p-6 flex flex-col justify-between space-y-5 transition-all duration-300 hover:border-violet-500/40 hover:shadow-2xl hover:shadow-violet-600/10 hover:-translate-y-1 backdrop-blur-md"
+              className={`p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-slate-700 transition-all duration-300 shadow-xl backdrop-blur-xl flex flex-col justify-between group relative overflow-hidden`}
             >
-              {/* Lueur de survol subtile */}
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-violet-600/5 via-indigo-600/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
-
               <div className="space-y-4 relative z-10">
-                {/* En-tête de carte */}
-                <div className="flex items-center justify-between gap-3">
-                  <div
-                    className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border transition-all ${
-                      isFondamental
-                        ? 'bg-indigo-600/20 text-indigo-400 border-indigo-500/30 group-hover:bg-indigo-600/30'
-                        : 'bg-violet-600/20 text-violet-400 border-violet-500/30 group-hover:bg-violet-600/30'
-                    }`}
-                  >
-                    <IconComp size={24} />
-                  </div>
-
-                  <div className="flex flex-col items-end">
-                    <span
-                      className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold border ${
-                        isFondamental
-                          ? 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20'
-                          : 'bg-violet-500/10 text-violet-300 border-violet-500/20'
-                      }`}
-                    >
-                      {module.levelLabel}
-                    </span>
-                    <span className="text-[10px] text-slate-500 font-mono mt-0.5">{module.code}</span>
+                {/* En-tête de la carte */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-2xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
+                      <IconComponent size={20} />
+                    </div>
+                    <div>
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400">
+                        {module.code}
+                      </span>
+                      <h3 className="text-base font-bold text-white group-hover:text-indigo-300 transition-colors">
+                        {module.title}
+                      </h3>
+                    </div>
                   </div>
                 </div>
 
-                {/* Titre & Description */}
-                <div>
-                  <h3 className="text-base font-bold text-white group-hover:text-indigo-300 transition-colors">
-                    {module.title}
-                  </h3>
-                  <p className="text-xs text-slate-400 mt-2 line-clamp-3 leading-relaxed">
-                    {module.description}
-                  </p>
+                {/* Badge niveau */}
+                <div className="inline-block">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-slate-800 text-slate-300 border border-slate-700">
+                    {module.levelLabel}
+                  </span>
                 </div>
 
-                {/* Formule Clé Encadrée */}
-                <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-1">
-                  <div className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                    Formule & Principe Clé :
-                  </div>
-                  <div className="text-xs font-mono font-bold text-amber-300/90 truncate">
+                {/* Description */}
+                <p className="text-xs text-slate-400 leading-relaxed line-clamp-3">
+                  {module.description}
+                </p>
+
+                {/* Formule fondamentale maîtresse */}
+                <div className="p-3 rounded-2xl bg-slate-950 border border-slate-800 font-mono space-y-1">
+                  <div className="text-[10px] text-indigo-400 font-bold uppercase">Loi Maîtresse :</div>
+                  <div className="text-xs font-bold text-white tracking-wide truncate">
                     {module.formula}
                   </div>
                   <div className="text-[10px] text-slate-500 truncate">{module.keyLaw}</div>
@@ -244,30 +267,30 @@ export default function PhysicsOverview({ onSelectModule }) {
           <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-1.5">
             <div className="text-white font-semibold flex items-center gap-1.5">
               <span className="w-5 h-5 rounded-full bg-indigo-600/20 text-indigo-400 flex items-center justify-center text-[11px] font-bold">1</span>
-              <span>Paramétrage Libre</span>
+              <span>Paramétrage Libre & Sliders</span>
             </div>
             <p>
-              Modifiez à volonté les grandeurs physiques fondamentales dans chaque panneau pour observer instantanément l'impact sur les lois théoriques.
+              Modifiez à volonté les grandeurs physiques fondamentales (masse, vitesse, RLC, indices n, températures, barrière) pour observer instantanément l'impact sur les lois théoriques.
             </p>
           </div>
 
           <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-1.5">
             <div className="text-white font-semibold flex items-center gap-1.5">
               <span className="w-5 h-5 rounded-full bg-violet-600/20 text-violet-400 flex items-center justify-center text-[11px] font-bold">2</span>
-              <span>Visualisation Dynamique</span>
+              <span>Visualisation Dynamique SVG</span>
             </div>
             <p>
-              Les courbes SVG s'ajustent en continu (trajectoires, oscillations de résonance, diagrammes d'ondes, P-V de Clapeyron et fonctions quantiques).
+              Les graphismes s'ajustent en temps réel : trajectoires balistiques, résonance de Bode, réfraction de Snell-Descartes, ondes OPPM Maxwell, cycles de Carnot/Otto et puits quantique.
             </p>
           </div>
 
           <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800/80 space-y-1.5">
             <div className="text-white font-semibold flex items-center gap-1.5">
               <span className="w-5 h-5 rounded-full bg-emerald-600/20 text-emerald-400 flex items-center justify-center text-[11px] font-bold">3</span>
-              <span>Exportation Propre</span>
+              <span>Export PDF A4 & Mode Examen</span>
             </div>
             <p>
-              Générez à tout moment votre compte-rendu en Markdown propre via l'API Blob pour l'insérer directement dans vos rendus universitaires.
+              Générez à tout moment votre compte-rendu de TP complet au format PDF A4 net (scale 2, KaTeX) et testez vos connaissances sur la banque d'examens universitaires.
             </p>
           </div>
         </div>

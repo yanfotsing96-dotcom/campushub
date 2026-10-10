@@ -7,31 +7,40 @@ import OpticsModule from './physics/OpticsModule';
 import ElectromagnetismModule from './physics/ElectromagnetismModule';
 import ThermodynamicsModule from './physics/ThermodynamicsModule';
 import QuantumModule from './physics/QuantumModule';
+import PhysicsExamTrainerModule from './physics/PhysicsExamTrainerModule';
 import TPExportModal from './physics/TPExportModal';
 import { PHYSICS_MODULES } from './physics/physicsData';
 
 /**
  * Composant Central "PhysicsLab Hub" pour la filière Physique de CampusHub (L1 à Master 2)
  *
- * Architecture SaaS haut de gamme (style Vercel / Stripe / virtual labs) :
- * - Navigation Latérale (Sidebar) structurée par cycles (L1-L2 Fondamentaux vs L3-Master Avancé + Overview)
+ * Architecture SaaS haut de gamme :
+ * - Navigation Latérale (Sidebar) structurée par cycles (L1-L2 Fondamentaux vs L3-Master Avancé + Overview + Mode Examen)
  * - Tableau de bord d'accueil interactif avec formules clés, KPIs et lancement rapide
- * - 6 bancs d'essais virtuels avec ajustement de paramètres physiques personnalisés en direct
- * - Graphiques SVG temps réel (trajectoires, résonance, optique, ondes Maxwell, diagramme Clapeyron, puits quantique)
- * - Exportation de compte-rendu de TP propre en Markdown (API Blob UTF-8) prêt pour insertion académique
+ * - 6 bancs d'essais virtuels avec ajustement dynamique des paramètres physiques (curseurs + champs libres)
+ * - Graphismes vectoriels SVG temps réel (trajectoires balistiques, Bode RLC, réfraction, ondes Maxwell, cycles P-V, puits quantique)
+ * - Mode Examen & Auto-Évaluation intégré : QCM universitaires, correction instantanée, score global et pas à pas détaillé
+ * - Module d'Exportation PDF Natif A4 (jsPDF + html2canvas, scale: 2) avec formules KaTeX et métadonnées certifiées
  */
 export default function PhysicsLab() {
   const [activeModuleId, setActiveModuleId] = useState('overview');
+  const [examCategory, setExamCategory] = useState('all');
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   const [exportPayload, setExportPayload] = useState(null);
 
   // Détermine les données du module actif
   const currentModuleData = useMemo(() => {
-    if (activeModuleId === 'overview') {
+    if (activeModuleId === 'overview' || activeModuleId === 'exam_trainer') {
       return PHYSICS_MODULES[0]; // module par défaut pour export global si besoin
     }
     return PHYSICS_MODULES.find((m) => m.id === activeModuleId) || PHYSICS_MODULES[0];
   }, [activeModuleId]);
+
+  // Gestionnaire de navigation vers le Mode Examen avec pré-filtrage optionnel de la discipline
+  const handleNavigateToExam = (categoryKey = 'all') => {
+    setExamCategory(categoryKey);
+    setActiveModuleId('exam_trainer');
+  };
 
   // Gestionnaire d'exportation déclenché depuis un sous-module avec ses paramètres actuels
   const handleExportFromModule = ({ moduleData, currentParams, computedResults }) => {
@@ -53,7 +62,11 @@ export default function PhysicsLab() {
         moduleData: currentModuleData,
         currentParams: currentModuleData.defaultParams,
         computedResults: {
-          'Statut de simulation': { val: 'Paramètres étalons enregistrés', unit: '', comment: 'Prêt pour manipulation' },
+          'Statut de simulation': {
+            val: 'Paramètres étalons enregistrés',
+            unit: '',
+            comment: 'Prêt pour manipulation',
+          },
         },
       });
       setIsExportModalOpen(true);
@@ -62,7 +75,7 @@ export default function PhysicsLab() {
 
   return (
     <div className="w-full text-slate-100 min-h-[600px] flex flex-col lg:flex-row gap-6 items-start">
-      {/* Barre Latérale SaaS avec Sélecteur par Niveaux (L1-L2 / L3-Master) */}
+      {/* Barre Latérale SaaS avec Sélecteur par Niveaux & Accès Examen */}
       <PhysicsSidebar
         activeModuleId={activeModuleId}
         onSelectModule={(id) => setActiveModuleId(id)}
@@ -75,32 +88,57 @@ export default function PhysicsLab() {
           <PhysicsOverview onSelectModule={(id) => setActiveModuleId(id)} />
         )}
 
+        {activeModuleId === 'exam_trainer' && (
+          <PhysicsExamTrainerModule
+            initialCategory={examCategory}
+            onNavigateToModule={(modId) => setActiveModuleId(modId)}
+          />
+        )}
+
         {activeModuleId === 'mechanics' && (
-          <MechanicsModule onExport={handleExportFromModule} />
+          <MechanicsModule
+            onExport={handleExportFromModule}
+            onNavigateToExam={handleNavigateToExam}
+          />
         )}
 
         {activeModuleId === 'rlc' && (
-          <RlcModule onExport={handleExportFromModule} />
+          <RlcModule
+            onExport={handleExportFromModule}
+            onNavigateToExam={handleNavigateToExam}
+          />
         )}
 
         {activeModuleId === 'optics' && (
-          <OpticsModule onExport={handleExportFromModule} />
+          <OpticsModule
+            onExport={handleExportFromModule}
+            onNavigateToExam={handleNavigateToExam}
+          />
         )}
 
         {activeModuleId === 'electromagnetism' && (
-          <ElectromagnetismModule onExport={handleExportFromModule} />
+          <ElectromagnetismModule
+            onExport={handleExportFromModule}
+            onNavigateToExam={handleNavigateToExam}
+          />
         )}
 
         {activeModuleId === 'thermodynamics' && (
-          <ThermodynamicsModule onExport={handleExportFromModule} />
+          <ThermodynamicsModule
+            onExport={handleExportFromModule}
+            onNavigateToExam={handleNavigateToExam}
+          />
         )}
 
         {activeModuleId === 'quantum' && (
-          <QuantumModule onExport={handleExportFromModule} />
+          <QuantumModule
+            onExport={handleExportFromModule}
+            onNavigateToExam={handleNavigateToExam}
+          />
         )}
       </main>
 
-      {/* Modal d'Exportation de Rapport de TP Propre (API Blob UTF-8) */}
+      {/* Modal d'Exportation de Rapport de TP Natif PDF A4 */}
       {isExportModalOpen && exportPayload && (
         <TPExportModal
           isOpen={isExportModalOpen}

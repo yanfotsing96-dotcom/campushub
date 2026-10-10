@@ -53,6 +53,8 @@ export default function PhysicsSidebar({
             <div className="text-[10px] text-slate-400 font-mono">
               {activeModuleId === 'overview'
                 ? 'Tableau de bord (Overview)'
+                : activeModuleId === 'exam_trainer'
+                ? 'Examen & Auto-Évaluation'
                 : PHYSICS_MODULES.find((m) => m.id === activeModuleId)?.shortTitle || 'Module'}
             </div>
           </div>
@@ -74,7 +76,7 @@ export default function PhysicsSidebar({
           mobileOpen ? 'block' : 'hidden'
         } lg:block w-full lg:w-72 shrink-0 space-y-5 text-left`}
       >
-        <div className="rounded-3xl bg-slate-900/90 border border-slate-800 p-4 shadow-xl backdrop-blur-xl space-y-5">
+        <div className="rounded-3xl bg-slate-900/90 border border-slate-800 p-4 shadow-xl backdrop-blur-xl space-y-4">
           {/* En-tête de la barre latérale */}
           <div className="flex items-center justify-between pb-3.5 border-b border-slate-800">
             <div className="flex items-center gap-2.5">
@@ -89,7 +91,7 @@ export default function PhysicsSidebar({
           </div>
 
           {/* Onglet Principal : Tableau de bord (Overview) */}
-          <div>
+          <div className="space-y-1.5">
             <button
               type="button"
               onClick={() => handleSelect('overview')}
@@ -100,11 +102,46 @@ export default function PhysicsSidebar({
               }`}
             >
               <div className="flex items-center gap-2.5">
-                <LayoutDashboard size={16} className={activeModuleId === 'overview' ? 'text-white' : 'text-indigo-400'} />
-                <span>Tableau de Bord (Overview)</span>
+                <LayoutDashboard
+                  size={16}
+                  className={activeModuleId === 'overview' ? 'text-white' : 'text-indigo-400'}
+                />
+                <span>Tableau de Bord</span>
               </div>
-              <span className={`text-[10px] px-1.5 py-0.5 rounded-md font-mono ${activeModuleId === 'overview' ? 'bg-white/20' : 'bg-slate-800 text-slate-400'}`}>
+              <span
+                className={`text-[10px] px-1.5 py-0.5 rounded-md font-mono ${
+                  activeModuleId === 'overview' ? 'bg-white/20' : 'bg-slate-800 text-slate-400'
+                }`}
+              >
                 6 TP
+              </span>
+            </button>
+
+            {/* Onglet : Mode Examen & Auto-Évaluation */}
+            <button
+              type="button"
+              onClick={() => handleSelect('exam_trainer')}
+              className={`w-full p-2.5 rounded-2xl text-xs font-bold transition-all flex items-center justify-between gap-2.5 ${
+                activeModuleId === 'exam_trainer'
+                  ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-600/25'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800/80 border border-transparent hover:border-slate-800'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <GraduationCap
+                  size={16}
+                  className={activeModuleId === 'exam_trainer' ? 'text-white' : 'text-violet-400'}
+                />
+                <span>Examen & Auto-Évaluation</span>
+              </div>
+              <span
+                className={`text-[10px] px-1.5 py-0.5 rounded-md font-mono ${
+                  activeModuleId === 'exam_trainer'
+                    ? 'bg-white/20'
+                    : 'bg-violet-950/60 text-violet-300 border border-violet-800/40'
+                }`}
+              >
+                10 QCM
               </span>
             </button>
           </div>
@@ -113,10 +150,10 @@ export default function PhysicsSidebar({
           <div className="space-y-2">
             <div className="px-2 pt-2 flex items-center justify-between">
               <span className="text-[11px] font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
-                <GraduationCap size={13} />
+                <Compass size={13} />
                 <span>Fondamentaux (L1 - L2)</span>
               </span>
-              <span className="text-[10px] text-slate-500 font-mono">3 modules</span>
+              <span className="text-[10px] text-slate-500 font-mono">3 bancs</span>
             </div>
 
             <div className="space-y-1">
@@ -170,7 +207,7 @@ export default function PhysicsSidebar({
                 <Sparkles size={13} />
                 <span>Avancé (L3 - Master)</span>
               </span>
-              <span className="text-[10px] text-slate-500 font-mono">3 modules</span>
+              <span className="text-[10px] text-slate-500 font-mono">3 bancs</span>
             </div>
 
             <div className="space-y-1">
@@ -225,7 +262,7 @@ export default function PhysicsSidebar({
               className="w-full py-2.5 px-3 rounded-2xl bg-slate-950 hover:bg-slate-800/90 text-slate-300 hover:text-white text-xs font-semibold border border-slate-800 hover:border-violet-500/30 transition-all flex items-center justify-center gap-2 shadow-sm"
             >
               <FileText size={14} className="text-violet-400" />
-              <span>Export Rapport de TP (.md)</span>
+              <span>Exporter Rapport TP (PDF A4)</span>
             </button>
           </div>
         </div>

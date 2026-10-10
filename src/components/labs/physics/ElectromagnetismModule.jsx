@@ -5,10 +5,12 @@ import {
   Download,
   Sparkles,
   SlidersHorizontal,
+  GraduationCap,
+  FileText,
 } from 'lucide-react';
 import { PHYSICS_MODULES, PHYSICAL_CONSTANTS } from './physicsData';
 
-export default function ElectromagnetismModule({ onExport }) {
+export default function ElectromagnetismModule({ onExport, onNavigateToExam }) {
   const moduleData = PHYSICS_MODULES.find((m) => m.id === 'electromagnetism');
 
   // Paramètres réglables (Champs libres)
@@ -182,7 +184,18 @@ export default function ElectromagnetismModule({ onExport }) {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          {onNavigateToExam && (
+            <button
+              type="button"
+              onClick={() => onNavigateToExam('electromagnetism')}
+              className="px-3 py-2 rounded-xl bg-violet-600/20 hover:bg-violet-600/30 text-violet-300 border border-violet-500/30 hover:border-violet-500/50 transition-all text-xs font-semibold flex items-center gap-1.5"
+            >
+              <GraduationCap size={14} />
+              <span className="hidden sm:inline">Tester en Mode Examen</span>
+              <span className="sm:hidden">Mode Examen</span>
+            </button>
+          )}
           <button
             type="button"
             onClick={handleReset}
@@ -196,8 +209,8 @@ export default function ElectromagnetismModule({ onExport }) {
             onClick={handleExportClick}
             className="px-4 py-2 rounded-xl bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white text-xs font-bold shadow-lg shadow-violet-600/20 transition-all flex items-center gap-1.5"
           >
-            <Download size={14} />
-            <span>Générer Rapport TP (.md)</span>
+            <FileText size={14} />
+            <span>Exporter Rapport TP (PDF A4)</span>
           </button>
         </div>
       </div>

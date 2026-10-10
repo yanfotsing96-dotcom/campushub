@@ -1,17 +1,67 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import {
-  Download,
+  FileText,
   Copy,
   Check,
+  Download,
   X,
-  FileText,
   Sparkles,
-  BookOpen,
-  Calendar,
   User,
+  School,
+  Loader2,
+  Calendar,
   GraduationCap,
+  Eye,
 } from 'lucide-react';
+import {
+  buildAcademicSheetInnerHtml,
+  getAcademicReportCss,
+  triggerAcademicDownload,
+  copyCleanAcademicDocument,
+  applyKatexAutoRender,
+  buildReportFilename,
+} from '../../../services/documentDownloadService';
 
+/**
+ * Aperçu direct HTML & KaTeX du compte-rendu A4 pour les sciences physiques
+ * Utilise la typographie officielle, la mise en page académique et le moteur mathématique KaTeX
+ */
+function AcademicPhysicsSheetPreview({ moduleName, academicLevel, content }) {
+  const containerRef = useRef(null);
+
+  const sheetInnerHtml = useMemo(() => {
+    return buildAcademicSheetInnerHtml({
+      moduleName,
+      academicLevel,
+      content,
+      includeFooter: true,
+    });
+  }, [moduleName, academicLevel, content]);
+
+  const reportCss = useMemo(() => getAcademicReportCss(), []);
+
+  useEffect(() => {
+    if (containerRef.current) {
+      applyKatexAutoRender(containerRef.current);
+    }
+  }, [sheetInnerHtml]);
+
+  return (
+    <div className="bg-slate-200/90 p-3 sm:p-5 rounded-2xl border border-slate-700 shadow-inner overflow-x-auto text-left">
+      <style>{reportCss}</style>
+      <div
+        ref={containerRef}
+        className="academic-report-sheet rounded-lg shadow-xl border border-slate-300"
+        dangerouslySetInnerHTML={{ __html: sheetInnerHtml }}
+      />
+    </div>
+  );
+}
+
+/**
+ * Modal d'exportation de Compte-Rendu de Travaux Pratiques (TP) en Sciences Physiques
+ * Architecture complète de Téléchargement PDF Natif (A4, scale 2, jsPDF + html2canvas).
+ */
 export default function TPExportModal({
   isOpen,
   onClose,
@@ -19,191 +69,193 @@ export default function TPExportModal({
   currentParams = {},
   computedResults = {},
 }) {
-  const [studentName, setStudentName] = useState('Étudiant CampusHub');
-  const [matricule, setMatricule] = useState('23U1098');
-  const [academicYear, setAcademicYear] = useState('2025 - 2026');
-  const [institution, setInstitution] = useState('Faculté des Sciences / École Polytechnique');
-  const [customObservations, setCustomObservations] = useState(
-    'Les résultats obtenus corroborent fidèlement les prédictions du modèle théorique avec un accord satisfaisant aux bornes physiques.'
+  const [studentName, setStudentName] = useState('Étudiant(e) en Physique');
+  const [matricule, setMatricule] = useState('PHY-2026-UY1');
+  const [academicLevel, setAcademicLevel] = useState(
+    moduleData?.levelLabel || 'Licence Sciences Physiques'
   );
+  const [institution, setInstitution] = useState('Faculté des Sciences / École Polytechnique');
+  const [notes, setNotes] = useState(
+    'Les résultats expérimentaux obtenus corroborent fidèlement les prédictions du modèle théorique avec un accord satisfaisant aux bornes physiques.'
+  );
+
   const [copied, setCopied] = useState(false);
-  const [viewMode, setViewMode] = useState('preview'); // 'preview' | 'raw'
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState(false);
+  const [pdfSuccess, setPdfSuccess] = useState(false);
+  const [activeTab, setActiveTab] = useState('preview'); // 'preview' | 'markdown'
 
-  // Génération du contenu textuel Markdown propre et structuré
-  const markdownContent = useMemo(() => {
+  const dateStr = new Date().toLocaleDateString('fr-FR', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric',
+  });
+
+  const moduleShortName = moduleData?.shortTitle || moduleData?.title || 'physique';
+
+  // Nom dynamique certifié du fichier PDF selon la convention demandée : compte-rendu-[module]-[date].pdf
+  const dynamicPdfFilename = buildReportFilename(moduleShortName, 'pdf');
+
+  // Construction dynamique du Markdown textuel propre avec balisage mathématique KaTeX
+  const generateCleanMarkdown = () => {
     if (!moduleData) return '';
+    const lines = [
+      `# COMPTE-RENDU DE TRAVAUX PRATIQUES : ${(moduleData.title || '').toUpperCase()}`,
+      `**Plateforme :** CampusHub · ${institution}`,
+      `**Unité d'Enseignement :** ${moduleData.code} - ${moduleData.title}`,
+      `**Niveau Académique :** ${academicLevel}`,
+      `**Date de la Manipulation :** ${dateStr}`,
+      `**Étudiant(e) Expérimentateur(trice) :** ${studentName} (Matricule : \`${matricule}\`)`,
+      ``,
+      `---`,
+      ``,
+      `## 1. Contexte Théorique & Principes Fondamentaux`,
+      `${moduleData.description}`,
+      ``,
+      `**Loi régissante maîtresse :** ${moduleData.keyLaw}`,
+      ``,
+      `**Formulation mathématique :**`,
+      `$$${moduleData.formula}$$`,
+      ``,
+    ];
 
-    const today = new Date().toLocaleDateString('fr-FR', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-    });
-
-    const lines = [];
-
-    lines.push(`# RÉPUBLIQUE DU CAMEROUN`);
-    lines.push(`**Paix - Travail - Patrie**`);
-    lines.push(`*MINESUP · ${institution}*`);
-    lines.push(`*Département de Physique · Année Académique : ${academicYear}*`);
-    lines.push(``);
-    lines.push(`---`);
-    lines.push(``);
-    lines.push(`# COMPTE-RENDU DE TRAVAUX PRATIQUES`);
-    lines.push(`## ${moduleData.code} : ${moduleData.title.toUpperCase()}`);
-    lines.push(``);
-    lines.push(`- **Étudiant(e)** : ${studentName}`);
-    lines.push(`- **Matricule** : ${matricule}`);
-    lines.push(`- **Niveau** : ${moduleData.levelLabel}`);
-    lines.push(`- **Date de la manipulation** : ${today}`);
-    lines.push(`- **Plateforme de simulation** : CampusHub PhysicsLab Hub`);
-    lines.push(``);
-    lines.push(`---`);
-    lines.push(``);
-    lines.push(`### I. OBJECTIF & CADRE THÉORIQUE`);
-    lines.push(``);
-    lines.push(`${moduleData.description}`);
-    lines.push(``);
-    lines.push(`- **Loi fondamentale régissante** : ${moduleData.keyLaw}`);
-    lines.push(`- **Formulation mathématique principale** : \`${moduleData.formula}\``);
     if (moduleData.expandedFormula) {
-      lines.push(`- **Équation développée / aux dérivées partielles** : \`${moduleData.expandedFormula}\``);
+      lines.push(`**Formulation développée / aux dérivées partielles :**`);
+      lines.push(`$$${moduleData.expandedFormula}$$`);
+      lines.push(``);
     }
-    lines.push(``);
-    lines.push(`**Objectifs pédagogiques visés :**`);
+
     if (moduleData.learningOutcomes && moduleData.learningOutcomes.length > 0) {
+      lines.push(`### Objectifs Pédagogiques Visés :`);
       moduleData.learningOutcomes.forEach((outcome, idx) => {
         lines.push(`${idx + 1}. ${outcome}`);
       });
+      lines.push(``);
     }
-    lines.push(``);
-    lines.push(`---`);
-    lines.push(``);
-    lines.push(`### II. CONDITIONS EXPÉRIMENTALES & PARAMÈTRES D'ENTRÉE`);
-    lines.push(``);
-    lines.push(`| Paramètre Physique | Symbole | Valeur Fixée | Unité SI / Pratique |`);
-    lines.push(`| :--- | :---: | :---: | :--- |`);
 
-    // Paramètres actuels
+    lines.push(
+      `---`,
+      ``,
+      `## 2. Conditions Expérimentales & Paramètres Fixés`,
+      ``,
+      `Le tableau ci-dessous consigne les grandeurs d'entrée configurées sur le banc virtuel au cours de la manipulation :`,
+      ``,
+      `| Paramètre Physique | Valeur Fixée | Unité & Système |`,
+      `| :--- | :--- | :--- |`
+    );
+
     Object.entries(currentParams).forEach(([key, val]) => {
-      const displayKey = key.replace(/([A-Z])/g, ' $1').toLowerCase();
-      let unit = '';
-      if (key.includes('mass')) unit = 'kg';
-      else if (key.includes('v0')) unit = 'm/s';
-      else if (key.includes('angle') || key.includes('theta')) unit = 'degrés (°)';
-      else if (key.includes('h0')) unit = 'm';
-      else if (key.includes('gravity')) unit = 'm/s²';
-      else if (key.includes('resistance')) unit = 'Ω (Ohms)';
-      else if (key.includes('inductance')) unit = 'H (Henry)';
-      else if (key.includes('capacitance')) unit = 'µF';
-      else if (key.includes('frequency')) unit = 'Hz';
-      else if (key.includes('temp')) unit = 'K (Kelvin)';
-      else if (key.includes('wavelength')) unit = 'nm';
-      else if (key.includes('energy')) unit = 'eV';
-      else if (key.includes('width')) unit = 'nm';
-
-      lines.push(`| ${displayKey} | \`${key}\` | ${val} | ${unit || '-'} |`);
+      lines.push(`| **${key}** | \`${val}\` | Système International (SI) |`);
     });
 
-    lines.push(``);
-    lines.push(`---`);
-    lines.push(``);
-    lines.push(`### III. RÉSULTATS NUMÉRIQUES & CARACTÉRISTIQUES CALCULÉES`);
-    lines.push(``);
-    lines.push(`| Grandeur Caractéristique | Valeur Obtenue | Unité | Interprétation Physique |`);
-    lines.push(`| :--- | :---: | :---: | :--- |`);
+    lines.push(
+      ``,
+      `---`,
+      ``,
+      `## 3. Données Numériques & Résultats Calculés en Temps Réel`,
+      ``,
+      `| Grandeur Physique Calculée | Valeur Obtenue | Unité | Interprétation & Comportement |`,
+      `| :--- | :--- | :--- | :--- |`
+    );
 
     Object.entries(computedResults).forEach(([label, info]) => {
       const valStr = typeof info === 'object' ? `${info.val}` : `${info}`;
       const unitStr = typeof info === 'object' && info.unit ? info.unit : '';
-      const commentStr = typeof info === 'object' && info.comment ? info.comment : 'Conforme au modèle';
-      lines.push(`| ${label} | **${valStr}** | ${unitStr} | ${commentStr} |`);
+      const commentStr =
+        typeof info === 'object' && info.comment ? info.comment : 'Conforme au modèle analytique';
+      lines.push(`| **${label}** | \`${valStr}\` | ${unitStr || '—'} | ${commentStr} |`);
     });
 
-    lines.push(``);
-    lines.push(`---`);
-    lines.push(``);
-    lines.push(`### IV. ANALYSE PHYSIQUE & COMMENTAIRES DE L'ÉTUDIANT`);
-    lines.push(``);
-    lines.push(`${customObservations}`);
-    lines.push(``);
-    lines.push(`---`);
-    lines.push(``);
-    lines.push(`### V. CONCLUSION & VALIDATION ACADÉMIQUE`);
-    lines.push(``);
     lines.push(
-      `Ce travail pratique confirme la cohérence rigoureuse entre la formalisation analytique et les comportements numériques mesurés dans l'environnement CampusHub PhysicsLab. Document certifié pour intégration au rapport d'évaluation semestrielle.`
+      ``,
+      `---`,
+      ``,
+      `## 4. Analyse Critique & Observations Personnelles`,
+      `${notes}`,
+      ``,
+      `---`,
+      ``,
+      `## 5. Conclusion & Validation Académique`,
+      `Les résultats observés sur ce laboratoire virtuel de physique corroborent de façon rigoureuse les lois fondamentales étudiées en cours magistral. La cohérence entre les valeurs théoriques et les points mesurés confirme la validité du protocole d'essai.`,
+      ``,
+      `*Rapport de TP officiel généré par CampusHub PhysicsLab Hub · Certifié conforme pour le cursus Licence / Master Sciences Physiques.*`
     );
-    lines.push(``);
-    lines.push(`*Généré automatiquement par CampusHub Virtual Laboratory · Export UTF-8 conforme.*`);
 
     return lines.join('\n');
-  }, [
-    moduleData,
-    currentParams,
-    computedResults,
-    studentName,
-    matricule,
-    academicYear,
-    institution,
-    customObservations,
-  ]);
+  };
 
-  if (!isOpen || !moduleData) return null;
+  const markdownContent = useMemo(
+    () => generateCleanMarkdown(),
+    [
+      moduleData,
+      currentParams,
+      computedResults,
+      studentName,
+      matricule,
+      academicLevel,
+      institution,
+      notes,
+      dateStr,
+    ]
+  );
 
-  // Téléchargement via Blob UTF-8 propre
-  const handleDownload = () => {
+  // Déclencheur du téléchargement PDF natif A4 côté client
+  const handleDownloadPdf = async () => {
+    setIsDownloadingPdf(true);
+    setPdfSuccess(false);
+
     try {
-      const blob = new Blob([markdownContent], { type: 'text/markdown;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      const downloadLink = document.createElement('a');
-      const cleanDate = new Date().toISOString().slice(0, 10);
-      downloadLink.href = url;
-      downloadLink.download = `CR_TP_${moduleData.code}_${cleanDate}.md`;
-      document.body.appendChild(downloadLink);
-      downloadLink.click();
-      document.body.removeChild(downloadLink);
-      URL.revokeObjectURL(url);
+      await triggerAcademicDownload({
+        title: `Compte-Rendu : ${moduleData.title}`,
+        moduleName: moduleShortName,
+        academicLevel,
+        content: markdownContent,
+        fileFormat: 'pdf',
+      });
+      setPdfSuccess(true);
+      setTimeout(() => setPdfSuccess(false), 3000);
     } catch (err) {
-      console.error('Erreur lors du téléchargement du rapport :', err);
+      console.error('Erreur lors de la génération du PDF :', err);
+    } finally {
+      setIsDownloadingPdf(false);
     }
   };
 
+  // Copie propre du compte-rendu dans le presse-papier
   const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(markdownContent);
+    const success = await copyCleanAcademicDocument(markdownContent);
+    if (success) {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error('Échec de la copie :', err);
     }
   };
+
+  if (!isOpen || !moduleData) return null;
 
   return (
     <div
       role="dialog"
       aria-modal="true"
-      aria-labelledby="tp-modal-title"
+      aria-labelledby="physics-tp-export-title"
       className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-5 bg-black/80 backdrop-blur-md overflow-y-auto"
     >
-      <div className="relative w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        {/* En-tête du Modal */}
-        <div className="p-5 border-b border-slate-800 bg-slate-950/80 flex items-center justify-between gap-4">
+      <div className="relative w-full max-w-4xl bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+        {/* EN-TÊTE DU MODAL */}
+        <div className="p-5 border-b border-slate-800 bg-slate-950/80 flex items-center justify-between gap-4 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-2xl bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 flex items-center justify-center shrink-0">
               <FileText size={20} />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 id="tp-modal-title" className="text-base sm:text-lg font-bold text-white">
-                  Exportation de Compte-Rendu de TP
+                <h3 id="physics-tp-export-title" className="text-base sm:text-lg font-bold text-white">
+                  Génération du Compte-Rendu de TP (PDF A4)
                 </h3>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono bg-violet-500/20 text-violet-300 border border-violet-500/30">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                   {moduleData.code}
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                Génération propre en Markdown (UTF-8) avec données expérimentales certifiées.
+                Document universitaire formaté A4 · Export PDF haute définition (scale: 2)
               </p>
             </div>
           </div>
@@ -212,20 +264,20 @@ export default function TPExportModal({
             type="button"
             onClick={onClose}
             className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-            aria-label="Fermer"
+            aria-label="Fermer le modal"
           >
             <X size={18} />
           </button>
         </div>
 
-        {/* Corps avec configuration & prévisualisation */}
+        {/* CORPS SCROLLABLE DU MODAL */}
         <div className="p-5 overflow-y-auto space-y-5 text-left text-xs">
           {/* Métadonnées de l'étudiant */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 p-4 rounded-2xl bg-slate-950 border border-slate-800">
             <div>
               <label className="block text-slate-400 font-medium mb-1 flex items-center gap-1.5">
                 <User size={12} className="text-indigo-400" />
-                <span>Nom de l'étudiant</span>
+                <span>Nom de l'étudiant(e)</span>
               </label>
               <input
                 type="text"
@@ -251,19 +303,19 @@ export default function TPExportModal({
             <div>
               <label className="block text-slate-400 font-medium mb-1 flex items-center gap-1.5">
                 <Calendar size={12} className="text-indigo-400" />
-                <span>Année Académique</span>
+                <span>Niveau Académique</span>
               </label>
               <input
                 type="text"
-                value={academicYear}
-                onChange={(e) => setAcademicYear(e.target.value)}
+                value={academicLevel}
+                onChange={(e) => setAcademicLevel(e.target.value)}
                 className="w-full px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-white focus:border-indigo-500 focus:outline-none"
               />
             </div>
 
             <div>
               <label className="block text-slate-400 font-medium mb-1 flex items-center gap-1.5">
-                <BookOpen size={12} className="text-violet-400" />
+                <School size={12} className="text-violet-400" />
                 <span>Établissement</span>
               </label>
               <input
@@ -275,86 +327,115 @@ export default function TPExportModal({
             </div>
           </div>
 
-          {/* Saisie d'observations personnalisées */}
+          {/* Saisie d'observations personnelles */}
           <div>
             <label className="block text-slate-300 font-bold mb-1.5 flex items-center gap-2">
               <Sparkles size={14} className="text-violet-400" />
-              <span>Observations et analyse personnelle (inclus dans la section IV du rapport) :</span>
+              <span>Observations et analyse personnelle (Section 4 du rapport de TP) :</span>
             </label>
             <textarea
               rows={3}
-              value={customObservations}
-              onChange={(e) => setCustomObservations(e.target.value)}
-              placeholder="Saisissez ici vos constats physiques sur les écarts, temps de réponse ou limites de résonance..."
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              placeholder="Saisissez ici vos constats physiques sur les incertitudes, déphasages ou limites du modèle..."
               className="w-full px-3.5 py-2.5 rounded-2xl bg-slate-950 border border-slate-800 text-white text-xs leading-relaxed focus:border-indigo-500 focus:outline-none"
             />
           </div>
 
-          {/* Sélecteur de mode de vue */}
+          {/* Onglets de prévisualisation */}
           <div className="flex items-center justify-between border-b border-slate-800 pb-2">
             <div className="flex items-center gap-1 bg-slate-950 p-1 rounded-xl border border-slate-800">
               <button
                 type="button"
-                onClick={() => setViewMode('preview')}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
-                  viewMode === 'preview'
+                onClick={() => setActiveTab('preview')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                  activeTab === 'preview'
                     ? 'bg-indigo-600 text-white shadow'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                Aperçu Document Structuré
+                <Eye size={12} />
+                <span>Aperçu Document A4</span>
               </button>
               <button
                 type="button"
-                onClick={() => setViewMode('raw')}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors ${
-                  viewMode === 'raw'
+                onClick={() => setActiveTab('markdown')}
+                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-colors flex items-center gap-1.5 ${
+                  activeTab === 'markdown'
                     ? 'bg-indigo-600 text-white shadow'
                     : 'text-slate-400 hover:text-white'
                 }`}
               >
-                Code Markdown Brut (.md)
+                <FileText size={12} />
+                <span>Texte Structuré</span>
               </button>
             </div>
 
-            <div className="text-[11px] text-slate-500 font-mono hidden sm:block">
-              Encodage UTF-8 certifié sans balise parasite
+            <div className="text-[11px] text-slate-400 font-mono hidden sm:flex items-center gap-1.5">
+              <span className="text-indigo-400">Nom du fichier :</span>
+              <span className="text-slate-300 font-bold">{dynamicPdfFilename}</span>
             </div>
           </div>
 
-          {/* Affichage du document */}
-          <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-slate-300 max-h-72 overflow-y-auto font-mono text-[11px] leading-relaxed select-text whitespace-pre-wrap">
-            {markdownContent}
-          </div>
+          {/* ZONE D'AFFICHAGE DE L'APERÇU */}
+          {activeTab === 'preview' ? (
+            <AcademicPhysicsSheetPreview
+              moduleName={moduleShortName}
+              academicLevel={academicLevel}
+              content={markdownContent}
+            />
+          ) : (
+            <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 text-slate-300 max-h-80 overflow-y-auto font-mono text-[11px] leading-relaxed select-text whitespace-pre-wrap">
+              {markdownContent}
+            </div>
+          )}
         </div>
 
-        {/* Pied de page d'actions */}
-        <div className="p-4 border-t border-slate-800 bg-slate-950/80 flex flex-wrap items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors text-xs font-semibold"
-          >
-            Fermer
-          </button>
-
-          <div className="flex items-center gap-2.5">
+        {/* PIED DE PAGE D'ACTIONS AVANCÉES (Sans .md et sans bouton Imprimer, conformément aux consignes) */}
+        <div className="p-4 border-t border-slate-800 bg-slate-950/80 flex flex-wrap items-center justify-between gap-3 shrink-0">
+          <div className="flex items-center gap-2">
             <button
               type="button"
               onClick={handleCopy}
               className="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-colors text-xs font-semibold flex items-center gap-1.5 border border-slate-700"
             >
               {copied ? <Check size={14} className="text-emerald-400" /> : <Copy size={14} />}
-              <span>{copied ? 'Copié !' : 'Copier le Texte'}</span>
+              <span>{copied ? 'Copié !' : 'Copier le Rapport'}</span>
             </button>
+          </div>
 
+          <div className="flex items-center gap-2.5">
             <button
               type="button"
-              onClick={handleDownload}
-              className="px-4 py-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs font-bold shadow-lg shadow-indigo-600/20 transition-all flex items-center gap-2"
+              onClick={onClose}
+              className="px-4 py-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors text-xs font-semibold"
             >
-              <Download size={15} />
-              <span>Télécharger le Rapport (.md)</span>
+              Fermer
+            </button>
+
+            {/* BOUTON UNIQUE D'EXPORTATION NATIVE PDF */}
+            <button
+              type="button"
+              onClick={handleDownloadPdf}
+              disabled={isDownloadingPdf}
+              className="px-5 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-white text-xs font-bold shadow-lg shadow-indigo-600/30 transition-all flex items-center gap-2"
+            >
+              {isDownloadingPdf ? (
+                <>
+                  <Loader2 size={15} className="animate-spin text-white" />
+                  <span>Génération du PDF A4 en cours...</span>
+                </>
+              ) : pdfSuccess ? (
+                <>
+                  <Check size={15} className="text-emerald-300" />
+                  <span>PDF Téléchargé avec Succès !</span>
+                </>
+              ) : (
+                <>
+                  <Download size={15} />
+                  <span>Télécharger PDF</span>
+                </>
+              )}
             </button>
           </div>
         </div>
