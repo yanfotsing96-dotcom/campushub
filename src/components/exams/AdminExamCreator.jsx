@@ -855,9 +855,9 @@ export default function AdminExamCreator({ onExamCreated }) {
 
       {/* Submissions Modal for Admin */}
       {selectedExamSubmissions && (
-        <div className="fixed inset-0 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 max-w-2xl w-full shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-3">
+        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+          <div className="bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700/80 rounded-3xl p-6 max-w-2xl w-full shadow-2xl space-y-4 max-h-[85vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-700/70 pb-3">
               <div>
                 <h3 className="text-base font-bold text-slate-900 dark:text-slate-100">
                   Copies Remises : {selectedExamSubmissions.titre}

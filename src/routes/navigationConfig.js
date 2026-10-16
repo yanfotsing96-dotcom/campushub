@@ -8,7 +8,6 @@ import {
   HelpCircle,
   LayoutDashboard,
   FileCheck2,
-  BookOpen,
 } from 'lucide-react';
 
 export const NAVIGATION_ITEMS = [
@@ -36,12 +35,6 @@ export const NAVIGATION_ITEMS = [
     label: 'Catalogue National',
     icon: Library,
     description: 'Gestion & catalogue des cours (CRUD multi-universités)',
-  },
-  {
-    path: '/falsh-hub',
-    label: 'Pôle FALSH & Lettres',
-    icon: BookOpen,
-    description: 'Méthodologie dissertation, figures de style & normes académiques',
   },
   {
     path: '/profile',

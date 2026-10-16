@@ -137,7 +137,7 @@ export default function DelegateDashboardPage() {
   return (
     <div className="page-content py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
       {/* SaaS Hero Header for Class Delegate */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-950 via-emerald-950 to-slate-900 text-white p-6 md:p-8 shadow-xl border border-emerald-900/40">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-emerald-950/70 to-slate-850 text-white p-6 md:p-8 shadow-xl border border-slate-700/70">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">

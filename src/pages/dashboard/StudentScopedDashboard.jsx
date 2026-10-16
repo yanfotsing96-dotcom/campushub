@@ -198,7 +198,7 @@ export default function StudentScopedDashboard() {
       </div>
 
       {/* 3. Enrolled Courses Chips of the Semester */}
-      <div className="bg-slate-800/90 border border-slate-700/60 rounded-3xl p-5 shadow-xs space-y-3 text-left">
+      <div className="bg-slate-800/95 border border-slate-700/70 rounded-3xl p-5 shadow-xs space-y-3 text-left">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
             <BookOpen size={14} className="text-indigo-400" />
@@ -213,13 +213,13 @@ export default function StudentScopedDashboard() {
           {scopedCourses.map((c) => (
             <div
               key={c.id}
-              className="p-3.5 rounded-2xl bg-slate-900/80 border border-slate-700/70 space-y-1.5 hover:border-indigo-400/80 transition-colors"
+              className="p-3.5 rounded-2xl bg-slate-850/90 border border-slate-700/80 space-y-1.5 hover:border-indigo-400 transition-colors shadow-xs"
             >
               <div className="flex items-center justify-between">
                 <span className="px-2 py-0.5 rounded text-[10px] font-mono font-black uppercase tracking-wider bg-indigo-600 text-white">
                   {c.codeUe}
                 </span>
-                <span className="text-[11px] font-bold text-slate-400 font-mono">
+                <span className="text-[11px] font-bold text-slate-300 font-mono">
                   {c.credits} Crédits
                 </span>
               </div>
@@ -311,13 +311,13 @@ export default function StudentScopedDashboard() {
             {availableExams.map((e) => (
               <div
                 key={e.id}
-                className="p-5 rounded-2xl bg-slate-900/80 border border-slate-700/70 space-y-3"
+                className="p-5 rounded-2xl bg-slate-850/90 border border-slate-700/80 space-y-3 shadow-xs"
               >
                 <div className="flex items-center justify-between">
                   <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-bold bg-indigo-600 text-white">
                     {e.codeUe}
                   </span>
-                  <span className="text-xs font-bold text-slate-400">
+                  <span className="text-xs font-bold text-slate-300">
                     {e.durationMinutes} min · {e.totalPoints} pts
                   </span>
                 </div>
@@ -326,14 +326,14 @@ export default function StudentScopedDashboard() {
                   {e.titre}
                 </h4>
 
-                <p className="text-xs text-slate-400 line-clamp-2">
+                <p className="text-xs text-slate-300 line-clamp-2">
                   {e.description}
                 </p>
 
                 <div className="pt-2 flex justify-end">
                   <Link
                     to="/exams"
-                    className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1 shadow-xs"
+                    className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1 shadow-xs transition-colors"
                   >
                     <span>Composer</span>
                     <ArrowRight size={12} />
@@ -347,7 +347,7 @@ export default function StudentScopedDashboard() {
 
       {/* Tab 3: Department Class Announcements */}
       {activeTab === 'announcements' && (
-        <div className="bg-slate-800/90 border border-slate-700/60 rounded-3xl p-6 shadow-xs space-y-4 text-left">
+        <div className="bg-slate-800/95 border border-slate-700/70 rounded-3xl p-6 shadow-xs space-y-4 text-left">
           <div className="flex items-center justify-between border-b border-slate-700/60 pb-3">
             <h3 className="text-base font-bold text-slate-100 flex items-center gap-2">
               <BellRing size={18} className="text-emerald-400" />
@@ -357,7 +357,7 @@ export default function StudentScopedDashboard() {
           </div>
 
           <div className="space-y-3 text-xs">
-            <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-700/70 space-y-1.5">
+            <div className="p-4 rounded-2xl bg-slate-850/90 border border-slate-700/80 space-y-1.5 shadow-xs">
               <div className="flex items-center justify-between font-bold">
                 <span className="text-indigo-400">INF201 · Rattrapage TP</span>
                 <span className="text-slate-400 text-[11px]">Aujourd'hui à 07:45</span>
@@ -370,7 +370,7 @@ export default function StudentScopedDashboard() {
               </p>
             </div>
 
-            <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-700/70 space-y-1.5">
+            <div className="p-4 rounded-2xl bg-slate-850/90 border border-slate-700/80 space-y-1.5 shadow-xs">
               <div className="flex items-center justify-between font-bold">
                 <span className="text-indigo-400">MAT201 · Changement Salle</span>
                 <span className="text-slate-400 text-[11px]">Hier à 16:30</span>

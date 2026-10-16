@@ -67,10 +67,10 @@ export default function ExamFinalSubmitModal({
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 md:p-7 max-w-lg w-full shadow-2xl space-y-5 animate-in zoom-in-95">
+    <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in">
+      <div className="bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700/80 rounded-3xl p-6 md:p-7 max-w-lg w-full shadow-2xl space-y-5 animate-in zoom-in-95">
         {/* Header */}
-        <div className="flex items-start justify-between border-b border-slate-100 dark:border-slate-800 pb-3.5">
+        <div className="flex items-start justify-between border-b border-slate-100 dark:border-slate-700/70 pb-3.5">
           <div className="flex items-center gap-3">
             <div className="w-11 h-11 rounded-2xl bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
               <FileCheck2 size={24} />

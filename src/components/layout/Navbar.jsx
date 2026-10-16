@@ -81,12 +81,12 @@ export default function Navbar() {
             <button
               type="button"
               onClick={() => setGlobalSearchOpen(true)}
-              className="hidden sm:inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-400 text-xs hover:bg-slate-800 hover:text-slate-200 transition-colors"
+              className="hidden sm:inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-800/90 border border-slate-700/80 text-slate-300 text-xs hover:bg-slate-750 hover:text-white transition-colors"
               title="Recherche globale (⌘K)"
             >
               <Search size={13} />
               <span>Rechercher...</span>
-              <kbd className="px-1 py-0.2 rounded text-[10px] font-mono bg-slate-900 border border-slate-800">
+              <kbd className="px-1 py-0.2 rounded text-[10px] font-mono bg-slate-900 border border-slate-700">
                 ⌘K
               </kbd>
             </button>
@@ -124,8 +124,8 @@ export default function Navbar() {
 
         {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
-          <div className="lg:hidden border-t border-slate-800 bg-slate-950 p-4 space-y-3">
-            <div className="flex items-center gap-2 pb-3 border-b border-slate-800 text-xs">
+          <div className="lg:hidden border-t border-slate-700/80 bg-slate-900 p-4 space-y-3">
+            <div className="flex items-center gap-2 pb-3 border-b border-slate-700/80 text-xs">
               <div className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 font-bold flex items-center justify-center">
                 {getInitials(fullName)}
               </div>

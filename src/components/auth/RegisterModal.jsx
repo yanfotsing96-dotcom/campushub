@@ -19,8 +19,8 @@ export default function RegisterModal({ isOpen, onClose, onRegisterSuccess }) {
   };
 
   return (
-    <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in overflow-y-auto">
-      <div className="relative bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-lg w-full shadow-2xl p-2 my-8">
+    <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-in fade-in overflow-y-auto">
+      <div className="relative bg-white dark:bg-slate-850 border border-slate-200 dark:border-slate-700/80 rounded-3xl max-w-lg w-full shadow-2xl p-2 my-8">
         <button
           type="button"
           onClick={onClose}

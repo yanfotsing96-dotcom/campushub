@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, lazy, Suspense } from 'react';
-import { NavLink, Link, useNavigate } from 'react-router-dom';
+import { NavLink, Link, useNavigate, useLocation } from 'react-router-dom';
 import {
   GraduationCap,
   Library,
@@ -14,7 +14,6 @@ import {
   ChevronDown,
   Building,
   FileCheck2,
-  BookOpen,
   Check,
   LifeBuoy,
 } from 'lucide-react';
@@ -41,7 +40,6 @@ const NAVIGATION_GROUPS = [
     titleKey: 'nav.studyTools',
     items: [
       { path: '/learning', labelKey: 'nav.learning', defaultLabel: 'Laboratoires & Playgrounds', icon: Sparkles, isLabFlag: true },
-      { path: '/falsh-hub', labelKey: 'nav.falshHub', defaultLabel: 'Pôle FALSH & Lettres', icon: BookOpen },
     ],
   },
   {
@@ -49,7 +47,6 @@ const NAVIGATION_GROUPS = [
     titleKey: 'nav.nationalResources',
     items: [
       { path: '/ressources', labelKey: 'nav.resources', defaultLabel: 'Catalogue National', icon: Library },
-      { path: '/profile', labelKey: 'nav.profile', defaultLabel: 'Profil National', icon: User },
     ],
   },
   {
@@ -68,6 +65,7 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onNavigate, 
   const { user, logout, switchRole: authSwitchRole } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const location = useLocation();
   const [roleDropdownOpen, setRoleDropdownOpen] = useState(false);
   const [verificationModalRole, setVerificationModalRole] = useState(null);
   const [examsCounter, setExamsCounter] = useState(0);
@@ -126,23 +124,43 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onNavigate, 
         isCollapsed ? 'w-16' : 'w-64'
       }`}
     >
-      {/* 1. Top Header with Immediate Top-Left FAQ Access & Collapse Trigger */}
-      <div className="p-3 border-b border-slate-700/60 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
+      {/* 1. Top Header with Immediate Top-Left Quick Access Icons (Aide & FAQ + Profil National) */}
+      <div className="p-2.5 border-b border-slate-700/60 flex items-center justify-between gap-1.5">
+        <div className="flex items-center gap-1.5 min-w-0">
           {/* Top-Left Help & FAQ Quick Access Button */}
           <Link
             to="/help"
             onClick={onNavigate}
-            className="p-1.5 rounded-lg border border-slate-700/80 bg-slate-800 hover:bg-indigo-600/20 text-indigo-300 hover:text-white transition-colors shrink-0 shadow-xs"
-            title="Centre d'Aide & FAQ Rapide"
+            className={`p-1.5 rounded-lg border transition-colors shrink-0 shadow-xs flex items-center justify-center ${
+              location.pathname === '/help'
+                ? 'bg-indigo-600 border-indigo-500 text-white shadow-indigo-500/25'
+                : 'border-slate-700/70 bg-slate-800 hover:bg-slate-750 text-indigo-300 hover:text-white'
+            }`}
+            title="Centre d'Aide & FAQ"
+            aria-label="Centre d'Aide & FAQ"
           >
             <LifeBuoy size={16} />
           </Link>
 
+          {/* Top-Left National Profile Quick Access Button */}
+          <Link
+            to="/profile"
+            onClick={onNavigate}
+            className={`p-1.5 rounded-lg border transition-colors shrink-0 shadow-xs flex items-center justify-center ${
+              location.pathname === '/profile'
+                ? 'bg-indigo-600 border-indigo-500 text-white shadow-indigo-500/25'
+                : 'border-slate-700/70 bg-slate-800 hover:bg-slate-750 text-slate-300 hover:text-white'
+            }`}
+            title="Profil National & Identité Académique"
+            aria-label="Profil National"
+          >
+            <User size={16} />
+          </Link>
+
           {!isCollapsed && (
-            <Link to="/dashboard" onClick={onNavigate} className="flex items-center gap-2 overflow-hidden">
+            <Link to="/dashboard" onClick={onNavigate} className="flex items-center gap-1.5 overflow-hidden ml-1">
               <div className="leading-tight truncate">
-                <span className="font-bold text-slate-100 text-sm tracking-tight block truncate">
+                <span className="font-bold text-slate-100 text-xs sm:text-sm tracking-tight block truncate">
                   CampusHub 🇨🇲
                 </span>
                 <span className="text-[10px] text-slate-400 font-medium block truncate">
@@ -158,6 +176,7 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onNavigate, 
           onClick={onToggleCollapse}
           className="p-1.5 rounded-lg border border-slate-700/60 text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-colors shrink-0"
           title={isCollapsed ? 'Déplier la barre latérale' : 'Replier'}
+          aria-label={isCollapsed ? 'Déplier la barre latérale' : 'Replier'}
         >
           {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
         </button>
@@ -307,32 +326,15 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onNavigate, 
         })}
       </nav>
 
-      {/* 4. Footer Utilities (With Help Center & Theme Switcher) */}
-      <div className="p-3 border-t border-slate-700/60 space-y-2">
-        <Link
-          to="/help"
-          onClick={onNavigate}
-          className={`w-full py-1.5 px-2 rounded-xl border border-slate-700/60 bg-slate-800/80 hover:bg-slate-750 text-slate-300 hover:text-white text-xs flex items-center transition-colors ${
-            isCollapsed ? 'justify-center' : 'justify-between'
-          }`}
-          title="Centre d'Aide & FAQ"
-        >
-          <div className="flex items-center gap-2">
-            <LifeBuoy size={14} className="text-indigo-400" />
-            {!isCollapsed && <span className="font-medium">Centre d'Aide & FAQ</span>}
-          </div>
-          {!isCollapsed && (
-            <span className="text-[10px] font-mono text-indigo-400">24/7</span>
-          )}
-        </Link>
-
+      {/* 4. Footer Utilities (Theme Switcher & Logout) */}
+      <div className="p-3 border-t border-slate-700/60">
         <div className={`flex items-center ${isCollapsed ? 'flex-col gap-2' : 'justify-between'}`}>
           <ThemeToggle />
 
           <button
             type="button"
             onClick={handleLogout}
-            className="p-1.5 text-slate-400 hover:text-red-400 rounded-lg hover:bg-slate-800 transition-colors flex items-center gap-1.5 text-xs"
+            className="p-1.5 text-slate-400 hover:text-red-400 rounded-lg hover:bg-slate-800 transition-colors flex items-center gap-1.5 text-xs font-medium"
             title="Déconnexion"
           >
             <LogOut size={14} />

@@ -5,6 +5,7 @@ import {
   GraduationCap,
   Building,
   LifeBuoy,
+  User,
 } from 'lucide-react';
 import ErrorBoundary from '../components/common/ErrorBoundary';
 import RouteLoadingSkeleton from '../components/common/RouteLoadingSkeleton';
@@ -68,7 +69,7 @@ export default function MainLayout() {
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden flex">
           <div
-            className="fixed inset-0 bg-slate-950/70 backdrop-blur-xs"
+            className="fixed inset-0 bg-slate-900/80 backdrop-blur-xs"
             onClick={() => setMobileMenuOpen(false)}
           />
           <div className="relative z-10 w-64 h-full bg-slate-900 shadow-2xl">
@@ -87,18 +88,38 @@ export default function MainLayout() {
 
       {/* 3. Main Application Column */}
       <div className="flex-1 flex flex-col min-w-0">
-        {/* Sticky Header with Top-Left FAQ Quick Access & Institutional Switcher */}
-        <header className="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-700/60 px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
-          {/* Top-Left Header: Quick Help / FAQ Icon, Mobile Toggle & Page Title */}
-          <div className="flex items-center gap-3 min-w-0">
+        {/* Sticky Header with Top-Left FAQ & Profile Quick Access + Institutional Switcher */}
+        <header className="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-700/60 px-4 sm:px-6 h-14 flex items-center justify-between gap-3 sm:gap-4">
+          {/* Top-Left Header: Quick Help / FAQ Icon, Profile Icon, Mobile Toggle & Page Title */}
+          <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
             {/* Direct Top-Left FAQ Quick Access Button */}
             <Link
               to="/help"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border border-slate-700/70 bg-slate-800 hover:bg-indigo-600/20 text-indigo-300 hover:text-white transition-colors text-xs font-semibold shrink-0 shadow-xs"
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border transition-colors text-xs font-semibold shrink-0 shadow-xs ${
+                location.pathname === '/help'
+                  ? 'bg-indigo-600 border-indigo-500 text-white'
+                  : 'border-slate-700/70 bg-slate-800 hover:bg-slate-750 text-indigo-300 hover:text-white'
+              }`}
               title="Centre d'Aide & FAQ CampusHub"
+              aria-label="Centre d'Aide & FAQ"
             >
-              <LifeBuoy size={15} className="text-indigo-400" />
+              <LifeBuoy size={15} className={location.pathname === '/help' ? 'text-white' : 'text-indigo-400'} />
               <span className="hidden sm:inline">Aide & FAQ</span>
+            </Link>
+
+            {/* Direct Top-Left National Profile Quick Access Button */}
+            <Link
+              to="/profile"
+              className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border transition-colors text-xs font-semibold shrink-0 shadow-xs ${
+                location.pathname === '/profile'
+                  ? 'bg-indigo-600 border-indigo-500 text-white'
+                  : 'border-slate-700/70 bg-slate-800 hover:bg-slate-750 text-slate-300 hover:text-white'
+              }`}
+              title="Profil National & Identité Académique"
+              aria-label="Profil National"
+            >
+              <User size={15} className={location.pathname === '/profile' ? 'text-white' : 'text-slate-300'} />
+              <span className="hidden md:inline">Profil National</span>
             </Link>
 
             <button

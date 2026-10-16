@@ -281,12 +281,22 @@ class AcademicAccessService {
       };
     }
 
-    // Filières FALSH (Lettres, Philo, Histoire, Langues)
+    // Spécialités FALSH explicites uniquement
+    if (norm.includes('falsh') || norm.includes('lettre') || norm.includes('philo') || norm.includes('hist') || norm.includes('langue')) {
+      return {
+        type: 'falsh',
+        title: 'Atelier Méthodologique & Rédaction',
+        description: 'Assistant de structuration de dissertation, dictionnaire des figures de style et générateur de bibliographie (APA/MLA/Chicago).',
+        badge: 'Lettres & Sciences Humaines',
+      };
+    }
+
+    // Défaut national général : Hub Informatique, Programmation & Sciences de l'Ingénieur
     return {
-      type: 'falsh',
-      title: 'Atelier Méthodologique FALSH',
-      description: 'Assistant de structuration de dissertation, dictionnaire des figures de style et générateur de bibliographie (APA/MLA/Chicago).',
-      badge: 'Humanités & Lettres',
+      type: 'code',
+      title: 'Laboratoire & Bac à Sable Informatique',
+      description: 'Compilateur C (GCC/Valgrind), interpréteur Python 3, requêtes SQL et prévisualisation Web.',
+      badge: 'Sciences Appliquées & Ingénierie',
     };
   }
 }
