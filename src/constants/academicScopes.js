@@ -117,6 +117,7 @@ export const ACADEMIC_LEVELS = [
   { id: 'Master', shortLabel: 'Master', label: 'Master (M1 / M2 / Ingénieur)', semester: 'Semestre 7 à 10' },
   { id: 'M1', shortLabel: 'M1', label: 'Master 1 (M1) / 4ème Année Ing.', semester: 'Semestre 7 & 8' },
   { id: 'M2', shortLabel: 'M2', label: 'Master 2 (M2) / 5ème Année Ing.', semester: 'Semestre 9 & 10' },
+  { id: 'Doctorat', shortLabel: 'Doctorat', label: 'Doctorat / PhD', semester: 'Recherche Doctorale' },
 ];
 
 /**

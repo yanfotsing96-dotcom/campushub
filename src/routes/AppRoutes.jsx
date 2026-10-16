@@ -1,53 +1,53 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import MainLayout from '../layouts/MainLayout';
 import ErrorBoundary from '../components/common/ErrorBoundary';
 import ProtectedRoute from '../components/auth/ProtectedRoute';
 import RouteLoadingSkeleton from '../components/common/RouteLoadingSkeleton';
+import { useAuth } from '../hooks/useAuth';
 
-// Public Landing & Auth Pages
-const LandingPage = lazy(() => import('../pages/LandingPage'));
-const AuthPage = lazy(() => import('../pages/AuthPage'));
+// Auth & Registration Pages
 const LoginPage = lazy(() => import('../pages/LoginPage'));
 const RegisterPage = lazy(() => import('../pages/RegisterPage'));
+const AuthPage = lazy(() => import('../pages/AuthPage'));
 
-// Core Academic Pages (Code-split chunks)
+// Core Academic Pages (Preserved & Enhanced)
 const StudentScopedDashboard = lazy(() => import('../pages/dashboard/StudentScopedDashboard'));
-const WorkspacePage = lazy(() => import('../pages/WorkspacePage'));
 const ExamsListPage = lazy(() => import('../pages/exams/ExamsListPage'));
 const ResourceCrud = lazy(() => import('../pages/ResourceCrud'));
-const TechHubPage = lazy(() => import('../pages/TechHubPage'));
 const FalshHubPage = lazy(() => import('../pages/FalshHubPage'));
-const SearchPage = lazy(() => import('../pages/SearchPage'));
 const LearningPage = lazy(() => import('../pages/LearningPage'));
-const ProductivityPage = lazy(() => import('../pages/ProductivityPage'));
-const EvaluationPage = lazy(() => import('../pages/EvaluationPage'));
-const ServicesPage = lazy(() => import('../pages/ServicesPage'));
-const PricingPage = lazy(() => import('../pages/PricingPage'));
 const HelpCenterPage = lazy(() => import('../pages/HelpCenterPage'));
-const FavoritesHistoryPage = lazy(() => import('../pages/FavoritesHistoryPage'));
-const NotebookPage = lazy(() => import('../pages/NotebookPage'));
 const ProfilePage = lazy(() => import('../pages/ProfilePage'));
 
-// Role-Protected Heavy Pages (Admin, Moderation, Delegate)
+// Role-Protected Dedicated Dashboards (Admin, Moderation, Delegate)
 const DelegateDashboardPage = lazy(() => import('../pages/delegate/DelegateDashboardPage'));
 const ModeratorDashboardPage = lazy(() => import('../pages/moderator/ModeratorDashboardPage'));
 const AdminPage = lazy(() => import('../pages/AdminPage'));
 const NotFoundPage = lazy(() => import('../pages/NotFoundPage'));
+
+// Root Gateway: Boots directly to the Dashboard if authenticated, or the Grand Registration Form
+function RootGateway() {
+  const { isAuthenticated } = useAuth();
+  if (isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+  return <RegisterPage />;
+}
 
 export default function AppRoutes() {
   return (
     <ErrorBoundary>
       <Suspense fallback={<RouteLoadingSkeleton />}>
         <Routes>
-          {/* 1. Public Front Page & Authentication Pages */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/home" element={<LandingPage />} />
+          {/* Direct entry point: boots to Grand Formulaire if guest, or main Dashboard if logged in */}
+          <Route path="/" element={<RootGateway />} />
+          <Route path="/home" element={<RootGateway />} />
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
 
-          {/* 2. Authenticated Academic App with MainLayout */}
+          {/* Authenticated Academic App with MainLayout */}
           <Route
             element={
               <ProtectedRoute>
@@ -55,30 +55,27 @@ export default function AppRoutes() {
               </ProtectedRoute>
             }
           >
-            {/* Scoped Dashboard & Enrolled Courses */}
+            {/* Scoped Dashboard & Courses */}
             <Route path="/dashboard" element={<StudentScopedDashboard />} />
-            <Route path="/workspace" element={<WorkspacePage />} />
             <Route path="/courses" element={<StudentScopedDashboard />} />
             <Route path="/exams" element={<ExamsListPage />} />
 
-            {/* National Catalogue & Search */}
+            {/* National Catalogue, Playgrounds & Specialized Hubs */}
             <Route path="/ressources" element={<ResourceCrud />} />
-            <Route path="/tech-hub" element={<TechHubPage />} />
-            <Route path="/falsh-hub" element={<FalshHubPage />} />
-            <Route path="/search" element={<SearchPage />} />
             <Route path="/learning" element={<LearningPage />} />
-            <Route path="/productivity" element={<ProductivityPage />} />
-            <Route path="/evaluation" element={<EvaluationPage />} />
-            <Route path="/services" element={<ServicesPage />} />
-            <Route path="/pricing" element={<PricingPage />} />
-            <Route path="/help" element={<HelpCenterPage />} />
-            <Route path="/favs-history" element={<FavoritesHistoryPage />} />
-            <Route path="/favorites" element={<FavoritesHistoryPage />} />
-            <Route path="/notebook" element={<NotebookPage />} />
+            <Route path="/falsh-hub" element={<FalshHubPage />} />
             <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/help" element={<HelpCenterPage />} />
 
-            {/* 3. Role-Protected Dedicated Dashboards */}
-            {/* Delegate Space: requires 'delegate' or higher ('admin') */}
+            {/* Redirects for removed sections to preserve deep link continuity */}
+            <Route path="/workspace" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/tech-hub" element={<Navigate to="/learning?tab=playground" replace />} />
+            <Route path="/search" element={<Navigate to="/ressources" replace />} />
+            <Route path="/evaluation" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/pricing" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/notebook" element={<Navigate to="/dashboard" replace />} />
+
+            {/* Role-Protected Dashboards */}
             <Route
               path="/delegate"
               element={
@@ -87,8 +84,6 @@ export default function AppRoutes() {
                 </ProtectedRoute>
               }
             />
-
-            {/* Moderator Space: requires 'moderator' or higher ('admin') */}
             <Route
               path="/moderation"
               element={
@@ -97,8 +92,6 @@ export default function AppRoutes() {
                 </ProtectedRoute>
               }
             />
-
-            {/* Admin Space: strictly requires 'admin' */}
             <Route
               path="/admin"
               element={
@@ -109,7 +102,7 @@ export default function AppRoutes() {
             />
           </Route>
 
-          {/* 4. Fallback 404 Route */}
+          {/* Fallback 404 Route */}
           <Route path="*" element={<NotFoundPage />} />
         </Routes>
       </Suspense>

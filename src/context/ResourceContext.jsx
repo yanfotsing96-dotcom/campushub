@@ -1,15 +1,11 @@
 /* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { resourceService } from '../services/resourceService';
-import { favoritesService } from '../services/favoritesService';
-import { historyService } from '../services/historyService';
 
 const ResourceContext = createContext(null);
 
 export function ResourceProvider({ children }) {
   const [resources, setResources] = useState(() => resourceService.getAll());
-  const [favorites, setFavorites] = useState(() => favoritesService.getFavoriteIds());
-  const [history, setHistory] = useState(() => historyService.getHistory());
 
   const refreshResources = useCallback(() => {
     setResources(resourceService.getAll());
@@ -29,68 +25,30 @@ export function ResourceProvider({ children }) {
 
   const deleteResource = useCallback((id) => {
     resourceService.delete(id);
-    favoritesService.remove(id);
     setResources(resourceService.getAll());
-    setFavorites(favoritesService.getFavoriteIds());
   }, []);
-
-  const toggleFavorite = useCallback((resourceId) => {
-    const result = favoritesService.toggle(resourceId);
-    setFavorites([...result.favorites]);
-    return result;
-  }, []);
-
-  const isFavorite = useCallback((resourceId) => {
-    return favorites.some((id) => String(id) === String(resourceId));
-  }, [favorites]);
 
   const recordDownload = useCallback((resourceId) => {
     resourceService.incrementDownloads(resourceId);
-    const updatedHistory = historyService.recordConsultation(resourceId);
-    setHistory([...updatedHistory]);
     setResources(resourceService.getAll());
-  }, []);
-
-  const clearHistory = useCallback(() => {
-    historyService.clear();
-    setHistory([]);
-  }, []);
-
-  const clearFavorites = useCallback(() => {
-    favoritesService.clear();
-    setFavorites([]);
   }, []);
 
   const contextValue = useMemo(() => {
     return {
       resources,
-      favorites,
-      history,
-      favoritesCount: favorites.length,
-      historyCount: history.length,
       refreshResources,
       addResource,
       updateResource,
       deleteResource,
-      toggleFavorite,
-      isFavorite,
       recordDownload,
-      clearHistory,
-      clearFavorites,
     };
   }, [
     resources,
-    favorites,
-    history,
     refreshResources,
     addResource,
     updateResource,
     deleteResource,
-    toggleFavorite,
-    isFavorite,
     recordDownload,
-    clearHistory,
-    clearFavorites,
   ]);
 
   return (

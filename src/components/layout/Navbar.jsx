@@ -6,89 +6,22 @@ import {
   Menu,
   X,
   Search,
-  Crown,
-  ShieldCheck,
-  Award,
-  BookOpen,
 } from 'lucide-react';
 import ThemeToggle from '../common/ThemeToggle';
 import GlobalSearchModal from '../search/GlobalSearchModal';
 import { useAuth } from '../../hooks/useAuth';
-import { useResources } from '../../hooks/useResources';
 import { NAVIGATION_ITEMS } from '../../routes/navigationConfig';
-import { ROLES, normalizeRole } from '../../constants/rbacConstants';
-import '../../styles/LinkNav.css';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [globalSearchOpen, setGlobalSearchOpen] = useState(false);
   const { user, logout } = useAuth();
-  const { favoritesCount } = useResources();
   const navigate = useNavigate();
 
-  // Dynamic user data
   const fullName = user?.fullName || user?.nom || 'Étudiant';
   const matricule = user?.matricule || '';
   const role = user?.role || 'Étudiant';
-  const isPro = user?.isPro ?? true;
-  const status = user?.status || (isPro ? 'Étudiant Pro' : (user?.roleLabel || 'Étudiant'));
 
-  // Role conditional styling helper (SaaS / Vercel theme)
-  const getRoleTheme = (userRole, userStatus) => {
-    const norm = normalizeRole(userRole);
-    const isProUser = userStatus === 'Étudiant Pro' || userStatus?.toLowerCase().includes('pro');
-
-    if (isProUser && norm === ROLES.STUDENT) {
-      return {
-        badgeBg: 'bg-amber-500/10 text-amber-800 dark:text-amber-300 border-amber-300/60 dark:border-amber-700/60',
-        dotBg: 'bg-amber-500',
-        avatarBg: 'bg-gradient-to-tr from-amber-500 via-indigo-600 to-purple-600 text-white',
-        icon: Crown,
-        label: 'Étudiant Pro',
-      };
-    }
-
-    switch (norm) {
-      case ROLES.ADMIN:
-        return {
-          badgeBg: 'bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800',
-          dotBg: 'bg-purple-500',
-          avatarBg: 'bg-gradient-to-tr from-purple-600 to-indigo-600 text-white',
-          icon: Crown,
-          label: userStatus || 'Administrateur',
-        };
-      case ROLES.MODERATOR:
-        return {
-          badgeBg: 'bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800',
-          dotBg: 'bg-sky-500',
-          avatarBg: 'bg-gradient-to-tr from-sky-600 to-blue-600 text-white',
-          icon: ShieldCheck,
-          label: userStatus || 'Modérateur',
-        };
-      case ROLES.DELEGATE:
-        return {
-          badgeBg: 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
-          dotBg: 'bg-emerald-500',
-          avatarBg: 'bg-gradient-to-tr from-emerald-600 to-teal-600 text-white',
-          icon: Award,
-          label: userStatus || 'Délégué',
-        };
-      case ROLES.STUDENT:
-      default:
-        return {
-          badgeBg: 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800',
-          dotBg: 'bg-indigo-500',
-          avatarBg: 'bg-gradient-to-tr from-indigo-600 to-blue-600 text-white',
-          icon: BookOpen,
-          label: userStatus || 'Étudiant',
-        };
-    }
-  };
-
-  const roleTheme = getRoleTheme(role, status);
-  const RoleIcon = roleTheme.icon;
-
-  // Listen for Cmd+K / Ctrl+K keyboard shortcut
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
@@ -106,7 +39,7 @@ export default function Navbar() {
   };
 
   const getInitials = (name) => {
-    if (!name) return 'YF';
+    if (!name) return 'ET';
     const parts = name.trim().split(/\s+/);
     if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
@@ -114,253 +47,124 @@ export default function Navbar() {
 
   return (
     <>
-      <header className="academic-header">
-        <div className="academic-nav-container">
-          {/* Brand Section */}
-          <Link to="/ressources" className="brand-logo">
-            <div className="brand-icon-box">
-              <GraduationCap size={22} />
+      <header className="sticky top-0 z-40 bg-slate-900/90 backdrop-blur-md border-b border-slate-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-6">
+          {/* Zone 1: Single Brand element */}
+          <Link to="/dashboard" className="flex items-center gap-2.5 shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center text-white font-bold">
+              <GraduationCap size={18} />
             </div>
-            <div className="brand-texts">
-              <span className="brand-title">CampusHub</span>
-              <span className="brand-subtitle">Univ. Yaoundé I</span>
-            </div>
+            <span className="font-bold text-sm tracking-tight text-slate-100 whitespace-nowrap">
+              CampusHub Cameroun
+            </span>
           </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="desktop-nav" aria-label="Navigation principale">
-            <ul className="nav-links">
-              {NAVIGATION_ITEMS.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <li key={item.path}>
-                    <NavLink
-                      to={item.path}
-                      className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-                    >
-                      <Icon size={17} className="nav-item-icon" />
-                      <span>{item.label}</span>
-                      {item.badgeKey === 'favoritesCount' && favoritesCount > 0 && (
-                        <span
-                          style={{
-                            backgroundColor: 'var(--primary, #6366f1)',
-                            color: '#ffffff',
-                            fontSize: '0.6875rem',
-                            fontWeight: 700,
-                            padding: '1px 6px',
-                            borderRadius: '999px',
-                            marginLeft: '2px',
-                          }}
-                        >
-                          {favoritesCount}
-                        </span>
-                      )}
-                    </NavLink>
-                  </li>
-                );
-              })}
-            </ul>
+          {/* Zone 2: 4-5 concise single-line nav links */}
+          <nav className="hidden lg:flex items-center gap-6 text-xs font-medium text-slate-400">
+            {NAVIGATION_ITEMS.slice(0, 6).map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  `whitespace-nowrap transition-colors hover:text-slate-100 ${
+                    isActive ? 'text-white font-semibold' : ''
+                  }`
+                }
+              >
+                {item.label}
+              </NavLink>
+            ))}
           </nav>
 
-          {/* Right Section: Global Search Trigger, Theme Toggle & Profile */}
-          <div className="nav-actions">
-            {/* Quick Global Search Trigger Button */}
+          {/* Zone 3: Search, Theme & Profile */}
+          <div className="flex items-center gap-3 shrink-0">
             <button
               type="button"
               onClick={() => setGlobalSearchOpen(true)}
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '8px',
-                padding: '6px 12px',
-                borderRadius: '8px',
-                background: 'var(--bg-subtle, #f1f5f9)',
-                border: '1px solid var(--border-subtle, #e2e8f0)',
-                color: 'var(--text-muted, #64748b)',
-                fontSize: '0.8125rem',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
-              title="Recherche globale rapide (Raccourci ⌘K ou Ctrl+K)"
+              className="hidden sm:inline-flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-950 border border-slate-800 text-slate-400 text-xs hover:bg-slate-800 hover:text-slate-200 transition-colors"
+              title="Recherche globale (⌘K)"
             >
-              <Search size={15} color="var(--primary, #6366f1)" />
-              <span className="global-search-text" style={{ display: 'none' }}>Rechercher...</span>
-              <kbd
-                style={{
-                  fontSize: '0.7rem',
-                  fontFamily: 'inherit',
-                  padding: '1px 5px',
-                  borderRadius: '4px',
-                  background: 'var(--bg-surface, #ffffff)',
-                  border: '1px solid var(--border-subtle, #cbd5e1)',
-                  color: 'var(--text-muted, #64748b)',
-                }}
-              >
+              <Search size={13} />
+              <span>Rechercher...</span>
+              <kbd className="px-1 py-0.2 rounded text-[10px] font-mono bg-slate-900 border border-slate-800">
                 ⌘K
               </kbd>
             </button>
 
-            <div className="theme-toggle-wrapper">
-              <ThemeToggle />
-            </div>
+            <ThemeToggle />
 
             <Link
               to="/profile"
-              className="user-profile-badge"
-              title={`Profil de ${fullName} (${status} · ${matricule})`}
-              style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+              className="flex items-center gap-2 p-1 rounded-lg hover:bg-slate-800 transition-colors text-left"
+              title={`${fullName} (${role})`}
             >
-              <div className="avatar-chip" style={{ position: 'relative' }}>
+              <div className="w-7 h-7 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center">
                 {getInitials(fullName)}
-                <span
-                  style={{
-                    position: 'absolute',
-                    bottom: '-1px',
-                    right: '-1px',
-                    width: '9px',
-                    height: '9px',
-                    borderRadius: '50%',
-                    backgroundColor: roleTheme.dotBg.includes('amber') ? '#f59e0b' : roleTheme.dotBg.includes('purple') ? '#a855f7' : roleTheme.dotBg.includes('sky') ? '#0ea5e9' : roleTheme.dotBg.includes('emerald') ? '#10b981' : '#6366f1',
-                    border: '2px solid var(--bg-surface, #ffffff)',
-                  }}
-                />
               </div>
-              <div className="user-info-text">
-                <span className="user-name" style={{ fontWeight: 700 }}>{fullName}</span>
-                <span className="user-role" style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                  {matricule} · {user?.filiere || 'Info'}
+              <div className="hidden sm:block leading-tight text-xs">
+                <span className="font-semibold text-slate-200 block truncate max-w-[120px]">
+                  {fullName}
+                </span>
+                <span className="text-[10px] font-mono text-slate-500 block truncate">
+                  {matricule}
                 </span>
               </div>
-              <span
-                className={`hidden sm:inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${roleTheme.badgeBg}`}
-                style={{ marginLeft: '4px' }}
-              >
-                <RoleIcon size={10} />
-                <span>{roleTheme.label}</span>
-              </span>
             </Link>
 
-            {/* Mobile hamburger button */}
+            {/* Mobile menu toggle */}
             <button
               type="button"
-              className="mobile-menu-toggle"
+              className="lg:hidden p-1.5 rounded-lg border border-slate-800 text-slate-400 hover:text-slate-200"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label={mobileMenuOpen ? 'Fermer le menu' : 'Ouvrir le menu'}
             >
-              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+              {mobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
             </button>
           </div>
         </div>
 
-        {/* Mobile Drawer */}
+        {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
-          <div className="mobile-nav-drawer" style={{ display: 'block' }}>
-            <div className="mobile-drawer-user" style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '16px 20px', borderBottom: '1px solid var(--border-subtle)' }}>
-              <div className="avatar-chip large">
+          <div className="lg:hidden border-t border-slate-800 bg-slate-950 p-4 space-y-3">
+            <div className="flex items-center gap-2 pb-3 border-b border-slate-800 text-xs">
+              <div className="w-8 h-8 rounded-lg bg-slate-800 border border-slate-700 text-slate-200 font-bold flex items-center justify-center">
                 {getInitials(fullName)}
               </div>
               <div>
-                <div style={{ fontWeight: 700, fontSize: '0.95rem' }}>{fullName}</div>
-                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                  {matricule} · {user?.filiere || 'Informatique'} ({user?.niveau || 'L2'})
-                </div>
-                <div style={{ marginTop: '4px' }}>
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border text-[9px] font-black uppercase tracking-wider ${roleTheme.badgeBg}`}>
-                    <RoleIcon size={10} />
-                    <span>{roleTheme.label}</span>
-                  </span>
-                </div>
+                <span className="font-semibold text-white block">{fullName}</span>
+                <span className="text-slate-500 font-mono text-[11px] block">{matricule} · {role}</span>
               </div>
             </div>
 
-            <div style={{ padding: '12px 20px', borderBottom: '1px solid var(--border-subtle)' }}>
-              <button
-                type="button"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  setGlobalSearchOpen(true);
-                }}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '10px',
-                  padding: '10px 14px',
-                  borderRadius: '8px',
-                  border: '1px solid var(--border-subtle)',
-                  background: 'var(--bg-subtle)',
-                  color: 'var(--text-muted)',
-                  fontSize: '0.875rem',
-                  cursor: 'pointer',
-                }}
-              >
-                <Search size={16} color="var(--primary, #6366f1)" />
-                <span>Recherche globale... (⌘K)</span>
-              </button>
-            </div>
-
-            <ul className="mobile-drawer-links" style={{ listStyle: 'none', padding: '12px 0', margin: 0 }}>
+            <nav className="flex flex-col gap-1">
               {NAVIGATION_ITEMS.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <li key={item.path}>
-                    <NavLink
-                      to={item.path}
-                      onClick={() => setMobileMenuOpen(false)}
-                      className={({ isActive }) => `mobile-nav-item ${isActive ? 'active' : ''}`}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        padding: '12px 20px',
-                        textDecoration: 'none',
-                        color: 'var(--text-main)',
-                        fontWeight: 500,
-                      }}
-                    >
-                      <Icon size={19} />
-                      <span>{item.label}</span>
-                      {item.badgeKey === 'favoritesCount' && favoritesCount > 0 && (
-                        <span
-                          style={{
-                            backgroundColor: 'var(--primary, #6366f1)',
-                            color: '#ffffff',
-                            fontSize: '0.75rem',
-                            fontWeight: 700,
-                            padding: '2px 8px',
-                            borderRadius: '999px',
-                            marginLeft: 'auto',
-                          }}
-                        >
-                          {favoritesCount}
-                        </span>
-                      )}
-                    </NavLink>
-                  </li>
+                  <NavLink
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={({ isActive }) =>
+                      `flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                        isActive
+                          ? 'bg-slate-800 text-white font-semibold'
+                          : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                      }`
+                    }
+                  >
+                    <Icon size={15} />
+                    <span>{item.label}</span>
+                  </NavLink>
                 );
               })}
-            </ul>
+            </nav>
 
-            <div style={{ padding: '16px 20px', borderTop: '1px solid var(--border-subtle)' }}>
+            <div className="pt-2 border-t border-slate-800">
               <button
                 type="button"
                 onClick={handleLogout}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  width: '100%',
-                  padding: '10px 14px',
-                  borderRadius: '8px',
-                  border: '1px solid rgba(239, 68, 68, 0.2)',
-                  backgroundColor: 'rgba(239, 68, 68, 0.08)',
-                  color: '#ef4444',
-                  fontWeight: 600,
-                  fontSize: '0.875rem',
-                  cursor: 'pointer',
-                }}
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium text-red-400 hover:bg-red-950/40 transition-colors"
               >
-                <LogOut size={16} />
+                <LogOut size={15} />
                 <span>Se déconnecter</span>
               </button>
             </div>
@@ -368,7 +172,6 @@ export default function Navbar() {
         )}
       </header>
 
-      {/* Global Quick Search Modal */}
       <GlobalSearchModal
         isOpen={globalSearchOpen}
         onClose={() => setGlobalSearchOpen(false)}

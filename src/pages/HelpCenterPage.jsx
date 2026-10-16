@@ -16,7 +16,7 @@ export default function HelpCenterPage() {
   return (
     <div className="page-content py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
       {/* Hero Banner Header */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-950 via-indigo-950 to-slate-900 text-white p-6 md:p-8 shadow-xl border border-indigo-800/40">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-850 text-white p-6 md:p-8 shadow-xl border border-indigo-800/40 text-left">
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
@@ -32,7 +32,7 @@ export default function HelpCenterPage() {
           </div>
 
           {/* Quick Support Badge */}
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-4 border border-white/10 min-w-[240px] space-y-2 self-start md:self-auto">
+          <div className="bg-slate-800/80 backdrop-blur-md rounded-2xl p-4 border border-slate-700/60 min-w-[240px] space-y-2 self-start md:self-auto text-left">
             <div className="flex items-center gap-2 text-xs font-bold text-emerald-400">
               <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
               <span>Équipe de Modération en Ligne</span>
@@ -45,11 +45,10 @@ export default function HelpCenterPage() {
 
         {/* Ambient background glow */}
         <div className="absolute -right-12 -bottom-12 w-64 h-64 rounded-full bg-indigo-500/15 blur-3xl pointer-events-none" />
-        <div className="absolute left-1/3 -top-12 w-48 h-48 rounded-full bg-purple-500/10 blur-3xl pointer-events-none" />
       </div>
 
       {/* Main Tabs Navigation */}
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-1.5 shadow-sm">
+      <div className="bg-slate-800/90 border border-slate-700/60 rounded-2xl p-1.5 shadow-sm">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5">
           <button
             type="button"
@@ -57,7 +56,7 @@ export default function HelpCenterPage() {
             className={`flex items-center justify-center gap-2 p-3 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'faq'
                 ? 'bg-indigo-600 text-white shadow-md'
-                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                : 'text-slate-300 hover:bg-slate-750 hover:text-white'
             }`}
           >
             <HelpCircle size={16} />
@@ -70,7 +69,7 @@ export default function HelpCenterPage() {
             className={`flex items-center justify-center gap-2 p-3 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'guide'
                 ? 'bg-indigo-600 text-white shadow-md'
-                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                : 'text-slate-300 hover:bg-slate-750 hover:text-white'
             }`}
           >
             <Compass size={16} />
@@ -83,7 +82,7 @@ export default function HelpCenterPage() {
             className={`flex items-center justify-center gap-2 p-3 rounded-xl text-xs font-bold transition-all ${
               activeTab === 'ticket'
                 ? 'bg-indigo-600 text-white shadow-md'
-                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                : 'text-slate-300 hover:bg-slate-750 hover:text-white'
             }`}
           >
             <MessageSquare size={16} />

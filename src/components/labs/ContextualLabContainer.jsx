@@ -41,7 +41,7 @@ export default function ContextualLabContainer({ className = '' }) {
   return (
     <div className={`space-y-5 ${className}`}>
       {/* En-tête de Certification Contextuelle */}
-      <div className="p-4 sm:p-5 rounded-3xl bg-slate-900/90 border border-slate-800 shadow-xl backdrop-blur-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left">
+      <div className="p-4 sm:p-5 rounded-3xl bg-slate-800/90 border border-slate-700/60 shadow-xl backdrop-blur-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left">
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
@@ -58,13 +58,13 @@ export default function ContextualLabContainer({ className = '' }) {
             <span>Espace Laboratoire Pratique : {department.label}</span>
           </h2>
 
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-300">
             Module technique taillé sur-mesure pour votre promotion. Accès automatique et sans interférence aux outils de votre filière.
           </p>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto text-xs font-mono">
-          <span className="px-3 py-1.5 rounded-xl bg-slate-950 border border-slate-800 text-slate-300 flex items-center gap-1.5">
+          <span className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/60 text-slate-200 flex items-center gap-1.5">
             <GraduationCap size={14} className="text-indigo-400" />
             <span>Filière : {activeFiliere}</span>
           </span>

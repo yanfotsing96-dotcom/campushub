@@ -3,39 +3,28 @@ import { NavLink, Link, useNavigate } from 'react-router-dom';
 import {
   GraduationCap,
   Library,
-  Search,
   Sparkles,
-  Clock,
   Award,
-  Briefcase,
   Crown,
   ShieldCheck,
-  Star,
-  BookMarked,
   User,
   ChevronLeft,
   ChevronRight,
   LogOut,
-  Zap,
-  CheckCircle2,
   ChevronDown,
   Building,
-  Cpu,
-  HelpCircle,
-  LayoutDashboard,
   FileCheck2,
   BookOpen,
+  Check,
+  LifeBuoy,
 } from 'lucide-react';
 import ThemeToggle from '../common/ThemeToggle';
-import RoleBadge from '../common/RoleBadge';
 
 const RoleVerificationModal = lazy(() => import('../auth/RoleVerificationModal'));
 import { useCampusHub } from '../../hooks/useCampusHub';
-import { useResources } from '../../hooks/useResources';
 import { useAuth } from '../../hooks/useAuth';
 import { useLanguage } from '../../hooks/useLanguage';
 import { ROLES, normalizeRole, isRoleAtLeast, ROLE_LABELS } from '../../constants/rbacConstants';
-import { getDepartmentPole } from '../tech/data/departmentPoleConfig';
 import { examService } from '../../services/examService';
 
 const NAVIGATION_GROUPS = [
@@ -43,16 +32,15 @@ const NAVIGATION_GROUPS = [
     id: 'filiere',
     titleKey: 'nav.dashboard',
     items: [
-      { path: '/dashboard', labelKey: 'nav.dashboard', defaultLabel: 'Tableau de Bord Filière', icon: LayoutDashboard, isPrimary: true },
-      { path: '/workspace', defaultLabel: 'Espace de Travail & Rôles', icon: GraduationCap },
+      { path: '/dashboard', labelKey: 'nav.dashboard', defaultLabel: 'Tableau de Bord', icon: GraduationCap, isPrimary: true },
       { path: '/exams', labelKey: 'nav.exams', defaultLabel: 'Compositions en Ligne', icon: FileCheck2, hasExamBadge: true },
     ],
   },
   {
-    id: 'tech',
-    titleKey: 'nav.coreTechFlagship',
+    id: 'labs',
+    titleKey: 'nav.studyTools',
     items: [
-      { path: '/tech-hub', labelKey: 'nav.techHub', defaultLabel: 'Pôle Informatique & Code', icon: Cpu, isFlagshipTech: true },
+      { path: '/learning', labelKey: 'nav.learning', defaultLabel: 'Laboratoires & Playgrounds', icon: Sparkles, isLabFlag: true },
       { path: '/falsh-hub', labelKey: 'nav.falshHub', defaultLabel: 'Pôle FALSH & Lettres', icon: BookOpen },
     ],
   },
@@ -60,57 +48,23 @@ const NAVIGATION_GROUPS = [
     id: 'resources',
     titleKey: 'nav.nationalResources',
     items: [
-      { path: '/ressources', labelKey: 'nav.resources', defaultLabel: 'Catalogue Multi-Universités', icon: Library },
-      { path: '/search', labelKey: 'nav.search', defaultLabel: 'Recherche & Filtres', icon: Search },
-      { path: '/favs-history', labelKey: 'nav.favorites', defaultLabel: 'Favoris & Historique', icon: Star, hasBadge: true },
+      { path: '/ressources', labelKey: 'nav.resources', defaultLabel: 'Catalogue National', icon: Library },
+      { path: '/profile', labelKey: 'nav.profile', defaultLabel: 'Profil National', icon: User },
     ],
   },
   {
-    id: 'study',
-    titleKey: 'nav.studyTools',
-    items: [
-      { path: '/learning', labelKey: 'nav.learning', defaultLabel: 'Playground & IA', icon: Sparkles },
-      { path: '/productivity', labelKey: 'nav.productivity', defaultLabel: 'Productivité & iCal', icon: Clock },
-      { path: '/evaluation', labelKey: 'nav.evaluation', defaultLabel: 'Évaluation & Mérite', icon: Award },
-    ],
-  },
-  {
-    id: 'campus',
-    titleKey: 'nav.campusLife',
-    items: [
-      { path: '/services', labelKey: 'nav.services', defaultLabel: 'Services & Covoiturage', icon: Briefcase },
-    ],
-  },
-  {
-    id: 'pro',
+    id: 'roles',
     titleKey: 'nav.proGovernance',
     items: [
-      { path: '/pricing', labelKey: 'nav.pricing', defaultLabel: 'CampusHub Pro', icon: Crown, highlight: true },
       { path: '/delegate', labelKey: 'nav.delegate', defaultLabel: 'Espace Délégué', icon: Award, requiredRole: ROLES.DELEGATE },
       { path: '/moderation', labelKey: 'nav.moderation', defaultLabel: 'Console Modération', icon: ShieldCheck, requiredRole: ROLES.MODERATOR },
       { path: '/admin', labelKey: 'nav.admin', defaultLabel: 'Administration', icon: Crown, requiredRole: ROLES.ADMIN },
     ],
   },
-  {
-    id: 'help',
-    titleKey: 'nav.assistanceGuides',
-    items: [
-      { path: '/help', labelKey: 'nav.help', defaultLabel: 'Centre d\'Aide & FAQ', icon: HelpCircle },
-    ],
-  },
-  {
-    id: 'space',
-    titleKey: 'nav.mySpace',
-    items: [
-      { path: '/notebook', labelKey: 'nav.notebook', defaultLabel: 'Carnet Privé', icon: BookMarked },
-      { path: '/profile', labelKey: 'nav.profile', defaultLabel: 'Profil National', icon: User },
-    ],
-  },
 ];
 
-export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch, onNavigate, onOpenUniversityModal }) {
+export default function AppSidebar({ isCollapsed, onToggleCollapse, onNavigate, onOpenUniversityModal }) {
   const { student, switchRole: campusSwitchRole } = useCampusHub();
-  const { favoritesCount } = useResources();
   const { user, logout, switchRole: authSwitchRole } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
@@ -118,7 +72,6 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch
   const [verificationModalRole, setVerificationModalRole] = useState(null);
   const [examsCounter, setExamsCounter] = useState(0);
 
-  // Synchronisation dynamique avec le catalogue d'examens
   useEffect(() => {
     const handleUpdate = () => setExamsCounter((c) => c + 1);
     window.addEventListener('campushub:exams_updated', handleUpdate);
@@ -129,85 +82,22 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch
     };
   }, []);
 
-  // Dynamic user data from authentication state
+  // Dynamic user data
   const fullName = user?.fullName || user?.nom || student?.fullName || student?.name || 'Étudiant';
   const matricule = user?.matricule || student?.matricule || '';
   const role = user?.role || student?.role || 'Étudiant';
-  const isPro = user?.isPro !== undefined ? user.isPro : student?.isPro;
-  const status = user?.status || (isPro ? 'Étudiant Pro' : (user?.roleLabel || student?.role)) || 'Étudiant';
 
-  // Nombre dynamique d'épreuves actives et disponibles pour cet étudiant
   const activeExamsCount = useMemo(() => {
     return examService.getActiveExamsCountForUser(user);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, examsCounter]);
 
-  // Dynamic department pole configuration
-  const userFiliere = user?.filiere || user?.filiereId || user?.department || student?.filiere || 'Informatique';
-  const pole = getDepartmentPole(userFiliere);
-
-  // Dynamic initials helper
   const getInitials = (name) => {
     if (!name || name === 'Étudiant') return 'ET';
     const parts = name.trim().split(/\s+/);
     if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
     return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
   };
-
-  // Role conditional styling helper (SaaS / Vercel theme)
-  const getRoleTheme = (userRole, userStatus) => {
-    const norm = normalizeRole(userRole);
-    const isProUser = userStatus === 'Étudiant Pro' || userStatus?.toLowerCase().includes('pro');
-
-    if (isProUser && norm === ROLES.STUDENT) {
-      return {
-        badgeBg: 'bg-gradient-to-r from-amber-500/15 via-yellow-500/15 to-amber-500/15 text-amber-800 dark:text-amber-300 border-amber-300/60 dark:border-amber-700/60',
-        dotBg: 'bg-amber-500',
-        avatarBg: 'bg-gradient-to-tr from-amber-500 via-indigo-600 to-purple-600 text-white',
-        icon: Crown,
-        label: 'Étudiant Pro',
-      };
-    }
-
-    switch (norm) {
-      case ROLES.ADMIN:
-        return {
-          badgeBg: 'bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800',
-          dotBg: 'bg-purple-500',
-          avatarBg: 'bg-gradient-to-tr from-purple-600 to-indigo-600 text-white',
-          icon: Crown,
-          label: userStatus || 'Administrateur',
-        };
-      case ROLES.MODERATOR:
-        return {
-          badgeBg: 'bg-sky-50 dark:bg-sky-950/60 text-sky-700 dark:text-sky-300 border-sky-200 dark:border-sky-800',
-          dotBg: 'bg-sky-500',
-          avatarBg: 'bg-gradient-to-tr from-sky-600 to-blue-600 text-white',
-          icon: ShieldCheck,
-          label: userStatus || 'Modérateur',
-        };
-      case ROLES.DELEGATE:
-        return {
-          badgeBg: 'bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
-          dotBg: 'bg-emerald-500',
-          avatarBg: 'bg-gradient-to-tr from-emerald-600 to-teal-600 text-white',
-          icon: Award,
-          label: userStatus || 'Délégué',
-        };
-      case ROLES.STUDENT:
-      default:
-        return {
-          badgeBg: 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-700 dark:text-indigo-300 border-indigo-200 dark:border-indigo-800',
-          dotBg: 'bg-indigo-500',
-          avatarBg: 'bg-gradient-to-tr from-indigo-600 to-blue-600 text-white',
-          icon: BookOpen,
-          label: userStatus || 'Étudiant',
-        };
-    }
-  };
-
-  const roleTheme = getRoleTheme(role, status);
-  const RoleIcon = roleTheme.icon;
 
   const handleRoleSelect = (targetRoleKey) => {
     setRoleDropdownOpen(false);
@@ -232,202 +122,136 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch
 
   return (
     <aside
-      className={`h-screen sticky top-0 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 flex flex-col justify-between transition-all duration-300 z-40 smooth-gpu ${
-        isCollapsed ? 'w-20' : 'w-72'
+      className={`h-screen sticky top-0 bg-slate-900 border-r border-slate-700/60 flex flex-col justify-between transition-all duration-200 z-40 select-none ${
+        isCollapsed ? 'w-16' : 'w-64'
       }`}
     >
-      {/* 1. Header with Brand & Collapse Trigger */}
-      <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
-        <Link to="/ressources" className="flex items-center gap-3 overflow-hidden">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-indigo-600 via-indigo-700 to-purple-600 text-white flex items-center justify-center font-black flex-shrink-0 shadow-md shadow-indigo-500/20">
-            <GraduationCap size={22} />
-          </div>
+      {/* 1. Top Header with Immediate Top-Left FAQ Access & Collapse Trigger */}
+      <div className="p-3 border-b border-slate-700/60 flex items-center justify-between gap-2">
+        <div className="flex items-center gap-2 min-w-0">
+          {/* Top-Left Help & FAQ Quick Access Button */}
+          <Link
+            to="/help"
+            onClick={onNavigate}
+            className="p-1.5 rounded-lg border border-slate-700/80 bg-slate-800 hover:bg-indigo-600/20 text-indigo-300 hover:text-white transition-colors shrink-0 shadow-xs"
+            title="Centre d'Aide & FAQ Rapide"
+          >
+            <LifeBuoy size={16} />
+          </Link>
+
           {!isCollapsed && (
-            <div className="leading-tight">
-              <span className="font-black text-slate-900 dark:text-slate-100 text-base tracking-tight block">
-                CampusHub 🇨🇲
-              </span>
-              <span className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 block uppercase tracking-wider truncate max-w-[150px]">
-                {student.universityShortName}
-              </span>
-            </div>
+            <Link to="/dashboard" onClick={onNavigate} className="flex items-center gap-2 overflow-hidden">
+              <div className="leading-tight truncate">
+                <span className="font-bold text-slate-100 text-sm tracking-tight block truncate">
+                  CampusHub 🇨🇲
+                </span>
+                <span className="text-[10px] text-slate-400 font-medium block truncate">
+                  {student.universityShortName || 'National'}
+                </span>
+              </div>
+            </Link>
           )}
-        </Link>
+        </div>
 
         <button
           type="button"
           onClick={onToggleCollapse}
-          className="p-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
-          title={isCollapsed ? 'Déplier la barre latérale' : 'Replier la barre latérale'}
+          className="p-1.5 rounded-lg border border-slate-700/60 text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-colors shrink-0"
+          title={isCollapsed ? 'Déplier la barre latérale' : 'Replier'}
         >
-          {isCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          {isCollapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
         </button>
       </div>
 
-      {/* Collapsed State Profile Avatar Mini */}
-      {isCollapsed && (
-        <div className="p-3 flex justify-center border-b border-slate-100 dark:border-slate-800">
-          <Link
-            to="/profile"
-            className="relative group p-1 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-            title={`${fullName} (${status} · ${matricule})`}
-          >
-            <div className={`w-9 h-9 rounded-xl ${roleTheme.avatarBg} font-bold text-xs flex items-center justify-center shadow-xs transition-transform group-hover:scale-105`}>
-              {getInitials(fullName)}
-            </div>
-            <span className={`absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full ${roleTheme.dotBg} border-2 border-white dark:border-slate-900`} />
-          </Link>
-        </div>
-      )}
-
-      {/* 2. Student Role & Pro Status Widget */}
+      {/* 2. User & University Status Card (Illuminated slate-800) */}
       {!isCollapsed && (
-        <div className="p-3.5 mx-3 my-2 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-2.5">
-          {/* University Switcher Pill */}
+        <div className="p-3 mx-2.5 my-2.5 rounded-2xl bg-slate-800/90 border border-slate-700/60 space-y-2 shadow-xs">
+          {/* University Switcher Trigger */}
           <button
             type="button"
             onClick={onOpenUniversityModal}
-            className="w-full px-2.5 py-1.5 rounded-xl bg-white dark:bg-slate-900 hover:bg-indigo-50/50 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-700 text-left flex items-center justify-between text-xs transition-colors shadow-2xs"
-            title="Changer d'université camerounaise"
+            className="w-full px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-750 border border-slate-700/60 text-left flex items-center justify-between text-xs transition-colors"
+            title="Changer d'université"
           >
             <div className="flex items-center gap-1.5 truncate">
-              <Building size={13} className="text-indigo-600 flex-shrink-0" />
-              <span className="font-bold text-slate-800 dark:text-slate-200 truncate text-[11px]">
+              <Building size={12} className="text-indigo-400 shrink-0" />
+              <span className="font-medium text-slate-200 truncate text-[11px]">
                 {student.universityShortName}
               </span>
             </div>
-            <span className="text-[10px] text-indigo-600 dark:text-indigo-400 font-bold flex-shrink-0 bg-indigo-50 dark:bg-indigo-950 px-1.5 py-0.5 rounded">
-              {t('header.switchUniversity')}
+            <span className="text-[10px] text-indigo-400 font-mono font-semibold">
+              Changer
             </span>
           </button>
 
-          {/* User Profile Card with dynamic Full Name, Matricule & Role Status */}
-          <div className="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/90 dark:border-slate-800 shadow-2xs space-y-2">
-            <div className="flex items-center justify-between gap-2">
-              <Link
-                to="/profile"
-                className="flex items-center gap-2.5 min-w-0 group flex-1"
-                title={`Profil de ${fullName} (${status} · ${matricule})`}
-              >
-                {/* Dynamic Avatar with role colors, initials, and active dot */}
-                <div className="relative flex-shrink-0">
-                  <div className={`w-9 h-9 rounded-xl ${roleTheme.avatarBg} font-bold text-xs flex items-center justify-center shadow-xs transition-transform group-hover:scale-105`}>
-                    {getInitials(fullName)}
-                  </div>
-                  <span className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full ${roleTheme.dotBg} border-2 border-white dark:border-slate-900`} />
-                </div>
-
-                {/* Dynamic Full Name & Matricule */}
-                <div className="leading-tight min-w-0">
-                  <span className="text-xs font-bold text-slate-900 dark:text-slate-100 block truncate group-hover:text-indigo-600 dark:group-hover:text-indigo-400 transition-colors" title={fullName}>
-                    {fullName}
-                  </span>
-                  <div className="flex items-center gap-1.5 text-[10px] font-mono text-slate-500 dark:text-slate-400 mt-0.5">
-                    <span>{matricule}</span>
-                    <span className="text-slate-300 dark:text-slate-700">·</span>
-                    <span className="truncate">{user?.niveau || student?.niveau || 'L2'}</span>
-                  </div>
-                </div>
-              </Link>
-
-              {/* Quick Role Switcher Trigger */}
-              <div className="relative flex-shrink-0">
-                <button
-                  type="button"
-                  onClick={() => setRoleDropdownOpen((prev) => !prev)}
-                  className="p-1 rounded-xl bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 flex items-center gap-1 transition-colors shadow-2xs"
-                  title="Changer de rôle (RBAC)"
-                >
-                  <RoleBadge role={role} size="xs" />
-                  <ChevronDown size={11} className={`text-slate-400 mr-0.5 ${roleDropdownOpen ? 'rotate-180' : ''} transition-transform`} />
-                </button>
-
-                {roleDropdownOpen && (
-                  <div className="absolute right-0 top-full mt-1.5 w-52 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xl p-1.5 z-50 text-xs animate-in fade-in zoom-in-95">
-                    <div className="px-2 py-1 text-[10px] font-black uppercase tracking-wider text-slate-400 border-b border-slate-100 dark:border-slate-800 mb-1">
-                      Changer de Rôle (RBAC)
-                    </div>
-                    {[
-                      { id: ROLES.STUDENT, label: 'Étudiant' },
-                      { id: ROLES.DELEGATE, label: 'Délégué de classe' },
-                      { id: ROLES.MODERATOR, label: 'Modérateur' },
-                      { id: ROLES.ADMIN, label: 'Administrateur' },
-                    ].map((r) => {
-                      const normCurrent = normalizeRole(role);
-                      const isSelected = normCurrent === r.id;
-                      return (
-                        <button
-                          key={r.id}
-                          type="button"
-                          onClick={() => handleRoleSelect(r.id)}
-                          className={`w-full text-left px-2.5 py-1.5 rounded-xl text-xs font-semibold flex items-center justify-between transition-colors ${
-                            isSelected
-                              ? 'bg-indigo-50 dark:bg-indigo-950/60 text-indigo-600 dark:text-indigo-400 font-bold'
-                              : 'hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-300'
-                          }`}
-                        >
-                          <div className="flex items-center gap-1.5">
-                            <RoleBadge role={r.id} size="xs" />
-                          </div>
-                          {isSelected && <CheckCircle2 size={13} />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Dynamic Status Badge under the user profile */}
-            <div className="flex items-center justify-between pt-1 border-t border-slate-100 dark:border-slate-800/80 text-[10px]">
-              <span className="text-slate-400 dark:text-slate-500 font-medium">Statut :</span>
-              <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md border font-black uppercase tracking-wider text-[9px] ${roleTheme.badgeBg}`}>
-                <RoleIcon size={10} className="flex-shrink-0" />
-                <span>{roleTheme.label}</span>
-              </span>
-            </div>
-          </div>
-
-          {/* Pro Status or Upgrade CTA */}
-          {isPro ? (
-            <div className="px-2.5 py-1 rounded-xl bg-gradient-to-r from-amber-500/15 via-yellow-500/15 to-amber-500/15 border border-amber-300/40 text-amber-800 dark:text-amber-300 text-[10px] font-black uppercase tracking-wider flex items-center justify-between">
-              <span className="flex items-center gap-1">
-                <Crown size={12} className="text-amber-500" />
-                <span>Membre Pro {student.universityShortName}</span>
-              </span>
-              <span className="text-[9px] font-bold text-slate-500 dark:text-slate-400">Illimité</span>
-            </div>
-          ) : (
+          {/* User Profile Card */}
+          <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-700/60">
             <Link
-              to="/pricing"
-              className="px-2.5 py-1 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 hover:bg-indigo-100 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-[11px] font-bold flex items-center justify-between transition-colors"
+              to="/profile"
+              onClick={onNavigate}
+              className="flex items-center gap-2 min-w-0 group flex-1"
+              title={`${fullName} (${matricule})`}
             >
-              <span className="flex items-center gap-1">
-                <Zap size={12} className="text-amber-500" />
-                <span>Passer à Pro</span>
-              </span>
-              <span className="font-mono text-[10px]">1 500 F</span>
+              <div className="w-7 h-7 rounded-lg bg-indigo-600/30 border border-indigo-500/40 text-indigo-200 font-bold text-xs flex items-center justify-center shrink-0">
+                {getInitials(fullName)}
+              </div>
+              <div className="leading-tight min-w-0">
+                <span className="text-xs font-semibold text-slate-100 block truncate group-hover:text-white transition-colors">
+                  {fullName}
+                </span>
+                <span className="text-[10px] font-mono text-slate-400 block truncate">
+                  {matricule} · {user?.niveau || student?.niveau || 'L2'}
+                </span>
+              </div>
             </Link>
-          )}
 
-          {/* XP Progress Bar */}
-          <div className="space-y-1 pt-0.5">
-            <div className="flex justify-between text-[10px] font-bold text-slate-500 dark:text-slate-400">
-              <span>{student.xp.toLocaleString()} XP</span>
-              <span className="text-indigo-600 dark:text-indigo-400">Niveau {student.currentLevel}</span>
-            </div>
-            <div className="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
-              <div
-                className="bg-gradient-to-r from-indigo-500 to-purple-500 h-1.5 rounded-full transition-all duration-500"
-                style={{ width: `${student.progressPercent}%` }}
-              />
+            {/* Role Trigger */}
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => setRoleDropdownOpen((prev) => !prev)}
+                className="px-2 py-1 rounded-md bg-slate-900 hover:bg-slate-750 border border-slate-700/60 flex items-center gap-1 transition-colors text-[10px] font-mono text-slate-200"
+                title="Changer de rôle"
+              >
+                <span>{role}</span>
+                <ChevronDown size={10} className={`text-slate-400 ${roleDropdownOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              {roleDropdownOpen && (
+                <div className="absolute right-0 top-full mt-1.5 w-44 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl p-1 z-50 text-xs">
+                  {[
+                    { id: ROLES.STUDENT, label: 'Étudiant' },
+                    { id: ROLES.DELEGATE, label: 'Délégué' },
+                    { id: ROLES.MODERATOR, label: 'Modérateur' },
+                    { id: ROLES.ADMIN, label: 'Administrateur' },
+                  ].map((r) => {
+                    const normCurrent = normalizeRole(role);
+                    const isSelected = normCurrent === r.id;
+                    return (
+                      <button
+                        key={r.id}
+                        type="button"
+                        onClick={() => handleRoleSelect(r.id)}
+                        className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition-colors ${
+                          isSelected
+                            ? 'bg-indigo-600 text-white font-semibold'
+                            : 'hover:bg-slate-700 text-slate-200'
+                        }`}
+                      >
+                        <span>{r.label}</span>
+                        {isSelected && <Check size={12} className="text-white" />}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>
       )}
 
-      {/* 3. Navigation Links List */}
-      <nav className="flex-1 overflow-y-auto px-3 py-2 space-y-4 scrollbar-thin">
+      {/* 3. Navigation Links List (Illuminated slate-800 hover & active states) */}
+      <nav className="flex-1 overflow-y-auto px-2 py-2 space-y-3">
         {NAVIGATION_GROUPS.map((group) => {
           const visibleItems = group.items.filter((item) => {
             if (item.requiredRole) {
@@ -439,71 +263,43 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch
           if (visibleItems.length === 0) return null;
 
           return (
-            <div key={group.id} className="space-y-1">
+            <div key={group.id} className="space-y-0.5">
               {!isCollapsed && (
-                <span className="px-3 text-[10px] font-black uppercase tracking-wider text-slate-400 block mb-1">
+                <span className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider text-slate-400 block font-semibold">
                   {t(group.titleKey)}
                 </span>
               )}
 
               {visibleItems.map((item) => {
-                const Icon = item.isFlagshipTech && pole.icon ? pole.icon : item.icon;
-                const label = item.isFlagshipTech
-                  ? pole.shortTitle
-                  : (item.labelKey ? t(item.labelKey, item.defaultLabel) : (item.defaultLabel || ''));
+                const Icon = item.icon;
+                const label = item.labelKey ? t(item.labelKey, item.defaultLabel) : (item.defaultLabel || '');
+
                 return (
                   <NavLink
                     key={item.path}
                     to={item.path}
                     onClick={onNavigate}
                     title={isCollapsed ? label : undefined}
-                  className={({ isActive }) =>
-                    `flex items-center gap-3 px-3 py-2 rounded-2xl text-xs font-semibold transition-all ${
-                      isActive
-                        ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20 font-bold'
-                        : item.highlight && !student.isPro
-                        ? 'text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40'
-                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
-                    } ${isCollapsed ? 'justify-center px-0' : ''}`
-                  }
-                >
-                  <Icon
-                    size={17}
-                    className={
-                      item.highlight && !isCollapsed
-                        ? 'text-amber-500'
-                        : undefined
+                    className={({ isActive }) =>
+                      `flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-medium transition-colors ${
+                        isActive
+                          ? 'bg-slate-800 text-white font-semibold border border-slate-700/80 shadow-xs'
+                          : 'text-slate-300 hover:text-white hover:bg-slate-800/70'
+                      } ${isCollapsed ? 'justify-center px-0' : ''}`
                     }
-                  />
+                  >
+                    <Icon size={16} className={`shrink-0 ${item.isLabFlag ? 'text-indigo-400' : 'text-slate-400'}`} />
 
-                  {!isCollapsed && (
-                    <span className="flex-1 truncate">{label}</span>
-                  )}
+                    {!isCollapsed && (
+                      <span className="flex-1 truncate">{label}</span>
+                    )}
 
-                  {!isCollapsed && item.hasBadge && favoritesCount > 0 && (
-                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300">
-                      {favoritesCount}
-                    </span>
-                  )}
-
-                  {!isCollapsed && item.hasExamBadge && activeExamsCount > 0 && (
-                    <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 dark:bg-rose-950 text-rose-700 dark:text-rose-300">
-                      {activeExamsCount}
-                    </span>
-                  )}
-
-                  {!isCollapsed && item.isFlagshipTech && (
-                    <span className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-wider ${pole.badgeClass} shadow-2xs`}>
-                      {pole.badge}
-                    </span>
-                  )}
-
-                  {!isCollapsed && item.highlight && (
-                    <span className="px-1.5 py-0.2 rounded text-[9px] font-black uppercase tracking-wider bg-amber-400 text-slate-950">
-                      PRO
-                    </span>
-                  )}
-                </NavLink>
+                    {!isCollapsed && item.hasExamBadge && activeExamsCount > 0 && (
+                      <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-red-900/60 text-red-200 border border-red-700/80 font-bold">
+                        {activeExamsCount}
+                      </span>
+                    )}
+                  </NavLink>
                 );
               })}
             </div>
@@ -511,46 +307,36 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onOpenSearch
         })}
       </nav>
 
-      {/* 4. Footer Utilities: Search, Theme & Logout */}
-      <div className="p-3 border-t border-slate-100 dark:border-slate-800 space-y-2">
-        {/* Quick Search Button */}
-        <button
-          type="button"
-          onClick={onOpenSearch}
-          className={`w-full py-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-xs font-semibold hover:bg-slate-100 flex items-center ${
-            isCollapsed ? 'justify-center' : 'justify-between px-3'
+      {/* 4. Footer Utilities (With Help Center & Theme Switcher) */}
+      <div className="p-3 border-t border-slate-700/60 space-y-2">
+        <Link
+          to="/help"
+          onClick={onNavigate}
+          className={`w-full py-1.5 px-2 rounded-xl border border-slate-700/60 bg-slate-800/80 hover:bg-slate-750 text-slate-300 hover:text-white text-xs flex items-center transition-colors ${
+            isCollapsed ? 'justify-center' : 'justify-between'
           }`}
-          title="Recherche globale rapide (⌘K)"
+          title="Centre d'Aide & FAQ"
         >
           <div className="flex items-center gap-2">
-            <Search size={14} className="text-indigo-600" />
-            {!isCollapsed && <span>{t('header.searchLabel')}</span>}
+            <LifeBuoy size={14} className="text-indigo-400" />
+            {!isCollapsed && <span className="font-medium">Centre d'Aide & FAQ</span>}
           </div>
           {!isCollapsed && (
-            <kbd className="px-1.5 py-0.5 rounded text-[10px] font-mono bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700">
-              ⌘K
-            </kbd>
+            <span className="text-[10px] font-mono text-indigo-400">24/7</span>
           )}
-        </button>
+        </Link>
 
-        {/* Theme & Logout Row */}
-        <div
-          className={`flex items-center ${
-            isCollapsed ? 'flex-col gap-2' : 'justify-between'
-          }`}
-        >
-          <div className="flex items-center">
-            <ThemeToggle />
-          </div>
+        <div className={`flex items-center ${isCollapsed ? 'flex-col gap-2' : 'justify-between'}`}>
+          <ThemeToggle />
 
           <button
             type="button"
             onClick={handleLogout}
-            className="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 rounded-xl transition-colors flex items-center gap-1.5 text-xs font-semibold"
-            title={t('nav.logout')}
+            className="p-1.5 text-slate-400 hover:text-red-400 rounded-lg hover:bg-slate-800 transition-colors flex items-center gap-1.5 text-xs"
+            title="Déconnexion"
           >
-            <LogOut size={15} />
-            {!isCollapsed && <span>{t('nav.logout')}</span>}
+            <LogOut size={14} />
+            {!isCollapsed && <span>Déconnexion</span>}
           </button>
         </div>
       </div>
