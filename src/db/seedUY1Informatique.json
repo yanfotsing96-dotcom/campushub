@@ -1,0 +1,547 @@
+{
+  "university": {
+    "id": "UY1",
+    "code": "UY1",
+    "name": "Université de Yaoundé I",
+    "shortName": "Univ. Yaoundé I",
+    "city": "Yaoundé",
+    "region": "Centre",
+    "type": "PUBLIC",
+    "faculties": [
+      {
+        "id": "UY1-FS",
+        "code": "FS",
+        "name": "Faculté des Sciences",
+        "type": "FACULTY",
+        "campus": "Ngoa-Ekellé",
+        "programs": [
+          {
+            "id": "UY1-FS-INF",
+            "code": "inf",
+            "name": "Licence en Informatique",
+            "domain": "Sciences et Technologies",
+            "cycle": "LMD",
+            "description": "Formation fondamentale et appliquée en informatique, génie logiciel, réseaux, bases de données et systèmes distribués.",
+            "levels": [
+              {
+                "id": "UY1-FS-INF-L1",
+                "code": "L1",
+                "name": "Licence 1 (L1)",
+                "orderIndex": 1,
+                "semesters": [1, 2],
+                "teachingUnits": [
+                  {
+                    "id": "UY1-FS-INF-L1-INFO111",
+                    "code": "INFO 111",
+                    "title": "Algorithmique et programmation 1",
+                    "credits": 6,
+                    "semester": 1,
+                    "isCore": true,
+                    "syllabusSummary": "Notion d'algorithme, variables, types simples, conditionnelles, boucles, fonctions et initiation au C.",
+                    "resources": [
+                      {
+                        "id": "res-uy1-inf111-poly",
+                        "title": "Polycopié officiel de cours - Algorithmique et Syntaxe C",
+                        "category": "COURS",
+                        "academicYear": "2025/2026",
+                        "session": null,
+                        "fileUrl": "https://cdn.campushub.cm/uy1/fs/inf/L1/INFO111_Cours_Algorithmique.pdf",
+                        "fileFormat": "PDF",
+                        "fileSizeBytes": 4200150,
+                        "hasSolution": false,
+                        "uploaderName": "Délégué INF 111",
+                        "uploaderRole": "delegate",
+                        "status": "APPROVED",
+                        "downloadsCount": 1840,
+                        "ratingAvg": 4.9
+                      },
+                      {
+                        "id": "res-uy1-inf111-td",
+                        "title": "Cahier de Travaux Dirigés (TD 1 à 6) avec corrigés types",
+                        "category": "TD",
+                        "academicYear": "2024/2025",
+                        "session": null,
+                        "fileUrl": "https://cdn.campushub.cm/uy1/fs/inf/L1/INFO111_Fiches_TD_Corriges.pdf",
+                        "fileFormat": "PDF",
+                        "fileSizeBytes": 2850000,
+                        "hasSolution": true,
+                        "uploaderName": "Dr. P. Kamgue",
+                        "uploaderRole": "admin",
+                        "status": "APPROVED",
+                        "downloadsCount": 1420,
+                        "ratingAvg": 4.95
+                      },
+                      {
+                        "id": "res-uy1-inf111-exam-2024",
+                        "title": "Épreuve Examen Session Normale 2024 & Grille de Correction",
+                        "category": "EXAMEN",
+                        "academicYear": "2023/2024",
+                        "session": "NORMALE",
+                        "fileUrl": "https://cdn.campushub.cm/uy1/fs/inf/L1/INFO111_SN_2024_Corrige.pdf",
+                        "fileFormat": "PDF",
+                        "fileSizeBytes": 1150000,
+                        "hasSolution": true,
+                        "uploaderName": "Comité Pédagogique Informatique",
+                        "uploaderRole": "moderator",
+                        "status": "APPROVED",
+                        "downloadsCount": 2100,
+                        "ratingAvg": 5.0
+                      }
+                    ]
+                  },
+                  {
+                    "id": "UY1-FS-INF-L1-INFO112",
+                    "code": "INFO 112",
+                    "title": "Architecture des ordinateurs",
+                    "credits": 5,
+                    "semester": 1,
+                    "isCore": true,
+                    "syllabusSummary": "Architecture de von Neumann, circuits logiques, algèbre booléenne, arithmétique binaire et registres.",
+                    "resources": [
+                      {
+                        "id": "res-uy1-inf112-crs",
+                        "title": "Cours Magistral - Modèle de von Neumann & Logique séquentielle",
+                        "category": "COURS",
+                        "academicYear": "2025/2026",
+                        "session": null,
+                        "fileUrl": "https://cdn.campushub.cm/uy1/fs/inf/L1/INFO112_Architecture.pdf",
+                        "fileFormat": "PDF",
+                        "fileSizeBytes": 3600000,
+                        "hasSolution": false,
+                        "uploaderName": "Dr. C. Fotso",
+                        "uploaderRole": "admin",
+                        "status": "APPROVED",
+                        "downloadsCount": 980,
+                        "ratingAvg": 4.8
+                      }
+                    ]
+                  },
+                  {
+                    "id": "UY1-FS-INF-L1-INFO113",
+                    "code": "INFO 113",
+                    "title": "Mathématiques discrètes",
+                    "credits": 4,
+                    "semester": 2,
+                    "isCore": true,
+                    "syllabusSummary": "Logique des propositions, théorie des ensembles, relations d'ordre/équivalence, combinatoire et graphes élémentaires.",
+                    "resources": [
+                      {
+                        "id": "res-uy1-inf113-exam",
+                        "title": "Annales d'examens 2021-2024 Mathématiques Discrètes UY1",
+                        "category": "EXAMEN",
+                        "academicYear": "2024/2025",
+                        "session": "NORMALE",
+                        "fileUrl": "https://cdn.campushub.cm/uy1/fs/inf/L1/INFO113_Annales_UY1.pdf",
+                        "fileFormat": "PDF",
+                        "fileSizeBytes": 2100000,
+                        "hasSolution": true,
+                        "uploaderName": "Brice Kamga",
+                        "uploaderRole": "delegate",
+                        "status": "APPROVED",
+                        "downloadsCount": 1150,
+                        "ratingAvg": 4.85
+                      }
+                    ]
+                  },
+                  {
+                    "id": "UY1-FS-INF-L1-MATH114",
+                    "code": "MATH 114",
+                    "title": "Analyse 1",
+                    "credits": 5,
+                    "semester": 1,
+                    "isCore": true,
+                    "syllabusSummary": "Suites réelles, limites, continuité, dérivabilité, développements limités et intégration de Riemann.",
+                    "resources": []
+                  },
+                  {
+                    "id": "UY1-FS-INF-L1-MATH115",
+                    "code": "MATH 115",
+                    "title": "Algèbre 1",
+                    "credits": 5,
+                    "semester": 1,
+                    "isCore": true,
+                    "syllabusSummary": "Structures algébriques de base, polynômes, fractions rationnelles, espaces vectoriels et dimension finie.",
+                    "resources": []
+                  },
+                  {
+                    "id": "UY1-FS-INF-L1-PHYS116",
+                    "code": "PHYS 116",
+                    "title": "Physique générale",
+                    "credits": 3,
+                    "semester": 2,
+                    "isCore": false,
+                    "syllabusSummary": "Mécanique du point, électrostatique et électrocinétique de base pour informaticiens.",
+                    "resources": []
+                  },
+                  {
+                    "id": "UY1-FS-INF-L1-CHEM117",
+                    "code": "CHEM 117",
+                    "title": "Chimie générale",
+                    "credits": 2,
+                    "semester": 2,
+                    "isCore": false,
+                    "syllabusSummary": "Structure atomique, classification périodique, liaisons chimiques et réactions acido-basiques.",
+                    "resources": []
+                  },
+                  {
+                    "id": "UY1-FS-INF-L1-METH118",
+                    "code": "METH 118",
+                    "title": "Méthodologie universitaire",
+                    "credits": 2,
+                    "semester": 1,
+                    "isCore": false,
+                    "syllabusSummary": "Techniques de travail intellectuel, prise de notes, recherche bibliographique et éthique académique.",
+                    "resources": []
+                  },
+                  {
+                    "id": "UY1-FS-INF-L1-LANG119",
+                    "code": "LANG 119",
+                    "title": "Anglais scientifique (souvent obligatoire)",
+                    "credits": 2,
+                    "semester": 2,
+                    "isCore": true,
+                    "syllabusSummary": "Technical writing in computer science, reading scientific papers and oral presentation skills.",
+                    "resources": []
+                  }
+                ]
+              },
+              {
+                "id": "UY1-FS-INF-L2",
+                "code": "L2",
+                "name": "Licence 2 (L2)",
+                "orderIndex": 2,
+                "semesters": [3, 4],
+                "teachingUnits": [
+                  {
+                    "id": "UY1-FS-INF-L2-INFO221",
+                    "code": "INFO 221",
+                    "title": "Algorithmique et programmation 2",
+                    "credits": 6,
+                    "semester": 3,
+                    "isCore": true,
+                    "syllabusSummary": "Pointeurs avancés, allocation dynamique, récursivité complexe, modularité et programmation C avancée.",
+                    "resources": [
+                      {
+                        "id": "res-uy1-inf221-crs",
+                        "title": "Cours C Avancé : Arithmétique des Pointeurs et Gestion Mémoire",
+                        "category": "COURS",
+                        "academicYear": "2025/2026",
+                        "session": null,
+                        "fileUrl": "https://cdn.campushub.cm/uy1/fs/inf/L2/INFO221_Pointeurs_Memoire.pdf",
+                        "fileFormat": "PDF",
+                        "fileSizeBytes": 3950000,
+                        "hasSolution": false,
+                        "uploaderName": "Dr. T. Mbarga",
+                        "uploaderRole": "admin",
+                        "status": "APPROVED",
+                        "downloadsCount": 1340,
+                        "ratingAvg": 4.9
+                      }
+                    ]
+                  },
+                  {
+                    "id": "UY1-FS-INF-L2-INFO222",
+                    "code": "INFO 222",
+                    "title": "Structures de données",
+                    "credits": 6,
+                    "semester": 3,
+                    "isCore": true,
+                    "syllabusSummary": "Listes simplement/doublement chaînées, piles, files, arbres binaires, ABR, arbres équilibrés AVL et tables de hachage.",
+                    "resources": [
+                      {
+                        "id": "res-uy1-inf222-tp",
+                        "title": "Recueil officiel de TP : Implémentation complète des Arbres AVL en C",
+                        "category": "TP",
+                        "academicYear": "2024/2025",
+                        "session": null,
+                        "fileUrl": "https://cdn.campushub.cm/uy1/fs/inf/L2/INFO222_TP_Arbres_AVL.pdf",
+                        "fileFormat": "PDF",
+                        "fileSizeBytes": 1780000,
+                        "hasSolution": true,
+                        "uploaderName": "Brice Kamga (Délégué)",
+                        "uploaderRole": "delegate",
+                        "status": "APPROVED",
+                        "downloadsCount": 1620,
+                        "ratingAvg": 5.0
+                      }
+                    ]
+                  },
+                  {
+                    "id": "UY1-FS-INF-L2-INFO223",
+                    "code": "INFO 223",
+                    "title": "Systèmes d’exploitation",
+                    "credits": 5,
+                    "semester": 4,
+                    "isCore": true,
+                    "syllabusSummary": "Gestion des processus POSIX (fork/exec), threads pthread, synchronisation (sémaphores, mutex) et tubes IPC.",
+                    "resources": [
+                      {
+                        "id": "res-uy1-inf223-resume",
+                        "title": "Fiche de synthèse : Sémaphores de Dijkstra, Deadlock de Coffman & IPC",
+                        "category": "RESUME_REVISION",
+                        "academicYear": "2025/2026",
+                        "session": null,
+                        "fileUrl": "https://cdn.campushub.cm/uy1/fs/inf/L2/INFO223_Synthese_POSIX.pdf",
+                        "fileFormat": "PDF",
+                        "fileSizeBytes": 1420000,
+                        "hasSolution": false,
+                        "uploaderName": "Yan Fotsing",
+                        "uploaderRole": "student",
+                        "status": "APPROVED",
+                        "downloadsCount": 890,
+                        "ratingAvg": 4.95
+                      }
+                    ]
+                  },
+                  {
+                    "id": "UY1-FS-INF-L2-INFO224",
+                    "code": "INFO 224",
+                    "title": "Bases de données 1",
+                    "credits": 5,
+                    "semester": 3,
+                    "isCore": true,
+                    "syllabusSummary": "Modélisation entité-association, modèle relationnel, formes normales 1NF/2NF/3NF/BCNF et requêtes SQL DDL/DML.",
+                    "resources": [
+                      {
+                        "id": "res-uy1-inf224-exam",
+                        "title": "Épreuve Examen Session Normale 2024 - Modélisation & Requêtes SQL",
+                        "category": "EXAMEN",
+                        "academicYear": "2023/2024",
+                        "session": "NORMALE",
+                        "fileUrl": "https://cdn.campushub.cm/uy1/fs/inf/L2/INFO224_Exam_2024.pdf",
+                        "fileFormat": "PDF",
+                        "fileSizeBytes": 950000,
+                        "hasSolution": true,
+                        "uploaderName": "Dr. M. Tchoupé",
+                        "uploaderRole": "admin",
+                        "status": "APPROVED",
+                        "downloadsCount": 1780,
+                        "ratingAvg": 4.9
+                      }
+                    ]
+                  },
+                  {
+                    "id": "UY1-FS-INF-L2-INFO225",
+                    "code": "INFO 225",
+                    "title": "Réseaux informatiques 1",
+                    "credits": 5,
+                    "semester": 4,
+                    "isCore": true,
+                    "syllabusSummary": "Modèle OSI 7 couches, pile TCP/IP, protocoles ARP/IP/ICMP, adressage IPv4 et calcul de sous-réseaux VLSM.",
+                    "resources": []
+                  },
+                  {
+                    "id": "UY1-FS-INF-L2-STAT226",
+                    "code": "STAT 226",
+                    "title": "Probabilités et statistiques",
+                    "credits": 4,
+                    "semester": 3,
+                    "isCore": true,
+                    "syllabusSummary": "Variables aléatoires discrètes/continues, lois usuelles, estimation ponctuelle et intervalles de confiance.",
+                    "resources": []
+                  },
+                  {
+                    "id": "UY1-FS-INF-L2-MATH227",
+                    "code": "MATH 227",
+                    "title": "Équations différentielles ordinaires",
+                    "credits": 4,
+                    "semester": 4,
+                    "isCore": false,
+                    "syllabusSummary": "Équations d'ordre 1 et 2, résolutions linéaires à coefficients constants et transformations de Laplace.",
+                    "resources": []
+                  },
+                  {
+                    "id": "UY1-FS-INF-L2-METH228",
+                    "code": "METH 228",
+                    "title": "Méthodologie de la recherche",
+                    "credits": 2,
+                    "semester": 3,
+                    "isCore": false,
+                    "syllabusSummary": "Méthodes quantitatives et qualitatives, rédaction d'articles scientifiques et structuration d'un protocole.",
+                    "resources": []
+                  },
+                  {
+                    "id": "UY1-FS-INF-L2-LANG229",
+                    "code": "LANG 229",
+                    "title": "Communication scientifique et technique",
+                    "credits": 2,
+                    "semester": 4,
+                    "isCore": true,
+                    "syllabusSummary": "Rapports techniques d'ingénierie, vulgarisation scientifique et soutenance devant jury.",
+                    "resources": []
+                  }
+                ]
+              },
+              {
+                "id": "UY1-FS-INF-L3",
+                "code": "L3",
+                "name": "Licence 3 (L3)",
+                "orderIndex": 3,
+                "semesters": [5, 6],
+                "teachingUnits": [
+                  {
+                    "id": "UY1-FS-INF-L3-INFO331",
+                    "code": "INFO 331",
+                    "title": "Génie logiciel",
+                    "credits": 6,
+                    "semester": 5,
+                    "isCore": true,
+                    "syllabusSummary": "Cycles en V, méthodes agiles Scrum, diagrammes UML 2.0 (classes, séquences, cas d'utilisation) et Design Patterns GoF.",
+                    "resources": [
+                      {
+                        "id": "res-uy1-inf331-crs",
+                        "title": "Cours complet : Modélisation UML & Patrons de conception GoF",
+                        "category": "COURS",
+                        "academicYear": "2025/2026",
+                        "session": null,
+                        "fileUrl": "https://cdn.campushub.cm/uy1/fs/inf/L3/INFO331_UML_Patterns.pdf",
+                        "fileFormat": "PDF",
+                        "fileSizeBytes": 5120000,
+                        "hasSolution": false,
+                        "uploaderName": "Pr. J. Kamga",
+                        "uploaderRole": "admin",
+                        "status": "APPROVED",
+                        "downloadsCount": 1950,
+                        "ratingAvg": 4.95
+                      },
+                      {
+                        "id": "res-uy1-inf331-exam",
+                        "title": "Examen Final 2024 avec Corrigé Type - Étude de cas Système Hospitalier",
+                        "category": "EXAMEN",
+                        "academicYear": "2023/2024",
+                        "session": "NORMALE",
+                        "fileUrl": "https://cdn.campushub.cm/uy1/fs/inf/L3/INFO331_Exam_Corrige.pdf",
+                        "fileFormat": "PDF",
+                        "fileSizeBytes": 2340000,
+                        "hasSolution": true,
+                        "uploaderName": "Modérateur FS UY1",
+                        "uploaderRole": "moderator",
+                        "status": "APPROVED",
+                        "downloadsCount": 2200,
+                        "ratingAvg": 5.0
+                      }
+                    ]
+                  },
+                  {
+                    "id": "UY1-FS-INF-L3-INFO332",
+                    "code": "INFO 332",
+                    "title": "Intelligence artificielle (introduction)",
+                    "credits": 5,
+                    "semester": 5,
+                    "isCore": true,
+                    "syllabusSummary": "Recherche heuristique dans les graphes (A*), jeux à deux joueurs (Minimax, élagage Alpha-Beta), et bases des réseaux de neurones.",
+                    "resources": [
+                      {
+                        "id": "res-uy1-inf332-crs",
+                        "title": "Polycopié de cours : Algorithmes Heuristiques & Apprentissage Supervisé",
+                        "category": "COURS",
+                        "academicYear": "2025/2026",
+                        "session": null,
+                        "fileUrl": "https://cdn.campushub.cm/uy1/fs/inf/L3/INFO332_Cours_IA.pdf",
+                        "fileFormat": "PDF",
+                        "fileSizeBytes": 4450000,
+                        "hasSolution": false,
+                        "uploaderName": "Dr. P. Kamgue",
+                        "uploaderRole": "admin",
+                        "status": "APPROVED",
+                        "downloadsCount": 1670,
+                        "ratingAvg": 4.9
+                      }
+                    ]
+                  },
+                  {
+                    "id": "UY1-FS-INF-L3-INFO333",
+                    "code": "INFO 333",
+                    "title": "Bases de données 2",
+                    "credits": 5,
+                    "semester": 6,
+                    "isCore": true,
+                    "syllabusSummary": "Optimisation des requêtes relationnelles, plans d'exécution, transactions ACID, concurrence et procédures PL/pgSQL.",
+                    "resources": []
+                  },
+                  {
+                    "id": "UY1-FS-INF-L3-INFO334",
+                    "code": "INFO 334",
+                    "title": "Réseaux informatiques 2",
+                    "credits": 5,
+                    "semester": 5,
+                    "isCore": true,
+                    "syllabusSummary": "Routage dynamique à vecteur de distance et état de liens (RIP, OSPF, BGP), commutation de paquets et sécurité des ports.",
+                    "resources": []
+                  },
+                  {
+                    "id": "UY1-FS-INF-L3-INFO335",
+                    "code": "INFO 335",
+                    "title": "Sécurité informatique",
+                    "credits": 4,
+                    "semester": 6,
+                    "isCore": true,
+                    "syllabusSummary": "Chiffrement symétrique/asymétrique (AES, RSA), fonctions de hachage, signature numérique, attaques web courantes et pare-feu.",
+                    "resources": [
+                      {
+                        "id": "res-uy1-inf335-memo",
+                        "title": "Fiche de révision : Cryptographie appliquée, certificats TLS et attaques XSS/CSRF/SQLi",
+                        "category": "RESUME_REVISION",
+                        "academicYear": "2025/2026",
+                        "session": null,
+                        "fileUrl": "https://cdn.campushub.cm/uy1/fs/inf/L3/INFO335_Fiche_Securite.pdf",
+                        "fileFormat": "PDF",
+                        "fileSizeBytes": 1820000,
+                        "hasSolution": false,
+                        "uploaderName": "Yan Fotsing",
+                        "uploaderRole": "student",
+                        "status": "APPROVED",
+                        "downloadsCount": 1180,
+                        "ratingAvg": 4.95
+                      }
+                    ]
+                  },
+                  {
+                    "id": "UY1-FS-INF-L3-INFO336",
+                    "code": "INFO 336",
+                    "title": "Calcul numérique appliqué",
+                    "credits": 3,
+                    "semester": 5,
+                    "isCore": false,
+                    "syllabusSummary": "Résolution numérique de systèmes d'équations, interpolation polynomiale et intégration approchée.",
+                    "resources": []
+                  },
+                  {
+                    "id": "UY1-FS-INF-L3-INFO337",
+                    "code": "INFO 337",
+                    "title": "Systèmes distribués",
+                    "credits": 4,
+                    "semester": 6,
+                    "isCore": true,
+                    "syllabusSummary": "Modèles de systèmes distribués, horloges logiques de Lamport, RPC, et algorithmes d'élection de leader.",
+                    "resources": []
+                  },
+                  {
+                    "id": "UY1-FS-INF-L3-INFO338",
+                    "code": "INFO 338",
+                    "title": "Informatique théorique (automates, complexité)",
+                    "credits": 3,
+                    "semester": 5,
+                    "isCore": true,
+                    "syllabusSummary": "Automates finis déterministes/non-déterministes, grammaires hors-contexte, machines de Turing et classes P/NP.",
+                    "resources": []
+                  },
+                  {
+                    "id": "UY1-FS-INF-L3-RES339",
+                    "code": "RES 339",
+                    "title": "Projet de fin de cycle",
+                    "credits": 6,
+                    "semester": 6,
+                    "isCore": true,
+                    "syllabusSummary": "Conception, développement et soutenance publique d'une application logicielle complète sous encadrement académique.",
+                    "resources": []
+                  }
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
