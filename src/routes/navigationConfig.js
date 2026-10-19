@@ -32,9 +32,9 @@ export const NAVIGATION_ITEMS = [
   },
   {
     path: '/ressources',
-    label: 'Catalogue National',
+    label: 'Ressources Nationales',
     icon: Library,
-    description: 'Gestion & catalogue des cours (CRUD multi-universités)',
+    description: 'Structure nationale : Universités, Facultés, Filières, Niveaux et UEs',
   },
   {
     path: '/profile',

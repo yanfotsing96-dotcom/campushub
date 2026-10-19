@@ -22,6 +22,11 @@ import {
 } from '../../constants/rbacConstants';
 import { DEPARTMENTS, ACADEMIC_LEVELS } from '../../constants/academicScopes';
 import { CAMEROON_UNIVERSITIES } from '../../constants/academicConstants';
+import {
+  nationalAcademicService,
+  INSTITUTIONS_REGISTRY,
+  FILIERE_PROGRAMS_MAP,
+} from '../../constants/nationalAcademicData';
 
 // Quick Demonstration Presets Across Cameroon
 const NATIONAL_PRESETS = [
@@ -77,7 +82,7 @@ export default function RegisterForm({ onSubmit, onCancel, showHeaderMotto = tru
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
 
-  // Form State
+  // Form State - 5-Step Academic Cascade
   const [formData, setFormData] = useState(() => ({
     nom: '',
     prenom: '',
@@ -86,8 +91,10 @@ export default function RegisterForm({ onSubmit, onCancel, showHeaderMotto = tru
     email: '',
     password: '',
     universityId: 'UY1',
+    facultyId: 'UY1_FS',
     faculty: 'Faculté des Sciences (FS)',
-    filiere: 'Informatique',
+    filiere: 'inf',
+    filiereLabel: 'Informatique',
     niveau: 'L2',
     role: ROLES.STUDENT,
     passcode: '',
@@ -127,15 +134,50 @@ export default function RegisterForm({ onSubmit, onCancel, showHeaderMotto = tru
   const [passcodeError, setPasscodeError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
 
-  // Currently selected university object
+  // 1. Université sélectionnée
   const selectedUnivObj = useMemo(() => {
     return CAMEROON_UNIVERSITIES.find((u) => u.id === formData.universityId) || CAMEROON_UNIVERSITIES[0];
   }, [formData.universityId]);
 
-  // Available faculties for the chosen university
-  const availableFaculties = useMemo(() => {
-    return selectedUnivObj?.faculties || ['Faculté des Sciences (FS)'];
-  }, [selectedUnivObj]);
+  // 2. Facultés rattachées à cette université parente
+  const availableInstitutions = useMemo(() => {
+    const list = nationalAcademicService.getFacultiesByUniversity(formData.universityId);
+    return list.length > 0 ? list : INSTITUTIONS_REGISTRY.filter((i) => i.universityId === 'UY1');
+  }, [formData.universityId]);
+
+  const currentInstitution = useMemo(() => {
+    return (
+      availableInstitutions.find((i) => i.id === formData.facultyId || i.name === formData.faculty) ||
+      availableInstitutions[0]
+    );
+  }, [availableInstitutions, formData.facultyId, formData.faculty]);
+
+  // 3. Filières officielles rattachées à la faculté choisie
+  const availableFilieres = useMemo(() => {
+    if (!currentInstitution) return [{ id: 'inf', label: 'Informatique', code: 'INF' }];
+    const filieres = nationalAcademicService.getFilieresForFaculty(currentInstitution.id);
+    return filieres.length > 0 ? filieres : [{ id: 'inf', label: 'Informatique', code: 'INF' }];
+  }, [currentInstitution]);
+
+  const currentFiliere = useMemo(() => {
+    return (
+      availableFilieres.find((f) => f.id === formData.filiere || f.label === formData.filiere) ||
+      availableFilieres[0]
+    );
+  }, [availableFilieres, formData.filiere]);
+
+  // 4. Niveaux académiques valides pour cette filière
+  const availableLevels = useMemo(() => {
+    if (!currentFiliere) return ['L1', 'L2', 'L3'];
+    const prog = FILIERE_PROGRAMS_MAP[currentFiliere.id];
+    return prog?.levels || ['L1', 'L2', 'L3'];
+  }, [currentFiliere]);
+
+  // 5. Unités d'Enseignement (UE) chargées automatiquement pour le niveau
+  const loadedUes = useMemo(() => {
+    if (!currentFiliere) return [];
+    return nationalAcademicService.getUesByFiliereAndLevel(currentFiliere.id, formData.niveau);
+  }, [currentFiliere, formData.niveau]);
 
   // Password validation (min 6 characters)
   const passwordLength = formData.password.length;
@@ -144,26 +186,57 @@ export default function RegisterForm({ onSubmit, onCancel, showHeaderMotto = tru
 
   // Generate university-specific matricule
   const handleGenerateMatricule = () => {
-    const yearPrefix = '25';
+    const yearPrefix = '26';
     let codeLetter = 'U';
     if (formData.universityId === 'ENSPY' || formData.universityId === 'ENSPD') codeLetter = 'P';
     if (formData.universityId === 'UB') codeLetter = 'B';
     if (formData.universityId === 'UDLA') codeLetter = 'D';
     if (formData.universityId === 'UDS') codeLetter = 'DS';
+    if (formData.universityId === 'UN') codeLetter = 'N';
+    if (formData.universityId === 'UMA') codeLetter = 'M';
+    if (formData.universityId === 'UGA') codeLetter = 'G';
+    if (formData.universityId === 'UBE') codeLetter = 'BE';
+    if (formData.universityId === 'UEB') codeLetter = 'EB';
     const randomDigits = Math.floor(1000 + Math.random() * 9000);
     const newMatricule = `${yearPrefix}${codeLetter}${randomDigits}`;
     setFormData((prev) => ({ ...prev, matricule: newMatricule }));
   };
 
-  // Input change handler
+  // Input change handler avec cascade automatique
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => {
       const next = { ...prev, [name]: value };
+
       if (name === 'universityId') {
-        const univ = CAMEROON_UNIVERSITIES.find((u) => u.id === value) || CAMEROON_UNIVERSITIES[0];
-        next.faculty = univ?.faculties?.[0] || 'Faculté des Sciences (FS)';
+        const institutions = nationalAcademicService.getFacultiesByUniversity(value);
+        const firstInst = institutions[0] || null;
+        next.facultyId = firstInst?.id || '';
+        next.faculty = firstInst?.name || '';
+        const filieres = firstInst ? nationalAcademicService.getFilieresForFaculty(firstInst.id) : [];
+        const firstFil = filieres[0] || null;
+        next.filiere = firstFil?.id || 'inf';
+        next.filiereLabel = firstFil?.label || 'Informatique';
+        const prog = firstFil ? FILIERE_PROGRAMS_MAP[firstFil.id] : null;
+        next.niveau = prog?.levels?.[0] || 'L1';
+      } else if (name === 'facultyId') {
+        const inst = INSTITUTIONS_REGISTRY.find((i) => i.id === value);
+        next.facultyId = value;
+        next.faculty = inst?.name || value;
+        const filieres = nationalAcademicService.getFilieresForFaculty(value);
+        const firstFil = filieres[0] || null;
+        next.filiere = firstFil?.id || 'inf';
+        next.filiereLabel = firstFil?.label || 'Informatique';
+        const prog = firstFil ? FILIERE_PROGRAMS_MAP[firstFil.id] : null;
+        next.niveau = prog?.levels?.[0] || 'L1';
+      } else if (name === 'filiere') {
+        next.filiere = value;
+        const filObj = availableFilieres.find((f) => f.id === value);
+        next.filiereLabel = filObj?.label || value;
+        const prog = FILIERE_PROGRAMS_MAP[value];
+        next.niveau = prog?.levels?.[0] || 'L1';
       }
+
       if ((name === 'prenom' || name === 'nom') && !prev.usernameEdited) {
         const p = name === 'prenom' ? value : prev.prenom;
         const n = name === 'nom' ? value : prev.nom;
@@ -525,14 +598,14 @@ export default function RegisterForm({ onSubmit, onCancel, showHeaderMotto = tru
                 </label>
                 <select
                   id={registerFacultyFieldId}
-                  name="faculty"
-                  value={availableFaculties.includes(formData.faculty) ? formData.faculty : (availableFaculties[0] || '')}
+                  name="facultyId"
+                  value={currentInstitution?.id || ''}
                   onChange={handleChange}
                   className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700/70 text-slate-100 text-xs focus:border-indigo-500 focus:outline-none"
                 >
-                  {availableFaculties.map((f, i) => (
-                    <option key={i} value={f}>
-                      {f}
+                  {availableInstitutions.map((inst) => (
+                    <option key={inst.id} value={inst.id}>
+                      {inst.name} ({inst.code})
                     </option>
                   ))}
                 </select>
@@ -540,21 +613,21 @@ export default function RegisterForm({ onSubmit, onCancel, showHeaderMotto = tru
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {/* Filière / Département */}
+              {/* Filière / Programme officiel */}
               <div className="space-y-1">
                 <label htmlFor={registerFiliereFieldId} className="block text-xs font-medium text-slate-300">
-                  Filière Académique *
+                  Filière de Formation Officielle *
                 </label>
                 <select
                   id={registerFiliereFieldId}
                   name="filiere"
-                  value={formData.filiere}
+                  value={currentFiliere?.id || formData.filiere}
                   onChange={handleChange}
                   className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700/70 text-slate-100 text-xs focus:border-indigo-500 focus:outline-none"
                 >
-                  {DEPARTMENTS.map((d) => (
-                    <option key={d.id} value={d.id}>
-                      {d.label} ({d.code})
+                  {availableFilieres.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.label} ({f.code})
                     </option>
                   ))}
                 </select>
@@ -563,7 +636,7 @@ export default function RegisterForm({ onSubmit, onCancel, showHeaderMotto = tru
               {/* Niveau d'études */}
               <div className="space-y-1">
                 <label htmlFor={registerNiveauFieldId} className="block text-xs font-medium text-slate-300">
-                  Niveau d'Études *
+                  Niveau Académique *
                 </label>
                 <select
                   id={registerNiveauFieldId}
@@ -572,13 +645,38 @@ export default function RegisterForm({ onSubmit, onCancel, showHeaderMotto = tru
                   onChange={handleChange}
                   className="w-full px-3 py-2 rounded-xl bg-slate-800 border border-slate-700/70 text-slate-100 text-xs focus:border-indigo-500 focus:outline-none"
                 >
-                  {ACADEMIC_LEVELS.map((lvl) => (
-                    <option key={lvl.id} value={lvl.id}>
-                      {lvl.label}
+                  {availableLevels.map((lvl) => (
+                    <option key={lvl} value={lvl}>
+                      {lvl}
                     </option>
                   ))}
                 </select>
               </div>
+
+              {/* Aperçu dynamique des UEs chargées pour ce niveau (PDF Page 6) */}
+              {loadedUes.length > 0 && (
+                <div className="col-span-full p-3 rounded-xl bg-slate-800/80 border border-indigo-500/30 space-y-2 mt-1">
+                  <div className="flex items-center justify-between text-[11px] font-bold text-indigo-300">
+                    <span className="flex items-center gap-1.5">
+                      <Sparkles size={13} className="text-indigo-400" />
+                      <span>Unités d'Enseignement (UE) chargées pour ce niveau ({loadedUes.length})</span>
+                    </span>
+                    <span className="text-[10px] text-emerald-400 font-mono">Conforme LMD</span>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto pr-1">
+                    {loadedUes.map((ue, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-indigo-950/80 border border-indigo-800/60 text-[11px] text-indigo-200"
+                        title={ue.title}
+                      >
+                        <span className="font-mono font-bold text-indigo-400">{ue.code}</span>
+                        <span className="text-slate-300 truncate max-w-[150px]">· {ue.title}</span>
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 

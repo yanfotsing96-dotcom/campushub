@@ -4,6 +4,7 @@
  */
 
 import { DEPARTMENTS, RELATION_COURSES } from '../constants/academicScopes';
+import { FILIERE_PROGRAMS_MAP } from '../constants/nationalAcademicData';
 import { ROLES, normalizeRole } from '../constants/rbacConstants';
 
 const STORAGE_MATERIALS_KEY = 'campushub_scoped_materials';
@@ -497,7 +498,29 @@ class DepartmentScopeService {
   }
 
   getDepartment(filiereId) {
-    return DEPARTMENTS.find((d) => d.id === filiereId) || DEPARTMENTS[0];
+    if (!filiereId) return DEPARTMENTS[0];
+    const found = DEPARTMENTS.find(
+      (d) => d.id.toLowerCase() === filiereId.toLowerCase() || d.label.toLowerCase() === filiereId.toLowerCase()
+    );
+    if (found) return found;
+
+    const prog = FILIERE_PROGRAMS_MAP[filiereId] || Object.values(FILIERE_PROGRAMS_MAP).find((p) => p.label.toLowerCase() === filiereId.toLowerCase());
+    if (prog) {
+      return {
+        id: prog.id,
+        code: prog.code,
+        label: prog.label,
+        labelEn: prog.title,
+        faculty: 'Faculté / Grande École Partenaire',
+        color: '#6366f1',
+        bgColor: 'bg-indigo-50 dark:bg-indigo-950/60',
+        borderColor: 'border-indigo-200 dark:border-indigo-800',
+        badgeText: 'text-indigo-700 dark:text-indigo-300',
+        isTechFlagship: true,
+        description: prog.title + ' - Programme officiel accrédité MINESUP Cameroun.',
+      };
+    }
+    return DEPARTMENTS[0];
   }
 
   getAllDepartments() {

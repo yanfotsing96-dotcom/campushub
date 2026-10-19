@@ -1,7 +1,4 @@
-/**
- * Cloisonnement Académique & Définition Relationnelle des Filières
- * CampusHub Cameroun - Standards Ministère de l'Enseignement Supérieur (MINESUP)
- */
+import { FILIERE_PROGRAMS_MAP, FACULTY_FILIERES_DEFINITIONS, PARTNER_UNIVERSITIES } from './nationalAcademicData';
 
 export const DEPARTMENTS = [
   {
@@ -120,11 +117,7 @@ export const ACADEMIC_LEVELS = [
   { id: 'Doctorat', shortLabel: 'Doctorat', label: 'Doctorat / PhD', semester: 'Recherche Doctorale' },
 ];
 
-/**
- * Catalogue Relationnel des Unités d'Enseignement (UE)
- * Reliées strictement à (filiereId, niveau)
- */
-export const RELATION_COURSES = [
+export const BASE_RELATION_COURSES = [
   // ==================== INFORMATIQUE ====================
   // INFORMATIQUE - L1
   {
@@ -589,5 +582,70 @@ export const RELATION_COURSES = [
     totalMaterials: 6,
     activeExams: 1,
   },
+];
+
+// Generate national UEs from FILIERE_PROGRAMS_MAP
+const generatedNationalCourses = [];
+const existingCodes = new Set(BASE_RELATION_COURSES.map((c) => `${c.filiereId}_${c.niveau}_${c.codeUe.replace(/\s+/g, '')}`));
+
+Object.values(FILIERE_PROGRAMS_MAP).forEach((prog) => {
+  if (prog.ues) {
+    Object.entries(prog.ues).forEach(([lvl, uesList]) => {
+      uesList.forEach((ue, idx) => {
+        const key = `${prog.id}_${lvl}_${ue.code.replace(/\s+/g, '')}`;
+        if (!existingCodes.has(key)) {
+          existingCodes.add(key);
+          generatedNationalCourses.push({
+            id: `nat-${prog.id}-${lvl.replace(/\s+/g, '-').toLowerCase()}-${idx}`,
+            codeUe: ue.code,
+            filiereId: prog.id,
+            filiere: prog.label,
+            niveau: lvl,
+            titre: ue.title,
+            credits: ue.credits || 6,
+            enseignant: 'Département ' + prog.label,
+            semestre: ue.semester || lvl,
+            description: `${ue.title} (${ue.code}) - Programme officiel MINESUP Cameroun`,
+            totalMaterials: 6,
+            activeExams: 1,
+          });
+        }
+        // Alias support for Informatique, Mathématiques, etc.
+        const aliasMap = {
+          inf: 'Informatique',
+          math: 'Mathématiques',
+          phys: 'Physique',
+          chim: 'Chimie',
+          bio: 'Biologie',
+          geo: 'Génie-Civil',
+        };
+        if (aliasMap[prog.id]) {
+          const aliasKey = `${aliasMap[prog.id]}_${lvl}_${ue.code.replace(/\s+/g, '')}`;
+          if (!existingCodes.has(aliasKey)) {
+            existingCodes.add(aliasKey);
+            generatedNationalCourses.push({
+              id: `nat-alias-${aliasMap[prog.id]}-${lvl.replace(/\s+/g, '-').toLowerCase()}-${idx}`,
+              codeUe: ue.code,
+              filiereId: aliasMap[prog.id],
+              filiere: aliasMap[prog.id],
+              niveau: lvl,
+              titre: ue.title,
+              credits: ue.credits || 6,
+              enseignant: 'Département ' + aliasMap[prog.id],
+              semestre: ue.semester || lvl,
+              description: `${ue.title} (${ue.code}) - Programme officiel MINESUP Cameroun`,
+              totalMaterials: 6,
+              activeExams: 1,
+            });
+          }
+        }
+      });
+    });
+  }
+});
+
+export const RELATION_COURSES = [
+  ...BASE_RELATION_COURSES,
+  ...generatedNationalCourses,
 ];
 
