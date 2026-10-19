@@ -8,8 +8,10 @@ import {
   CheckCircle2,
   AlertTriangle,
   Atom,
+  LayoutDashboard,
 } from 'lucide-react';
 import ChemistryPlayground from './ChemistryPlayground';
+import ProcessLabWorkspace from './l03/ProcessLabWorkspace';
 
 const PERIODIC_ELEMENTS = [
   { z: 1, s: 'H', n: 'Hydrogène', m: 1.008, cat: 'Non-métal', en: 2.20, config: '1s¹', period: 1, group: 1 },
@@ -40,7 +42,7 @@ const PERIODIC_ELEMENTS = [
 ];
 
 export default function ChemistryLab() {
-  const [activeTab, setActiveTab] = useState('playground'); // 'playground' | 'table' | 'molarity' | 'ph' | 'safety'
+  const [activeTab, setActiveTab] = useState('workspace'); // 'workspace' | 'playground' | 'table' | 'safety'
   const [searchElem, setSearchElem] = useState('');
   const [selectedElem, setSelectedElem] = useState(PERIODIC_ELEMENTS[5]); // Carbone default
 
@@ -88,39 +90,51 @@ export default function ChemistryLab() {
   return (
     <div className="space-y-6 text-left">
       {/* Top Header Tabs */}
-      <div className="p-4 rounded-3xl bg-slate-900 border border-slate-800 flex flex-wrap items-center justify-between gap-3">
-        <div className="inline-flex p-1 rounded-2xl bg-slate-950 border border-slate-800 text-xs font-bold flex-wrap gap-1">
+      <div className="p-4 rounded-3xl bg-[#EFECE6] border border-[#E3DEC9] flex flex-wrap items-center justify-between gap-3 shadow-xs">
+        <div className="inline-flex p-1 rounded-2xl bg-[#F7F5F0] border border-[#E3DEC9] text-xs font-bold flex-wrap gap-1">
+          <button
+            type="button"
+            onClick={() => setActiveTab('workspace')}
+            className={`px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1.5 ${
+              activeTab === 'workspace'
+                ? 'bg-[#059669] text-white shadow-xs'
+                : 'text-[#6E5D4F] hover:text-[#2C2218]'
+            }`}
+          >
+            <LayoutDashboard size={14} />
+            <span>Workspace 3 Panneaux (21 Filières)</span>
+          </button>
           <button
             type="button"
             onClick={() => setActiveTab('playground')}
             className={`px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1.5 ${
               activeTab === 'playground'
-                ? 'bg-gradient-to-r from-violet-600 to-indigo-600 text-white shadow-lg shadow-violet-900/30'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-[#059669] text-white shadow-xs'
+                : 'text-[#6E5D4F] hover:text-[#2C2218]'
             }`}
           >
             <Atom size={14} />
-            <span>Playground Modulaire (L1 ➔ Master 2)</span>
+            <span>Bancs Modulaires Chimie</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('table')}
             className={`px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1.5 ${
               activeTab === 'table'
-                ? 'bg-teal-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-[#059669] text-white shadow-xs'
+                : 'text-[#6E5D4F] hover:text-[#2C2218]'
             }`}
           >
             <FlaskConical size={14} />
-            <span>Tableau Périodique Mendeleïev</span>
+            <span>Tableau Périodique</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('safety')}
             className={`px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1.5 ${
               activeTab === 'safety'
-                ? 'bg-teal-600 text-white shadow-md'
-                : 'text-slate-400 hover:text-white'
+                ? 'bg-[#059669] text-white shadow-xs'
+                : 'text-[#6E5D4F] hover:text-[#2C2218]'
             }`}
           >
             <Shield size={14} />
@@ -128,13 +142,16 @@ export default function ChemistryLab() {
           </button>
         </div>
 
-        <div className="text-xs text-indigo-300 font-mono flex items-center gap-1.5">
-          <Sparkles size={13} className="text-violet-400" />
-          <span>CHM101 ➔ CHM501 · Pôle Sciences Chimiques</span>
+        <div className="text-xs text-[#059669] font-bold flex items-center gap-1.5">
+          <Sparkles size={13} className="text-[#059669]" />
+          <span>Lab L03 · Chimie & Génie des Procédés MINESUP</span>
         </div>
       </div>
 
-      {/* 0. Chemistry Playground Tab (Primary Experience) */}
+      {/* 0. Espace de Travail Tripartite Lab L03 */}
+      {activeTab === 'workspace' && <ProcessLabWorkspace />}
+
+      {/* 1. Chemistry Playground Tab */}
       {activeTab === 'playground' && (
         <div className="animate-in fade-in duration-200">
           <ChemistryPlayground />

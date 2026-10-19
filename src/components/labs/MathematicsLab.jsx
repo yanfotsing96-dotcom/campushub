@@ -5,11 +5,13 @@ import {
   Sparkles,
   BookOpen,
   School,
+  LayoutDashboard,
 } from 'lucide-react';
 import Lab01MathematicsView from './Lab01MathematicsView';
+import MathLabWorkspace from './l01/MathLabWorkspace';
 
 export default function MathematicsLab() {
-  const [activeTab, setActiveTab] = useState('filieres'); // 'filieres' | 'matrix' | 'calculus' | 'theorems'
+  const [activeTab, setActiveTab] = useState('workspace'); // 'workspace' | 'filieres' | 'matrix' | 'calculus' | 'theorems'
 
   // 2x2 Matrix State: [ [a, b], [c, d] ]
   const [a, setA] = useState(4);
@@ -78,6 +80,18 @@ export default function MathematicsLab() {
         <div className="inline-flex p-1 rounded-2xl bg-[#F7F5F0] border border-[#E3DEC9] text-xs font-bold">
           <button
             type="button"
+            onClick={() => setActiveTab('workspace')}
+            className={`px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1.5 ${
+              activeTab === 'workspace'
+                ? 'bg-[#5C4033] text-white shadow-xs'
+                : 'text-[#6E5D4F] hover:text-[#2C2218]'
+            }`}
+          >
+            <LayoutDashboard size={14} />
+            <span>Workspace 3 Panneaux</span>
+          </button>
+          <button
+            type="button"
             onClick={() => setActiveTab('filieres')}
             className={`px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1.5 ${
               activeTab === 'filieres'
@@ -132,9 +146,12 @@ export default function MathematicsLab() {
         </div>
       </div>
 
-      {/* 0. Répertoire Officiel des 14 Filières Lab L01 */}
+      {/* 0. Espace de Travail en 3 Panneaux Lab L01 */}
+      {activeTab === 'workspace' && <MathLabWorkspace />}
+
+      {/* 0 bis. Répertoire Officiel des 14 Filières Lab L01 */}
       {activeTab === 'filieres' && (
-        <Lab01MathematicsView onNavigateToSimulator={() => setActiveTab('matrix')} />
+        <Lab01MathematicsView onNavigateToSimulator={() => setActiveTab('workspace')} />
       )}
 
       {/* 1. Matrix Calculator */}

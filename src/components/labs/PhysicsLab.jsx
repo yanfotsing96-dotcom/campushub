@@ -11,18 +11,20 @@ import PhysicsExamTrainerModule from './physics/PhysicsExamTrainerModule';
 import TPExportModal from './physics/TPExportModal';
 import { PHYSICS_MODULES } from './physics/physicsData';
 import Lab02PhysicsView from './Lab02PhysicsView';
-import { School, Sparkles, Atom } from 'lucide-react';
+import PhysicsLabWorkspace from './l02/PhysicsLabWorkspace';
+import { School, Sparkles, Atom, LayoutDashboard } from 'lucide-react';
 
 /**
  * Composant Central "PhysicsLab Hub" pour la filière Physique de CampusHub (Lab L02)
  *
  * Combine :
  * - Le Répertoire Officiel des 14 Filières MINESUP de UY1 à UEb (Page 2 et 3) avec numéros de dossier
+ * - Le Workspace 3 Panneaux (Consignes MINESUP, Simulateurs RLC & Optique, Correcteur IA)
  * - Les 6 Bancs d'Essais Virtuels & Entraîneur d'Examen
  * - Le Thème Beige & Chocolat MINESUP (#F7F5F0, #EFECE6, #E3DEC9, #5C4033) avec accent Cyan/Technique (#0284C7)
  */
 export default function PhysicsLab() {
-  const [mainTab, setMainTab] = useState('filieres'); // 'filieres' | 'simulators'
+  const [mainTab, setMainTab] = useState('workspace'); // 'workspace' | 'filieres' | 'simulators'
   const [activeModuleId, setActiveModuleId] = useState('overview');
   const [examCategory, setExamCategory] = useState('all');
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -79,6 +81,18 @@ export default function PhysicsLab() {
         <div className="inline-flex p-1 rounded-2xl bg-[#F7F5F0] border border-[#E3DEC9] text-xs font-bold">
           <button
             type="button"
+            onClick={() => setMainTab('workspace')}
+            className={`px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1.5 ${
+              mainTab === 'workspace'
+                ? 'bg-[#0284C7] text-white shadow-xs'
+                : 'text-[#6E5D4F] hover:text-[#2C2218]'
+            }`}
+          >
+            <LayoutDashboard size={14} />
+            <span>Workspace 3 Panneaux</span>
+          </button>
+          <button
+            type="button"
             onClick={() => setMainTab('filieres')}
             className={`px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1.5 ${
               mainTab === 'filieres'
@@ -99,7 +113,7 @@ export default function PhysicsLab() {
             }`}
           >
             <Atom size={14} />
-            <span>Bancs de Simulation & Entraîneur (6 Modules)</span>
+            <span>Bancs Avancés (6 Modules)</span>
           </button>
         </div>
 
@@ -109,9 +123,12 @@ export default function PhysicsLab() {
         </div>
       </div>
 
+      {/* Vue 0 : Espace de Travail en 3 Panneaux Lab L02 */}
+      {mainTab === 'workspace' && <PhysicsLabWorkspace />}
+
       {/* Vue 1 : Répertoire Officiel des 14 Filières */}
       {mainTab === 'filieres' && (
-        <Lab02PhysicsView onNavigateToSimulator={() => setMainTab('simulators')} />
+        <Lab02PhysicsView onNavigateToSimulator={() => setMainTab('workspace')} />
       )}
 
       {/* Vue 2 : Bancs de Simulation & Entraîneur */}
