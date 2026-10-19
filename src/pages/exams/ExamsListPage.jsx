@@ -187,9 +187,9 @@ export default function ExamsListPage() {
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {availableExams.map((exam) => (
+                {availableExams.map((exam, idx) => (
                   <div
-                    key={exam.id}
+                    key={`${exam.id || 'exam'}-${idx}`}
                     className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 shadow-xs flex flex-col justify-between space-y-4 hover:border-indigo-300 dark:hover:border-indigo-800 transition-all"
                   >
                     <div className="space-y-3">

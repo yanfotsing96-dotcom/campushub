@@ -40,32 +40,32 @@ export default function ContextualLabContainer({ className = '' }) {
 
   return (
     <div className={`space-y-5 ${className}`}>
-      {/* En-tête de Certification Contextuelle */}
-      <div className="p-4 sm:p-5 rounded-3xl bg-slate-800/90 border border-slate-700/60 shadow-xl backdrop-blur-xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left">
+      {/* En-tête de Certification Contextuelle (Thème Beige & Chocolat MINESUP) */}
+      <div className="p-4 sm:p-5 rounded-3xl bg-[#EFECE6] border border-[#E3DEC9] shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-left">
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
-              <Lock size={12} className="text-indigo-400" />
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-[#5C4033]/10 text-[#5C4033] border border-[#5C4033]/25">
+              <Lock size={12} className="text-[#5C4033]" />
               <span>Laboratoire Contextuel Dédié · MINESUP</span>
             </span>
 
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-white/10 text-white font-mono">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-bold bg-[#F7F5F0] text-[#2C2218] border border-[#E3DEC9] font-mono">
               {department.code} · {activeNiveau}
             </span>
           </div>
 
-          <h2 className="text-lg sm:text-xl font-black text-white flex items-center gap-2">
+          <h2 className="text-lg sm:text-xl font-black text-[#2C2218] flex items-center gap-2">
             <span>Espace Laboratoire Pratique : {department.label}</span>
           </h2>
 
-          <p className="text-xs text-slate-300">
+          <p className="text-xs text-[#6E5D4F]">
             Module technique taillé sur-mesure pour votre promotion. Accès automatique et sans interférence aux outils de votre filière.
           </p>
         </div>
 
         <div className="flex items-center gap-2 self-start sm:self-auto text-xs font-mono">
-          <span className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/60 text-slate-200 flex items-center gap-1.5">
-            <GraduationCap size={14} className="text-indigo-400" />
+          <span className="px-3 py-1.5 rounded-xl bg-[#F7F5F0] border border-[#E3DEC9] text-[#2C2218] flex items-center gap-1.5 font-bold shadow-xs">
+            <GraduationCap size={14} className="text-[#5C4033]" />
             <span>Filière : {activeFiliere}</span>
           </span>
         </div>

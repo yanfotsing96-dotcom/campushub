@@ -10,19 +10,19 @@ import QuantumModule from './physics/QuantumModule';
 import PhysicsExamTrainerModule from './physics/PhysicsExamTrainerModule';
 import TPExportModal from './physics/TPExportModal';
 import { PHYSICS_MODULES } from './physics/physicsData';
+import Lab02PhysicsView from './Lab02PhysicsView';
+import { School, Sparkles, Atom } from 'lucide-react';
 
 /**
- * Composant Central "PhysicsLab Hub" pour la filière Physique de CampusHub (L1 à Master 2)
+ * Composant Central "PhysicsLab Hub" pour la filière Physique de CampusHub (Lab L02)
  *
- * Architecture SaaS haut de gamme :
- * - Navigation Latérale (Sidebar) structurée par cycles (L1-L2 Fondamentaux vs L3-Master Avancé + Overview + Mode Examen)
- * - Tableau de bord d'accueil interactif avec formules clés, KPIs et lancement rapide
- * - 6 bancs d'essais virtuels avec ajustement dynamique des paramètres physiques (curseurs + champs libres)
- * - Graphismes vectoriels SVG temps réel (trajectoires balistiques, Bode RLC, réfraction, ondes Maxwell, cycles P-V, puits quantique)
- * - Mode Examen & Auto-Évaluation intégré : QCM universitaires, correction instantanée, score global et pas à pas détaillé
- * - Module d'Exportation PDF Natif A4 (jsPDF + html2canvas, scale: 2) avec formules KaTeX et métadonnées certifiées
+ * Combine :
+ * - Le Répertoire Officiel des 14 Filières MINESUP de UY1 à UEb (Page 2 et 3) avec numéros de dossier
+ * - Les 6 Bancs d'Essais Virtuels & Entraîneur d'Examen
+ * - Le Thème Beige & Chocolat MINESUP (#F7F5F0, #EFECE6, #E3DEC9, #5C4033) avec accent Cyan/Technique (#0284C7)
  */
 export default function PhysicsLab() {
+  const [mainTab, setMainTab] = useState('filieres'); // 'filieres' | 'simulators'
   const [activeModuleId, setActiveModuleId] = useState('overview');
   const [examCategory, setExamCategory] = useState('all');
   const [isExportModalOpen, setIsExportModalOpen] = useState(false);
@@ -57,7 +57,6 @@ export default function PhysicsLab() {
     if (exportPayload) {
       setIsExportModalOpen(true);
     } else {
-      // Préremplit avec le module courant
       setExportPayload({
         moduleData: currentModuleData,
         currentParams: currentModuleData.defaultParams,
@@ -74,69 +73,114 @@ export default function PhysicsLab() {
   };
 
   return (
-    <div className="w-full text-slate-100 min-h-[600px] flex flex-col lg:flex-row gap-6 items-start">
-      {/* Barre Latérale SaaS avec Sélecteur par Niveaux & Accès Examen */}
-      <PhysicsSidebar
-        activeModuleId={activeModuleId}
-        onSelectModule={(id) => setActiveModuleId(id)}
-        onOpenGlobalExport={handleOpenGlobalExport}
-      />
+    <div className="w-full space-y-6 text-left">
+      {/* En-tête de Sélection de Mode (Thème Beige & Chocolat MINESUP) */}
+      <div className="p-3.5 sm:p-4 rounded-3xl bg-[#EFECE6] border border-[#E3DEC9] flex flex-wrap items-center justify-between gap-3 shadow-xs">
+        <div className="inline-flex p-1 rounded-2xl bg-[#F7F5F0] border border-[#E3DEC9] text-xs font-bold">
+          <button
+            type="button"
+            onClick={() => setMainTab('filieres')}
+            className={`px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1.5 ${
+              mainTab === 'filieres'
+                ? 'bg-[#5C4033] text-white shadow-xs'
+                : 'text-[#6E5D4F] hover:text-[#2C2218]'
+            }`}
+          >
+            <School size={14} />
+            <span>Filières Officielles UY1 à UEb (14)</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setMainTab('simulators')}
+            className={`px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1.5 ${
+              mainTab === 'simulators'
+                ? 'bg-[#5C4033] text-white shadow-xs'
+                : 'text-[#6E5D4F] hover:text-[#2C2218]'
+            }`}
+          >
+            <Atom size={14} />
+            <span>Bancs de Simulation & Entraîneur (6 Modules)</span>
+          </button>
+        </div>
 
-      {/* Espace Central de Simulation & Visualisation */}
-      <main className="flex-1 w-full min-w-0 transition-all duration-300">
-        {activeModuleId === 'overview' && (
-          <PhysicsOverview onSelectModule={(id) => setActiveModuleId(id)} />
-        )}
+        <div className="text-xs text-[#0284C7] font-bold flex items-center gap-1.5">
+          <Sparkles size={13} className="text-[#0284C7]" />
+          <span>Lab L02 · Physique MINESUP</span>
+        </div>
+      </div>
 
-        {activeModuleId === 'exam_trainer' && (
-          <PhysicsExamTrainerModule
-            initialCategory={examCategory}
-            onNavigateToModule={(modId) => setActiveModuleId(modId)}
+      {/* Vue 1 : Répertoire Officiel des 14 Filières */}
+      {mainTab === 'filieres' && (
+        <Lab02PhysicsView onNavigateToSimulator={() => setMainTab('simulators')} />
+      )}
+
+      {/* Vue 2 : Bancs de Simulation & Entraîneur */}
+      {mainTab === 'simulators' && (
+        <div className="w-full min-h-[600px] flex flex-col lg:flex-row gap-6 items-start">
+          {/* Barre Latérale SaaS avec Sélecteur par Niveaux & Accès Examen */}
+          <PhysicsSidebar
+            activeModuleId={activeModuleId}
+            onSelectModule={(id) => setActiveModuleId(id)}
+            onOpenGlobalExport={handleOpenGlobalExport}
           />
-        )}
 
-        {activeModuleId === 'mechanics' && (
-          <MechanicsModule
-            onExport={handleExportFromModule}
-            onNavigateToExam={handleNavigateToExam}
-          />
-        )}
+          {/* Espace Central de Simulation & Visualisation */}
+          <main className="flex-1 w-full min-w-0 transition-all duration-300">
+            {activeModuleId === 'overview' && (
+              <PhysicsOverview onSelectModule={(id) => setActiveModuleId(id)} />
+            )}
 
-        {activeModuleId === 'rlc' && (
-          <RlcModule
-            onExport={handleExportFromModule}
-            onNavigateToExam={handleNavigateToExam}
-          />
-        )}
+            {activeModuleId === 'exam_trainer' && (
+              <PhysicsExamTrainerModule
+                initialCategory={examCategory}
+                onNavigateToModule={(modId) => setActiveModuleId(modId)}
+              />
+            )}
 
-        {activeModuleId === 'optics' && (
-          <OpticsModule
-            onExport={handleExportFromModule}
-            onNavigateToExam={handleNavigateToExam}
-          />
-        )}
+            {activeModuleId === 'mechanics' && (
+              <MechanicsModule
+                onExport={handleExportFromModule}
+                onNavigateToExam={handleNavigateToExam}
+              />
+            )}
 
-        {activeModuleId === 'electromagnetism' && (
-          <ElectromagnetismModule
-            onExport={handleExportFromModule}
-            onNavigateToExam={handleNavigateToExam}
-          />
-        )}
+            {activeModuleId === 'rlc' && (
+              <RlcModule
+                onExport={handleExportFromModule}
+                onNavigateToExam={handleNavigateToExam}
+              />
+            )}
 
-        {activeModuleId === 'thermodynamics' && (
-          <ThermodynamicsModule
-            onExport={handleExportFromModule}
-            onNavigateToExam={handleNavigateToExam}
-          />
-        )}
+            {activeModuleId === 'optics' && (
+              <OpticsModule
+                onExport={handleExportFromModule}
+                onNavigateToExam={handleNavigateToExam}
+              />
+            )}
 
-        {activeModuleId === 'quantum' && (
-          <QuantumModule
-            onExport={handleExportFromModule}
-            onNavigateToExam={handleNavigateToExam}
-          />
-        )}
-      </main>
+            {activeModuleId === 'electromagnetism' && (
+              <ElectromagnetismModule
+                onExport={handleExportFromModule}
+                onNavigateToExam={handleNavigateToExam}
+              />
+            )}
+
+            {activeModuleId === 'thermodynamics' && (
+              <ThermodynamicsModule
+                onExport={handleExportFromModule}
+                onNavigateToExam={handleNavigateToExam}
+              />
+            )}
+
+            {activeModuleId === 'quantum' && (
+              <QuantumModule
+                onExport={handleExportFromModule}
+                onNavigateToExam={handleNavigateToExam}
+              />
+            )}
+          </main>
+        </div>
+      )}
 
       {/* Modal d'Exportation de Rapport de TP Natif PDF A4 */}
       {isExportModalOpen && exportPayload && (

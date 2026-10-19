@@ -13,6 +13,7 @@ import {
   CheckCircle2,
   AlertCircle,
   Building,
+  Sparkles,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import {
@@ -20,7 +21,6 @@ import {
   ROLE_LABELS,
   ROLE_SECRET_PASSCODES,
 } from '../../constants/rbacConstants';
-import { DEPARTMENTS, ACADEMIC_LEVELS } from '../../constants/academicScopes';
 import { CAMEROON_UNIVERSITIES } from '../../constants/academicConstants';
 import {
   nationalAcademicService,

@@ -726,7 +726,7 @@ export default function AdminExamCreator({ onExamCreated }) {
 
           {/* Exams Grid */}
           <div className="grid grid-cols-1 gap-3.5">
-            {filteredExams.map((exam) => {
+            {filteredExams.map((exam, idx) => {
               const subs = examService.getSubmissionsForExam(exam.id);
               const isDraft = exam.status === 'brouillon';
               const isActive = exam.status === 'actif' || exam.status === 'active';
@@ -734,7 +734,7 @@ export default function AdminExamCreator({ onExamCreated }) {
 
               return (
                 <div
-                  key={exam.id}
+                  key={`${exam.id || 'exam'}-${idx}`}
                   className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-5 md:p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4 hover:border-indigo-300 dark:hover:border-indigo-800 transition-all"
                 >
                   <div className="space-y-2 flex-1 min-w-0">

@@ -11,6 +11,7 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     document.body.className = theme + (focusMode ? ' focus-mode' : '');
+    document.documentElement.classList.toggle('dark', theme === 'dark');
     localStorage.setItem('theme', theme);
   }, [theme, focusMode]);
 

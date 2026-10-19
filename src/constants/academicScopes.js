@@ -1,4 +1,4 @@
-import { FILIERE_PROGRAMS_MAP, FACULTY_FILIERES_DEFINITIONS, PARTNER_UNIVERSITIES } from './nationalAcademicData';
+import { FILIERE_PROGRAMS_MAP } from './nationalAcademicData';
 
 export const DEPARTMENTS = [
   {

@@ -28,18 +28,29 @@ const ResourceItemCard = memo(function ResourceItemCard({
 
         {/* Zero-Pill Typography Metadata */}
         <div className="crud-item-meta">
-          <span className="meta-field font-semibold">{res.filiere}</span>
+          {res.category && (
+            <>
+              <span className="px-2 py-0.5 rounded-md font-mono text-[10px] font-bold bg-[#E3DEC9] dark:bg-[#382D23] text-[#5C381E] dark:text-[#D8D1B8]">
+                {res.category === 'COURS' ? '📖 COURS' : res.category === 'TD' || res.category === 'TP' ? '🧪 TD / TP' : res.category === 'EXAMEN' || res.category === 'CC' ? '📝 ÉPREUVE' : '💡 FICHE'}
+              </span>
+              <span className="meta-separator" aria-hidden="true">
+                ·
+              </span>
+            </>
+          )}
+
+          <span className="meta-field font-semibold text-[#2C2218] dark:text-[#FAF5F0]">{res.filiere}</span>
           <span className="meta-separator" aria-hidden="true">
             ·
           </span>
-          <span className="meta-field">{res.niveau}</span>
+          <span className="meta-field font-bold text-[#744A2B] dark:text-[#D8D1B8]">{res.niveau}</span>
 
           {res.codeUe && (
             <>
               <span className="meta-separator" aria-hidden="true">
                 ·
               </span>
-              <span className="meta-field font-mono font-bold text-indigo-600 dark:text-indigo-400">
+              <span className="meta-field font-mono font-bold text-[#744A2B] dark:text-[#D8D1B8]">
                 {res.codeUe}
               </span>
             </>
@@ -50,7 +61,7 @@ const ResourceItemCard = memo(function ResourceItemCard({
               <span className="meta-separator" aria-hidden="true">
                 ·
               </span>
-              <span className="meta-field font-semibold text-slate-700 dark:text-slate-300">
+              <span className="meta-field font-semibold text-[#493C30] dark:text-[#CFC4B6]">
                 🏛️ {res.universityName}
               </span>
             </>
@@ -61,7 +72,7 @@ const ResourceItemCard = memo(function ResourceItemCard({
               <span className="meta-separator" aria-hidden="true">
                 ·
               </span>
-              <span className="meta-field text-slate-500">
+              <span className="meta-field text-[#6E5D4F] dark:text-[#AFA28F]">
                 Publié par : {res.authorName}
               </span>
             </>
@@ -70,13 +81,13 @@ const ResourceItemCard = memo(function ResourceItemCard({
           <span className="meta-separator" aria-hidden="true">
             ·
           </span>
-          <span className="meta-field text-emerald-600 dark:text-emerald-400 font-semibold">
+          <span className="meta-field text-[#3D6B42] dark:text-[#7EB584] font-semibold">
             📥 {res.downloads || 0} téléchargements
           </span>
         </div>
 
         {res.description && (
-          <p className="crud-item-desc line-clamp-2">{res.description}</p>
+          <p className="crud-item-desc line-clamp-2 text-[#6E5D4F] dark:text-[#CFC4B6]">{res.description}</p>
         )}
       </div>
 

@@ -120,12 +120,12 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onNavigate, 
 
   return (
     <aside
-      className={`h-screen sticky top-0 bg-slate-900 border-r border-slate-700/60 flex flex-col justify-between transition-all duration-200 z-40 select-none ${
+      className={`h-screen sticky top-0 bg-[#EFECE6] dark:bg-[#1C1612] border-r border-[#E3DEC9] dark:border-[#44382E] flex flex-col justify-between transition-all duration-200 z-40 select-none text-[#2C2218] dark:text-[#FAF5F0] ${
         isCollapsed ? 'w-16' : 'w-64'
       }`}
     >
       {/* 1. Top Header with Immediate Top-Left Quick Access Icons (Aide & FAQ + Profil National) */}
-      <div className="p-2.5 border-b border-slate-700/60 flex items-center justify-between gap-1.5">
+      <div className="p-2.5 border-b border-[#E3DEC9] dark:border-[#44382E] flex items-center justify-between gap-1.5">
         <div className="flex items-center gap-1.5 min-w-0">
           {/* Top-Left Help & FAQ Quick Access Button */}
           <Link
@@ -133,8 +133,8 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onNavigate, 
             onClick={onNavigate}
             className={`p-1.5 rounded-lg border transition-colors shrink-0 shadow-xs flex items-center justify-center ${
               location.pathname === '/help'
-                ? 'bg-indigo-600 border-indigo-500 text-white shadow-indigo-500/25'
-                : 'border-slate-700/70 bg-slate-800 hover:bg-slate-750 text-indigo-300 hover:text-white'
+                ? 'bg-[#744A2B] border-[#5C381E] text-white shadow-xs'
+                : 'border-[#E3DEC9] dark:border-[#44382E] bg-[#FAF8F5] dark:bg-[#261F1A] hover:bg-[#E3DEC9] text-[#744A2B] dark:text-[#D8D1B8]'
             }`}
             title="Centre d'Aide & FAQ"
             aria-label="Centre d'Aide & FAQ"
@@ -148,8 +148,8 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onNavigate, 
             onClick={onNavigate}
             className={`p-1.5 rounded-lg border transition-colors shrink-0 shadow-xs flex items-center justify-center ${
               location.pathname === '/profile'
-                ? 'bg-indigo-600 border-indigo-500 text-white shadow-indigo-500/25'
-                : 'border-slate-700/70 bg-slate-800 hover:bg-slate-750 text-slate-300 hover:text-white'
+                ? 'bg-[#744A2B] border-[#5C381E] text-white shadow-xs'
+                : 'border-[#E3DEC9] dark:border-[#44382E] bg-[#FAF8F5] dark:bg-[#261F1A] hover:bg-[#E3DEC9] text-[#744A2B] dark:text-[#D8D1B8]'
             }`}
             title="Profil National & Identité Académique"
             aria-label="Profil National"
@@ -160,10 +160,10 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onNavigate, 
           {!isCollapsed && (
             <Link to="/dashboard" onClick={onNavigate} className="flex items-center gap-1.5 overflow-hidden ml-1">
               <div className="leading-tight truncate">
-                <span className="font-bold text-slate-100 text-xs sm:text-sm tracking-tight block truncate">
+                <span className="font-extrabold text-[#2C2218] dark:text-[#FAF5F0] text-xs sm:text-sm tracking-tight block truncate">
                   CampusHub 🇨🇲
                 </span>
-                <span className="text-[10px] text-slate-400 font-medium block truncate">
+                <span className="text-[10px] text-[#6E5D4F] dark:text-[#AFA28F] font-semibold block truncate">
                   {student.universityShortName || 'National'}
                 </span>
               </div>
@@ -174,7 +174,7 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onNavigate, 
         <button
           type="button"
           onClick={onToggleCollapse}
-          className="p-1.5 rounded-lg border border-slate-700/60 text-slate-400 hover:text-slate-100 hover:bg-slate-800 transition-colors shrink-0"
+          className="p-1.5 rounded-lg border border-[#E3DEC9] dark:border-[#44382E] text-[#6E5D4F] dark:text-[#AFA28F] hover:text-[#2C2218] hover:bg-[#E3DEC9]/70 transition-colors shrink-0"
           title={isCollapsed ? 'Déplier la barre latérale' : 'Replier'}
           aria-label={isCollapsed ? 'Déplier la barre latérale' : 'Replier'}
         >
@@ -182,43 +182,43 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onNavigate, 
         </button>
       </div>
 
-      {/* 2. User & University Status Card (Illuminated slate-800) */}
+      {/* 2. User & University Status Card */}
       {!isCollapsed && (
-        <div className="p-3 mx-2.5 my-2.5 rounded-2xl bg-slate-800/90 border border-slate-700/60 space-y-2 shadow-xs">
+        <div className="p-3 mx-2.5 my-2.5 rounded-2xl bg-[#F7F5F0] dark:bg-[#261F1A] border border-[#E3DEC9] dark:border-[#44382E] space-y-2 shadow-xs">
           {/* University Switcher Trigger */}
           <button
             type="button"
             onClick={onOpenUniversityModal}
-            className="w-full px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-750 border border-slate-700/60 text-left flex items-center justify-between text-xs transition-colors"
+            className="w-full px-2.5 py-1.5 rounded-xl bg-[#EFECE6] dark:bg-[#1C1612] hover:bg-[#E3DEC9] border border-[#E3DEC9] dark:border-[#44382E] text-left flex items-center justify-between text-xs transition-colors"
             title="Changer d'université"
           >
             <div className="flex items-center gap-1.5 truncate">
-              <Building size={12} className="text-indigo-400 shrink-0" />
-              <span className="font-medium text-slate-200 truncate text-[11px]">
+              <Building size={12} className="text-[#744A2B] dark:text-[#A87D56] shrink-0" />
+              <span className="font-bold text-[#2C2218] dark:text-[#FAF5F0] truncate text-[11px]">
                 {student.universityShortName}
               </span>
             </div>
-            <span className="text-[10px] text-indigo-400 font-mono font-semibold">
+            <span className="text-[10px] text-[#744A2B] dark:text-[#D8D1B8] font-mono font-bold">
               Changer
             </span>
           </button>
 
           {/* User Profile Card */}
-          <div className="flex items-center justify-between gap-2 pt-1 border-t border-slate-700/60">
+          <div className="flex items-center justify-between gap-2 pt-1 border-t border-[#E3DEC9] dark:border-[#44382E]">
             <Link
               to="/profile"
               onClick={onNavigate}
               className="flex items-center gap-2 min-w-0 group flex-1"
               title={`${fullName} (${matricule})`}
             >
-              <div className="w-7 h-7 rounded-lg bg-indigo-600/30 border border-indigo-500/40 text-indigo-200 font-bold text-xs flex items-center justify-center shrink-0">
+              <div className="w-7 h-7 rounded-lg bg-[#744A2B]/15 border border-[#744A2B]/30 text-[#744A2B] dark:bg-[#A87D56]/20 dark:border-[#A87D56]/40 dark:text-[#FAF5F0] font-bold text-xs flex items-center justify-center shrink-0">
                 {getInitials(fullName)}
               </div>
               <div className="leading-tight min-w-0">
-                <span className="text-xs font-semibold text-slate-100 block truncate group-hover:text-white transition-colors">
+                <span className="text-xs font-bold text-[#2C2218] dark:text-[#FAF5F0] block truncate group-hover:text-[#744A2B] transition-colors">
                   {fullName}
                 </span>
-                <span className="text-[10px] font-mono text-slate-400 block truncate">
+                <span className="text-[10px] font-mono text-[#6E5D4F] dark:text-[#AFA28F] block truncate">
                   {matricule} · {user?.niveau || student?.niveau || 'L2'}
                 </span>
               </div>
@@ -229,15 +229,15 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onNavigate, 
               <button
                 type="button"
                 onClick={() => setRoleDropdownOpen((prev) => !prev)}
-                className="px-2 py-1 rounded-md bg-slate-900 hover:bg-slate-750 border border-slate-700/60 flex items-center gap-1 transition-colors text-[10px] font-mono text-slate-200"
+                className="px-2 py-1 rounded-md bg-[#FAF8F5] dark:bg-[#1C1612] hover:bg-[#E3DEC9] border border-[#E3DEC9] dark:border-[#44382E] flex items-center gap-1 transition-colors text-[10px] font-mono text-[#2C2218] dark:text-[#FAF5F0]"
                 title="Changer de rôle"
               >
                 <span>{role}</span>
-                <ChevronDown size={10} className={`text-slate-400 ${roleDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={10} className={`text-[#6E5D4F] ${roleDropdownOpen ? 'rotate-180' : ''}`} />
               </button>
 
               {roleDropdownOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-44 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl p-1 z-50 text-xs">
+                <div className="absolute right-0 top-full mt-1.5 w-44 bg-[#FAF8F5] dark:bg-[#261F1A] border border-[#E3DEC9] dark:border-[#44382E] rounded-xl shadow-2xl p-1 z-50 text-xs">
                   {[
                     { id: ROLES.STUDENT, label: 'Étudiant' },
                     { id: ROLES.DELEGATE, label: 'Délégué' },
@@ -253,8 +253,8 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onNavigate, 
                         onClick={() => handleRoleSelect(r.id)}
                         className={`w-full text-left px-2.5 py-1.5 rounded-lg text-xs flex items-center justify-between transition-colors ${
                           isSelected
-                            ? 'bg-indigo-600 text-white font-semibold'
-                            : 'hover:bg-slate-700 text-slate-200'
+                            ? 'bg-[#744A2B] text-white font-semibold'
+                            : 'hover:bg-[#EFECE6] dark:hover:bg-[#332B24] text-[#2C2218] dark:text-[#FAF5F0]'
                         }`}
                       >
                         <span>{r.label}</span>
@@ -269,7 +269,7 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onNavigate, 
         </div>
       )}
 
-      {/* 3. Navigation Links List (Illuminated slate-800 hover & active states) */}
+      {/* 3. Navigation Links List */}
       <nav className="flex-1 overflow-y-auto px-2 py-2 space-y-3">
         {NAVIGATION_GROUPS.map((group) => {
           const visibleItems = group.items.filter((item) => {
@@ -284,7 +284,7 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onNavigate, 
           return (
             <div key={group.id} className="space-y-0.5">
               {!isCollapsed && (
-                <span className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider text-slate-400 block font-semibold">
+                <span className="px-2.5 py-1 text-[10px] font-mono uppercase tracking-wider text-[#6E5D4F] dark:text-[#AFA28F] block font-bold">
                   {t(group.titleKey)}
                 </span>
               )}
@@ -300,21 +300,21 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onNavigate, 
                     onClick={onNavigate}
                     title={isCollapsed ? label : undefined}
                     className={({ isActive }) =>
-                      `flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-medium transition-colors ${
+                      `flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-xs font-semibold transition-colors ${
                         isActive
-                          ? 'bg-slate-800 text-white font-semibold border border-slate-700/80 shadow-xs'
-                          : 'text-slate-300 hover:text-white hover:bg-slate-800/70'
+                          ? 'bg-[#744A2B] text-white border border-[#5C381E] shadow-xs'
+                          : 'text-[#6E5D4F] dark:text-[#D1C7BA] hover:text-[#2C2218] dark:hover:text-[#FAF5F0] hover:bg-[#E3DEC9]/70 dark:hover:bg-[#261F1A]'
                       } ${isCollapsed ? 'justify-center px-0' : ''}`
                     }
                   >
-                    <Icon size={16} className={`shrink-0 ${item.isLabFlag ? 'text-indigo-400' : 'text-slate-400'}`} />
+                    <Icon size={16} className={`shrink-0 ${item.isLabFlag ? 'text-[#744A2B] dark:text-[#D8D1B8]' : 'text-current'}`} />
 
                     {!isCollapsed && (
                       <span className="flex-1 truncate">{label}</span>
                     )}
 
                     {!isCollapsed && item.hasExamBadge && activeExamsCount > 0 && (
-                      <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-red-900/60 text-red-200 border border-red-700/80 font-bold">
+                      <span className="px-1.5 py-0.2 rounded text-[10px] font-mono bg-red-800 text-white font-bold">
                         {activeExamsCount}
                       </span>
                     )}
@@ -327,14 +327,14 @@ export default function AppSidebar({ isCollapsed, onToggleCollapse, onNavigate, 
       </nav>
 
       {/* 4. Footer Utilities (Theme Switcher & Logout) */}
-      <div className="p-3 border-t border-slate-700/60">
+      <div className="p-3 border-t border-[#E3DEC9] dark:border-[#44382E]">
         <div className={`flex items-center ${isCollapsed ? 'flex-col gap-2' : 'justify-between'}`}>
           <ThemeToggle />
 
           <button
             type="button"
             onClick={handleLogout}
-            className="p-1.5 text-slate-400 hover:text-red-400 rounded-lg hover:bg-slate-800 transition-colors flex items-center gap-1.5 text-xs font-medium"
+            className="p-1.5 text-[#6E5D4F] dark:text-[#AFA28F] hover:text-red-600 rounded-lg hover:bg-[#E3DEC9]/70 dark:hover:bg-[#261F1A] transition-colors flex items-center gap-1.5 text-xs font-semibold"
             title="Déconnexion"
           >
             <LogOut size={14} />

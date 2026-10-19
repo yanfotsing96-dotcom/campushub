@@ -55,7 +55,7 @@ export default function MainLayout() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-100 flex transition-colors">
+    <div className="min-h-screen bg-[#F7F5F0] text-[#2C2218] dark:bg-[#1C1612] dark:text-[#FAF5F0] flex transition-colors">
       {/* 1. Desktop Persistent Sidebar */}
       <div className="hidden lg:block">
         <AppSidebar
@@ -69,10 +69,10 @@ export default function MainLayout() {
       {mobileMenuOpen && (
         <div className="fixed inset-0 z-50 lg:hidden flex">
           <div
-            className="fixed inset-0 bg-slate-900/80 backdrop-blur-xs"
+            className="fixed inset-0 bg-[#2C2218]/60 backdrop-blur-xs"
             onClick={() => setMobileMenuOpen(false)}
           />
-          <div className="relative z-10 w-64 h-full bg-slate-900 shadow-2xl">
+          <div className="relative z-10 w-64 h-full bg-[#EFECE6] dark:bg-[#1C1612] shadow-2xl">
             <AppSidebar
               isCollapsed={false}
               onToggleCollapse={() => setMobileMenuOpen(false)}
@@ -89,7 +89,7 @@ export default function MainLayout() {
       {/* 3. Main Application Column */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Sticky Header with Top-Left FAQ & Profile Quick Access + Institutional Switcher */}
-        <header className="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-md border-b border-slate-700/60 px-4 sm:px-6 h-14 flex items-center justify-between gap-3 sm:gap-4">
+        <header className="sticky top-0 z-30 bg-[#EFECE6]/95 dark:bg-[#261F1A]/95 backdrop-blur-md border-b border-[#E3DEC9] dark:border-[#44382E] px-4 sm:px-6 h-14 flex items-center justify-between gap-3 sm:gap-4 transition-colors">
           {/* Top-Left Header: Quick Help / FAQ Icon, Profile Icon, Mobile Toggle & Page Title */}
           <div className="flex items-center gap-1.5 sm:gap-2.5 min-w-0">
             {/* Direct Top-Left FAQ Quick Access Button */}
@@ -97,13 +97,13 @@ export default function MainLayout() {
               to="/help"
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border transition-colors text-xs font-semibold shrink-0 shadow-xs ${
                 location.pathname === '/help'
-                  ? 'bg-indigo-600 border-indigo-500 text-white'
-                  : 'border-slate-700/70 bg-slate-800 hover:bg-slate-750 text-indigo-300 hover:text-white'
+                  ? 'bg-[#744A2B] border-[#5C381E] text-white'
+                  : 'border-[#E3DEC9] dark:border-[#44382E] bg-[#FAF8F5] dark:bg-[#261F1A] hover:bg-[#E3DEC9] text-[#744A2B] dark:text-[#D8D1B8]'
               }`}
               title="Centre d'Aide & FAQ CampusHub"
               aria-label="Centre d'Aide & FAQ"
             >
-              <LifeBuoy size={15} className={location.pathname === '/help' ? 'text-white' : 'text-indigo-400'} />
+              <LifeBuoy size={15} className={location.pathname === '/help' ? 'text-white' : 'text-[#744A2B] dark:text-[#D8D1B8]'} />
               <span className="hidden sm:inline">Aide & FAQ</span>
             </Link>
 
@@ -112,38 +112,38 @@ export default function MainLayout() {
               to="/profile"
               className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border transition-colors text-xs font-semibold shrink-0 shadow-xs ${
                 location.pathname === '/profile'
-                  ? 'bg-indigo-600 border-indigo-500 text-white'
-                  : 'border-slate-700/70 bg-slate-800 hover:bg-slate-750 text-slate-300 hover:text-white'
+                  ? 'bg-[#744A2B] border-[#5C381E] text-white'
+                  : 'border-[#E3DEC9] dark:border-[#44382E] bg-[#FAF8F5] dark:bg-[#261F1A] hover:bg-[#E3DEC9] text-[#5C381E] dark:text-[#D1C7BA]'
               }`}
               title="Profil National & Identité Académique"
               aria-label="Profil National"
             >
-              <User size={15} className={location.pathname === '/profile' ? 'text-white' : 'text-slate-300'} />
+              <User size={15} className={location.pathname === '/profile' ? 'text-white' : 'text-[#744A2B] dark:text-[#D1C7BA]'} />
               <span className="hidden md:inline">Profil National</span>
             </Link>
 
             <button
               type="button"
               onClick={() => setMobileMenuOpen(true)}
-              className="lg:hidden p-1.5 rounded-lg border border-slate-700/60 text-slate-300 hover:text-white hover:bg-slate-800"
+              className="lg:hidden p-1.5 rounded-lg border border-[#E3DEC9] dark:border-[#44382E] text-[#6E5D4F] dark:text-[#D1C7BA] hover:text-[#2C2218] hover:bg-[#E3DEC9]/60"
               aria-label="Ouvrir le menu"
             >
               <Menu size={16} />
             </button>
 
             <div className="leading-tight min-w-0 flex items-center gap-2">
-              <h1 className="text-sm font-semibold text-slate-100 truncate">
+              <h1 className="text-sm font-bold text-[#2C2218] dark:text-[#FAF5F0] truncate">
                 {getPageTitle(location.pathname)}
               </h1>
 
               <button
                 type="button"
                 onClick={() => setUniversityModalOpen(true)}
-                className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-mono text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-750 border border-slate-700/60 transition-colors"
+                className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-mono text-[#5C381E] dark:text-[#D8D1B8] hover:text-[#2C2218] bg-[#FAF8F5] dark:bg-[#261F1A] hover:bg-[#E3DEC9] border border-[#E3DEC9] dark:border-[#44382E] transition-colors"
                 title="Changer d'établissement universitaire"
               >
-                <Building size={11} className="text-indigo-400" />
-                <span>{student.universityShortName || selectedUniversity?.shortName}</span>
+                <Building size={11} className="text-[#744A2B] dark:text-[#A87D56]" />
+                <span className="font-semibold">{student.universityShortName || selectedUniversity?.shortName}</span>
               </button>
             </div>
           </div>
@@ -156,17 +156,17 @@ export default function MainLayout() {
             {/* Profile Avatar Card */}
             <Link
               to="/profile"
-              className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-slate-800 transition-colors border border-transparent hover:border-slate-700/60"
+              className="flex items-center gap-2 p-1.5 rounded-xl hover:bg-[#E3DEC9]/60 dark:hover:bg-[#332B24] transition-colors border border-transparent hover:border-[#E3DEC9] dark:hover:border-[#44382E]"
               title={`${fullName} (${role})`}
             >
-              <div className="w-7 h-7 rounded-lg bg-indigo-600/30 border border-indigo-500/40 text-indigo-200 font-bold text-xs flex items-center justify-center">
+              <div className="w-7 h-7 rounded-lg bg-[#744A2B]/15 border border-[#744A2B]/30 text-[#744A2B] dark:bg-[#A87D56]/20 dark:border-[#A87D56]/40 dark:text-[#FAF5F0] font-extrabold text-xs flex items-center justify-center">
                 {getInitials(fullName)}
               </div>
               <div className="text-left hidden md:block leading-tight text-xs">
-                <span className="font-semibold text-slate-100 block truncate max-w-[120px]">
+                <span className="font-bold text-[#2C2218] dark:text-[#FAF5F0] block truncate max-w-[120px]">
                   {fullName}
                 </span>
-                <span className="text-[10px] font-mono text-slate-400 block truncate">
+                <span className="text-[10px] font-mono text-[#6E5D4F] dark:text-[#AFA28F] block truncate">
                   {matricule}
                 </span>
               </div>
@@ -184,15 +184,15 @@ export default function MainLayout() {
         </main>
 
         {/* Refined Institutional Footer */}
-        <footer className="border-t border-slate-700/60 bg-slate-900/80 py-4 px-4 sm:px-6 mt-auto">
-          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-slate-400">
+        <footer className="border-t border-[#E3DEC9] dark:border-[#44382E] bg-[#EFECE6]/90 dark:bg-[#1C1612]/90 py-4 px-4 sm:px-6 mt-auto transition-colors">
+          <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-[#6E5D4F] dark:text-[#AFA28F]">
             <div className="flex items-center gap-2">
-              <GraduationCap size={15} className="text-indigo-400" />
+              <GraduationCap size={15} className="text-[#744A2B] dark:text-[#A87D56]" />
               <span>
-                <strong className="text-slate-300">CampusHub Cameroun</strong> · Consortium des Universités d'État & Grandes Écoles
+                <strong className="text-[#2C2218] dark:text-[#FAF5F0]">CampusHub Cameroun</strong> · Consortium des Universités d'État & Grandes Écoles
               </span>
             </div>
-            <div className="font-mono text-slate-400 text-[11px]">
+            <div className="font-mono text-[#6E5D4F] dark:text-[#968574] text-[11px]">
               MINESUP Cameroun · Session 2025-2026
             </div>
           </div>

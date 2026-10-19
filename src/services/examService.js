@@ -260,7 +260,7 @@ export const INITIAL_EXAMS = [
     ],
   },
   {
-    id: 'exam-chm101-cc',
+    id: 'exam-chm101-partiel',
     codeUe: 'CHM101',
     filiereId: 'Chimie',
     niveau: 'L1',
@@ -1030,14 +1030,39 @@ class ExamService {
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const existingIds = new Set(parsed.map((e) => e.id));
+          let hasMigrated = false;
+          // Heal legacy duplicate exam-chm101-cc if present from previous sessions
+          const sanitized = parsed.map((e) => {
+            if (e.id === 'exam-chm101-cc' && e.titre && e.titre.includes('Chimie Générale')) {
+              hasMigrated = true;
+              return { ...e, id: 'exam-chm101-partiel' };
+            }
+            return e;
+          });
+
+          // Ensure every id in the array is strictly unique
+          const seen = new Set();
+          const deduped = [];
+          for (const exam of sanitized) {
+            if (!seen.has(exam.id)) {
+              seen.add(exam.id);
+              deduped.push(exam);
+            } else {
+              hasMigrated = true;
+              const uniqueId = `${exam.id}-${deduped.length}`;
+              seen.add(uniqueId);
+              deduped.push({ ...exam, id: uniqueId });
+            }
+          }
+
+          const existingIds = new Set(deduped.map((e) => e.id));
           const missing = INITIAL_EXAMS.filter((e) => !existingIds.has(e.id));
-          if (missing.length > 0) {
-            const merged = [...parsed, ...missing];
+          if (missing.length > 0 || hasMigrated) {
+            const merged = [...deduped, ...missing];
             this.saveExams(merged);
             return merged;
           }
-          return parsed;
+          return deduped;
         }
       }
     } catch {

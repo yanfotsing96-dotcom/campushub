@@ -67,7 +67,9 @@ export default function AppRoutes() {
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/help" element={<HelpCenterPage />} />
 
-            {/* Redirects for removed sections to preserve deep link continuity */}
+            {/* Redirects for direct lab links & removed sections */}
+            <Route path="/lab" element={<Navigate to="/learning?tab=playground" replace />} />
+            <Route path="/labs" element={<Navigate to="/learning?tab=playground" replace />} />
             <Route path="/workspace" element={<Navigate to="/dashboard" replace />} />
             <Route path="/tech-hub" element={<Navigate to="/learning?tab=playground" replace />} />
             <Route path="/search" element={<Navigate to="/ressources" replace />} />
