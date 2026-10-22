@@ -25,6 +25,156 @@ export const ROLE_LABELS = {
 };
 
 /**
+ * Portée officielle pour chaque rôle (Standards CampusHub)
+ */
+export const ROLE_SCOPES = {
+  [ROLES.STUDENT]: 'Sa filière et son niveau',
+  [ROLES.DELEGATE]: 'Sa filière et son niveau',
+  [ROLES.MODERATOR]: 'Une faculté ou une filière',
+  [ROLES.ADMIN]: 'Une faculté (et ses filières)',
+};
+
+/**
+ * Description officielle des attributions pour chaque rôle (Standards CampusHub)
+ */
+export const ROLE_DESCRIPTIONS = {
+  [ROLES.STUDENT]: 'Consulte les UE, passe les évaluations, utilise le Playground & IA, télécharge les ressources.',
+  [ROLES.DELEGATE]: 'Représente sa classe : relaie les annonces, propose des ressources et des dates d\'évaluation.',
+  [ROLES.MODERATOR]: 'Valide les ressources publiées, programme les évaluations, signale ou retire les contenus inappropriés.',
+  [ROLES.ADMIN]: 'Gère les comptes et les rôles, suit les statistiques, paramètre les modules de sa faculté.',
+};
+
+/**
+ * Définition complète des 4 rôles CampusHub
+ */
+export const ROLE_DEFINITIONS = [
+  {
+    role: ROLES.STUDENT,
+    label: 'Étudiant',
+    labelEn: 'Student',
+    scope: ROLE_SCOPES[ROLES.STUDENT],
+    description: ROLE_DESCRIPTIONS[ROLES.STUDENT],
+    color: '#6366f1',
+    icon: 'BookOpen',
+  },
+  {
+    role: ROLES.DELEGATE,
+    label: 'Délégué',
+    labelEn: 'Class Delegate',
+    scope: ROLE_SCOPES[ROLES.DELEGATE],
+    description: ROLE_DESCRIPTIONS[ROLES.DELEGATE],
+    color: '#10b981',
+    icon: 'Award',
+  },
+  {
+    role: ROLES.MODERATOR,
+    label: 'Modérateur',
+    labelEn: 'Moderator',
+    scope: ROLE_SCOPES[ROLES.MODERATOR],
+    description: ROLE_DESCRIPTIONS[ROLES.MODERATOR],
+    color: '#0284c7',
+    icon: 'ShieldCheck',
+  },
+  {
+    role: ROLES.ADMIN,
+    label: 'Administrateur',
+    labelEn: 'Administrator',
+    scope: ROLE_SCOPES[ROLES.ADMIN],
+    description: ROLE_DESCRIPTIONS[ROLES.ADMIN],
+    color: '#d97706',
+    icon: 'Crown',
+  },
+];
+
+/**
+ * Matrice des permissions officielle synchronisée avec les spécifications CampusHub
+ * Valeurs : true (autorisé), false (non autorisé), 'sur validation' (soumis à validation)
+ */
+export const PERMISSIONS_MATRIX = [
+  {
+    id: 'consult_ues_and_resources',
+    action: 'Consulter les UE et les ressources',
+    description: 'Accès en lecture aux maquettes pédagogiques et documents de cours',
+    [ROLES.STUDENT]: true,
+    [ROLES.DELEGATE]: true,
+    [ROLES.MODERATOR]: true,
+    [ROLES.ADMIN]: true,
+  },
+  {
+    id: 'pass_online_exams',
+    action: 'Passer les évaluations et CC en ligne',
+    description: 'Participation chronométrée aux contrôles continus et examens',
+    [ROLES.STUDENT]: true,
+    [ROLES.DELEGATE]: true,
+    [ROLES.MODERATOR]: false,
+    [ROLES.ADMIN]: false,
+  },
+  {
+    id: 'use_playground_and_ai',
+    action: 'Utiliser le Playground & IA',
+    description: 'Laboratoires virtuels (code, physique, chimie, biologie, maths, FALSH)',
+    [ROLES.STUDENT]: true,
+    [ROLES.DELEGATE]: true,
+    [ROLES.MODERATOR]: true,
+    [ROLES.ADMIN]: true,
+  },
+  {
+    id: 'publish_resource',
+    action: 'Publier une ressource',
+    description: 'Dépôt de supports de cours, polycopiés, fiches de révision et annales',
+    [ROLES.STUDENT]: false,
+    [ROLES.DELEGATE]: 'sur validation',
+    [ROLES.MODERATOR]: true,
+    [ROLES.ADMIN]: true,
+  },
+  {
+    id: 'validate_or_remove_resource',
+    action: 'Valider ou retirer une ressource',
+    description: 'Certification académique, validation anti-plagiat et retrait de contenus',
+    [ROLES.STUDENT]: false,
+    [ROLES.DELEGATE]: false,
+    [ROLES.MODERATOR]: true,
+    [ROLES.ADMIN]: true,
+  },
+  {
+    id: 'schedule_evaluation',
+    action: 'Programmer une évaluation / un CC',
+    description: 'Définition des créneaux, barèmes et sujets de contrôles continus',
+    [ROLES.STUDENT]: false,
+    [ROLES.DELEGATE]: 'sur validation',
+    [ROLES.MODERATOR]: true,
+    [ROLES.ADMIN]: true,
+  },
+  {
+    id: 'publish_department_announcement',
+    action: 'Publier une annonce de filière',
+    description: 'Communication amphi, changement de salle et alertes académiques',
+    [ROLES.STUDENT]: false,
+    [ROLES.DELEGATE]: true,
+    [ROLES.MODERATOR]: true,
+    [ROLES.ADMIN]: true,
+  },
+  {
+    id: 'manage_accounts_and_roles',
+    action: 'Gérer les comptes et les rôles',
+    description: 'Attribution des privilèges, suspension de comptes et gouvernance',
+    [ROLES.STUDENT]: false,
+    [ROLES.DELEGATE]: false,
+    [ROLES.MODERATOR]: false,
+    [ROLES.ADMIN]: true,
+  },
+  {
+    id: 'view_faculty_statistics',
+    action: 'Voir les statistiques de la faculté',
+    description: 'Métriques d\'engagement, taux de participation et suivi des départements',
+    [ROLES.STUDENT]: false,
+    [ROLES.DELEGATE]: false,
+    [ROLES.MODERATOR]: 'sur validation',
+    [ROLES.ADMIN]: true,
+  },
+];
+
+/**
  * Codes d'Accès Secrets Obligatoires pour l'attribution des rôles sensibles
  */
 export const ROLE_SECRET_PASSCODES = {
@@ -55,129 +205,146 @@ export const ROLE_BADGES = {
   [ROLES.STUDENT]: {
     label: 'Étudiant',
     labelEn: 'Student',
+    scope: ROLE_SCOPES[ROLES.STUDENT],
     color: '#6366f1',
     bgColor: 'bg-indigo-50 dark:bg-indigo-950/70',
     textColor: 'text-indigo-700 dark:text-indigo-300',
     borderColor: 'border-indigo-200 dark:border-indigo-800',
     badgeGlow: 'shadow-indigo-500/10',
     icon: 'BookOpen',
-    description: 'Accès standard aux cours, annales, carnet privé et playground de code.',
+    description: ROLE_DESCRIPTIONS[ROLES.STUDENT],
   },
   [ROLES.DELEGATE]: {
     label: 'Délégué',
     labelEn: 'Class Delegate',
+    scope: ROLE_SCOPES[ROLES.DELEGATE],
     color: '#10b981',
     bgColor: 'bg-emerald-50 dark:bg-emerald-950/70',
     textColor: 'text-emerald-700 dark:text-emerald-300',
     borderColor: 'border-emerald-200 dark:border-emerald-800',
     badgeGlow: 'shadow-emerald-500/10',
     icon: 'Award',
-    description: 'Publication des avis officiels de filière, gestion du calendrier de classe et relais amphi.',
+    description: ROLE_DESCRIPTIONS[ROLES.DELEGATE],
   },
   [ROLES.MODERATOR]: {
     label: 'Modérateur',
     labelEn: 'Moderator',
+    scope: ROLE_SCOPES[ROLES.MODERATOR],
     color: '#0284c7',
     bgColor: 'bg-sky-50 dark:bg-sky-950/70',
     textColor: 'text-sky-700 dark:text-sky-300',
     borderColor: 'border-sky-200 dark:border-sky-800',
     badgeGlow: 'shadow-sky-500/10',
     icon: 'ShieldCheck',
-    description: 'Contrôle qualité des documents, traitement des signalements et audit anti-plagiat.',
+    description: ROLE_DESCRIPTIONS[ROLES.MODERATOR],
   },
   [ROLES.ADMIN]: {
     label: 'Administrateur',
     labelEn: 'Super Admin',
+    scope: ROLE_SCOPES[ROLES.ADMIN],
     color: '#d97706',
     bgColor: 'bg-amber-50 dark:bg-amber-950/70',
     textColor: 'text-amber-700 dark:text-amber-300',
     borderColor: 'border-amber-300 dark:border-amber-700',
     badgeGlow: 'shadow-amber-500/20',
     icon: 'Crown',
-    description: 'Gouvernance globale, promotion des comptes, supervision analytique et sécurité.',
+    description: ROLE_DESCRIPTIONS[ROLES.ADMIN],
   },
 };
 
 export const PERMISSIONS = {
-  // Student permissions
-  VIEW_CATALOG: 'catalog:view',
+  // Matrice standardisée
+  CONSULT_UES_AND_RESOURCES: 'consult:ues_and_resources',
+  PASS_ONLINE_EXAMS: 'exam:pass_online',
+  USE_PLAYGROUND_AND_AI: 'playground:use_ai',
+  PUBLISH_RESOURCE: 'resource:publish',
+  VALIDATE_OR_REMOVE_RESOURCE: 'resource:validate_or_remove',
+  SCHEDULE_EVALUATION: 'exam:schedule_evaluation',
+  PUBLISH_DEPARTMENT_ANNOUNCEMENT: 'announcement:publish_department',
+  MANAGE_ACCOUNTS_AND_ROLES: 'admin:manage_accounts_and_roles',
+  VIEW_FACULTY_STATISTICS: 'analytics:view_faculty_statistics',
+
+  // Aliases rétro-compatibles
+  VIEW_CATALOG: 'consult:ues_and_resources',
   DOWNLOAD_DOCS: 'docs:download',
-  USE_PLAYGROUND: 'playground:use',
+  USE_PLAYGROUND: 'playground:use_ai',
   USE_NOTEBOOK: 'notebook:use',
-  UPLOAD_RESOURCE: 'resource:upload',
+  UPLOAD_RESOURCE: 'resource:publish',
   RESOURCE_ADD: 'resource:add',
   RESOURCE_EDIT: 'resource:edit',
   RESOURCE_DELETE: 'resource:delete',
   RESOURCE_MANAGE_ANY: 'resource:manage_any',
   RATE_RESOURCE: 'resource:rate',
 
-  // Delegate permissions
-  PUBLISH_CLASS_ANNOUNCEMENT: 'class:publish_announcement',
+  PUBLISH_CLASS_ANNOUNCEMENT: 'announcement:publish_department',
   PIN_ANNOUNCEMENT: 'class:pin_announcement',
   MANAGE_CLASS_SCHEDULE: 'class:manage_schedule',
   VIEW_CLASS_ROSTER: 'class:view_roster',
 
-  // Moderator permissions
-  MODERATE_RESOURCES: 'moderation:resources',
+  MODERATE_RESOURCES: 'resource:validate_or_remove',
   AUDIT_PLAGIARISM: 'moderation:plagiarism',
   RESOLVE_REPORTS: 'moderation:resolve_reports',
   FLAG_USERS: 'moderation:flag_users',
   DELETE_ANY_RESOURCE: 'moderation:delete_any_resource',
 
-  // Admin permissions
-  MANAGE_USERS: 'admin:manage_users',
+  MANAGE_USERS: 'admin:manage_accounts_and_roles',
   ASSIGN_ROLES: 'admin:assign_roles',
-  VIEW_ANALYTICS: 'admin:view_analytics',
+  VIEW_ANALYTICS: 'analytics:view_faculty_statistics',
   MANAGE_SYSTEM_SETTINGS: 'admin:system_settings',
   VIEW_AUDIT_LOGS: 'admin:view_audit_logs',
 };
 
 export const ROLE_PERMISSIONS = {
   [ROLES.STUDENT]: [
-    // Accès en lecture seule strict
-    PERMISSIONS.VIEW_CATALOG,
+    PERMISSIONS.CONSULT_UES_AND_RESOURCES,
+    PERMISSIONS.PASS_ONLINE_EXAMS,
+    PERMISSIONS.USE_PLAYGROUND_AND_AI,
     PERMISSIONS.DOWNLOAD_DOCS,
-    PERMISSIONS.USE_PLAYGROUND,
     PERMISSIONS.USE_NOTEBOOK,
     PERMISSIONS.RATE_RESOURCE,
   ],
   [ROLES.DELEGATE]: [
-    // Permissions de base
-    PERMISSIONS.VIEW_CATALOG,
+    PERMISSIONS.CONSULT_UES_AND_RESOURCES,
+    PERMISSIONS.PASS_ONLINE_EXAMS,
+    PERMISSIONS.USE_PLAYGROUND_AND_AI,
     PERMISSIONS.DOWNLOAD_DOCS,
-    PERMISSIONS.USE_PLAYGROUND,
     PERMISSIONS.USE_NOTEBOOK,
     PERMISSIONS.RATE_RESOURCE,
-    // Permissions délégué (écriture partielle et gestion de classe)
+    // Permissions étendues délégué (publications soumises à validation et annonces de filière)
+    PERMISSIONS.PUBLISH_RESOURCE,
     PERMISSIONS.RESOURCE_ADD,
     PERMISSIONS.RESOURCE_EDIT,
     PERMISSIONS.RESOURCE_DELETE,
-    PERMISSIONS.PUBLISH_CLASS_ANNOUNCEMENT,
+    PERMISSIONS.SCHEDULE_EVALUATION,
+    PERMISSIONS.PUBLISH_DEPARTMENT_ANNOUNCEMENT,
     PERMISSIONS.PIN_ANNOUNCEMENT,
     PERMISSIONS.MANAGE_CLASS_SCHEDULE,
     PERMISSIONS.VIEW_CLASS_ROSTER,
   ],
   [ROLES.MODERATOR]: [
-    // Permissions de base
-    PERMISSIONS.VIEW_CATALOG,
+    PERMISSIONS.CONSULT_UES_AND_RESOURCES,
+    PERMISSIONS.USE_PLAYGROUND_AND_AI,
     PERMISSIONS.DOWNLOAD_DOCS,
-    PERMISSIONS.USE_PLAYGROUND,
     PERMISSIONS.USE_NOTEBOOK,
     PERMISSIONS.RATE_RESOURCE,
-    // Gestion complète des ressources et modération
+    // Modération & gestion des ressources
+    PERMISSIONS.PUBLISH_RESOURCE,
+    PERMISSIONS.VALIDATE_OR_REMOVE_RESOURCE,
     PERMISSIONS.RESOURCE_ADD,
     PERMISSIONS.RESOURCE_EDIT,
     PERMISSIONS.RESOURCE_DELETE,
     PERMISSIONS.RESOURCE_MANAGE_ANY,
     PERMISSIONS.MODERATE_RESOURCES,
+    PERMISSIONS.DELETE_ANY_RESOURCE,
+    PERMISSIONS.SCHEDULE_EVALUATION,
+    PERMISSIONS.PUBLISH_DEPARTMENT_ANNOUNCEMENT,
     PERMISSIONS.AUDIT_PLAGIARISM,
     PERMISSIONS.RESOLVE_REPORTS,
     PERMISSIONS.FLAG_USERS,
-    PERMISSIONS.DELETE_ANY_RESOURCE,
+    PERMISSIONS.VIEW_FACULTY_STATISTICS,
     PERMISSIONS.VIEW_ANALYTICS,
   ],
   [ROLES.ADMIN]: [
-    // Plein accès à toutes les permissions
     ...Object.values(PERMISSIONS),
   ],
 };
@@ -387,3 +554,67 @@ export const DEMO_PROFILES = [
     badge: 'Administrateur Système (Super Admin)',
   },
 ];
+
+/**
+ * Fonctions d'évaluation directe basées sur la Matrice des Permissions
+ */
+
+/**
+ * Récupère le statut d'une action dans la matrice : true, false ou 'sur validation'
+ */
+export function getMatrixPermission(role, actionId) {
+  const norm = normalizeRole(role);
+  const row = PERMISSIONS_MATRIX.find((item) => item.id === actionId);
+  if (!row) return false;
+  return row[norm] ?? false;
+}
+
+/**
+ * Vérifie si le rôle a l'autorisation de passer les évaluations et CC en ligne
+ * Selon la matrice : Étudiant (true), Délégué (true), Modérateur (false), Administrateur (false)
+ */
+export function canPassExams(role) {
+  const norm = normalizeRole(role);
+  return norm === ROLES.STUDENT || norm === ROLES.DELEGATE;
+}
+
+/**
+ * Vérifie si le rôle peut programmer une évaluation / CC
+ * Selon la matrice : Administrateur (true), Modérateur (true), Délégué ('sur validation'), Étudiant (false)
+ */
+export function canScheduleEvaluation(role) {
+  const norm = normalizeRole(role);
+  if (norm === ROLES.ADMIN || norm === ROLES.MODERATOR) return true;
+  if (norm === ROLES.DELEGATE) return 'sur validation';
+  return false;
+}
+
+/**
+ * Vérifie si le rôle peut publier des annonces de filière
+ * Selon la matrice : Délégué (true), Modérateur (true), Administrateur (true), Étudiant (false)
+ */
+export function canPublishAnnouncement(role) {
+  const norm = normalizeRole(role);
+  return norm === ROLES.DELEGATE || norm === ROLES.MODERATOR || norm === ROLES.ADMIN;
+}
+
+/**
+ * Vérifie si le rôle peut gérer les comptes et les rôles
+ * Selon la matrice : Administrateur uniquement (true)
+ */
+export function canManageAccountsAndRoles(role) {
+  const norm = normalizeRole(role);
+  return norm === ROLES.ADMIN;
+}
+
+/**
+ * Vérifie si le rôle a accès aux statistiques de la faculté
+ * Selon la matrice : Administrateur (true), Modérateur ('sur validation'), Délégué (false), Étudiant (false)
+ */
+export function canViewFacultyStats(role) {
+  const norm = normalizeRole(role);
+  if (norm === ROLES.ADMIN) return true;
+  if (norm === ROLES.MODERATOR) return 'sur validation';
+  return false;
+}
+

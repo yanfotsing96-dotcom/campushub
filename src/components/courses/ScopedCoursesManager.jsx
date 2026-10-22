@@ -37,18 +37,7 @@ export default function ScopedCoursesManager() {
   const [selectedType, setSelectedType] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
   const deferredSearchQuery = useDeferredValue(searchQuery);
-  const [rawPage, setRawPage] = useState(1);
-
-  // Derive filter key to compute page without cascading setState inside useEffect
-  const filterKey = `${activeDepartmentId}-${activeNiveau}-${selectedCourseId}-${selectedType}-${deferredSearchQuery}`;
-  const [prevFilterKey, setPrevFilterKey] = useState(filterKey);
-
-  let currentPage = rawPage;
-  if (filterKey !== prevFilterKey) {
-    setPrevFilterKey(filterKey);
-    setRawPage(1);
-    currentPage = 1;
-  }
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Publication modal
   const [publishModalOpen, setPublishModalOpen] = useState(false);
@@ -85,11 +74,12 @@ export default function ScopedCoursesManager() {
   }, [user, isAdmin, activeDepartmentId, activeNiveau, selectedCourseId, selectedType, deferredSearchQuery]);
 
   // Paginated materials
-  const totalPages = Math.ceil(materials.length / MATERIALS_PER_PAGE);
+  const totalPages = Math.max(1, Math.ceil(materials.length / MATERIALS_PER_PAGE));
+  const safePage = Math.min(currentPage, totalPages);
   const paginatedMaterials = useMemo(() => {
-    const startIndex = (currentPage - 1) * MATERIALS_PER_PAGE;
+    const startIndex = (safePage - 1) * MATERIALS_PER_PAGE;
     return materials.slice(startIndex, startIndex + MATERIALS_PER_PAGE);
-  }, [materials, currentPage]);
+  }, [materials, safePage]);
 
   const handleDownloadMaterial = useCallback(() => {
     setToastMessage(`Téléchargement certifié pour le matricule ${user?.matricule || 'Inscrit'}.`);
@@ -183,6 +173,7 @@ export default function ScopedCoursesManager() {
               onChange={(e) => {
                 setAdminDepartmentId(e.target.value);
                 setSelectedCourseId('all');
+                setCurrentPage(1);
               }}
               className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-semibold text-xs"
             >
@@ -195,7 +186,10 @@ export default function ScopedCoursesManager() {
 
             <select
               value={activeNiveau}
-              onChange={(e) => setAdminNiveau(e.target.value)}
+              onChange={(e) => {
+                setAdminNiveau(e.target.value);
+                setCurrentPage(1);
+              }}
               className="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 font-semibold text-xs"
             >
               {ACADEMIC_LEVELS.map((lvl) => (
@@ -219,7 +213,10 @@ export default function ScopedCoursesManager() {
       <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
         <button
           type="button"
-          onClick={() => setSelectedCourseId('all')}
+          onClick={() => {
+            setSelectedCourseId('all');
+            setCurrentPage(1);
+          }}
           className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border ${
             selectedCourseId === 'all'
               ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900 border-slate-900 dark:border-white shadow-xs'
@@ -234,7 +231,10 @@ export default function ScopedCoursesManager() {
           <button
             key={course.id}
             type="button"
-            onClick={() => setSelectedCourseId(course.id)}
+            onClick={() => {
+              setSelectedCourseId(course.id);
+              setCurrentPage(1);
+            }}
             className={`px-3.5 py-2 rounded-2xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 border ${
               selectedCourseId === course.id
                 ? 'bg-indigo-600 text-white border-indigo-600 shadow-xs'
@@ -254,7 +254,10 @@ export default function ScopedCoursesManager() {
           <input
             type="text"
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
             placeholder="Rechercher par titre, UE, mot-clé ou enseignant..."
             className="w-full pl-9 pr-3.5 py-2 text-xs rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-slate-100"
           />
@@ -264,7 +267,10 @@ export default function ScopedCoursesManager() {
           <Filter size={14} className="text-slate-400" />
           <select
             value={selectedType}
-            onChange={(e) => setSelectedType(e.target.value)}
+            onChange={(e) => {
+              setSelectedType(e.target.value);
+              setCurrentPage(1);
+            }}
             className="px-3 py-1.5 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-800 dark:text-slate-200"
           >
             <option value="all">Tous les formats</option>
@@ -305,7 +311,7 @@ export default function ScopedCoursesManager() {
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
-            onPageChange={setRawPage}
+            onPageChange={setCurrentPage}
             totalItems={materials.length}
             pageSize={MATERIALS_PER_PAGE}
           />

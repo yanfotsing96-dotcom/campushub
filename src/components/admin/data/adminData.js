@@ -10,7 +10,7 @@ export const INITIAL_ADMIN_USERS = [
     email: 'f.tagne@uy1.uninet.cm',
     matricule: 'ENS-INFO-04',
     filiere: 'Département Informatique',
-    role: 'Enseignant',
+    role: 'Modérateur',
     status: 'Actif',
     joinedDate: '10 Jan 2025',
     contributionsCount: 14,

@@ -79,7 +79,7 @@ const INITIAL_SCHEDULE = [
 ];
 
 export default function DelegateDashboardPage() {
-  const { student, selectedUniversity, triggerToast } = useCampusHub();
+  const { student, triggerToast } = useCampusHub();
   const [announcements, setAnnouncements] = useState(INITIAL_ANNOUNCEMENTS);
   const [schedule] = useState(INITIAL_SCHEDULE);
 
@@ -145,11 +145,13 @@ export default function DelegateDashboardPage() {
               <span>Espace Délégué de Promotion · Module Réservé</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
-              <span>Tableau de Bord Délégué de Classe</span>
+              <span>Tableau de Bord Délégué</span>
               <RoleBadge role="delegate" size="md" />
             </h1>
             <p className="text-sm md:text-base text-slate-300 leading-relaxed">
-              Gestion de promotion pour la filière <strong>{student.filiere}</strong> ({student.niveau}) à l'<strong>{selectedUniversity.name}</strong>. Diffusez les avis officiels, gérez le calendrier d'amphi et coordonnez les délégués de groupe.
+              <strong>Portée :</strong> Sa filière et son niveau ({student.filiere} · {student.niveau}).
+              <br />
+              <strong>Attributions officielles :</strong> Représente sa classe : relaie les annonces, propose des ressources et des dates d'évaluation (soumises à validation).
             </p>
           </div>
 

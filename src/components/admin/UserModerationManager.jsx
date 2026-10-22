@@ -2,16 +2,22 @@ import { useState, useMemo } from 'react';
 import {
   Users,
   Search,
-  Shield,
   ShieldCheck,
   UserCheck,
   UserX,
   AlertTriangle,
   CheckCircle2,
   X,
-  GraduationCap,
+  TableProperties,
 } from 'lucide-react';
 import { INITIAL_ADMIN_USERS } from './data/adminData';
+import {
+  ROLES,
+  ROLE_DEFINITIONS,
+  normalizeRole,
+} from '../../constants/rbacConstants';
+import RoleBadge from '../common/RoleBadge';
+import RolesAndPermissionsMatrix from '../common/RolesAndPermissionsMatrix';
 
 const STORAGE_USERS_KEY = 'campushub_admin_users';
 
@@ -28,6 +34,7 @@ export default function UserModerationManager() {
   const [searchQuery, setSearchQuery] = useState('');
   const [roleFilter, setRoleFilter] = useState('ALL');
   const [statusFilter, setStatusFilter] = useState('ALL');
+  const [showMatrix, setShowMatrix] = useState(false);
 
   // Modals state
   const [selectedUserToEdit, setSelectedUserToEdit] = useState(null);
@@ -94,7 +101,7 @@ export default function UserModerationManager() {
   const filteredUsers = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     return users.filter((u) => {
-      if (roleFilter !== 'ALL' && u.role !== roleFilter) return false;
+      if (roleFilter !== 'ALL' && normalizeRole(u.role) !== normalizeRole(roleFilter)) return false;
       if (statusFilter !== 'ALL' && u.status !== statusFilter) return false;
       if (!q) return true;
       return (
@@ -120,16 +127,31 @@ export default function UserModerationManager() {
               Gestion des Comptes & Modération des Utilisateurs
             </h2>
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Supervisez les rôles académiques, suspendez les comptes abusifs et protégez la communauté estudiantine.
+              Quatre rôles standardisés (Étudiant, Délégué, Modérateur, Administrateur) attribués par faculté et par filière.
             </p>
           </div>
 
-          <div className="flex items-center gap-3 text-xs text-slate-500">
-            <span className="font-semibold text-slate-800 dark:text-slate-200">{users.length} comptes enregistrés</span>
-            <span>•</span>
-            <span className="text-emerald-600 dark:text-emerald-400 font-bold">{users.filter((u) => u.status === 'Actif').length} actifs</span>
-            <span>•</span>
-            <span className="text-rose-600 dark:text-rose-400 font-bold">{users.filter((u) => u.status === 'Bloqué').length} bloqués</span>
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={() => setShowMatrix((prev) => !prev)}
+              className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 border ${
+                showMatrix
+                  ? 'bg-[#13294B] text-white border-[#13294B] shadow-xs'
+                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-200 dark:hover:bg-slate-750'
+              }`}
+            >
+              <TableProperties size={14} className="text-emerald-400" />
+              <span>{showMatrix ? 'Masquer la Matrice' : 'Matrice des Permissions'}</span>
+            </button>
+
+            <div className="flex items-center gap-3 text-xs text-slate-500 bg-slate-50 dark:bg-slate-850 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800">
+              <span className="font-semibold text-slate-800 dark:text-slate-200">{users.length} comptes</span>
+              <span>•</span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-bold">{users.filter((u) => u.status === 'Actif').length} actifs</span>
+              <span>•</span>
+              <span className="text-rose-600 dark:text-rose-400 font-bold">{users.filter((u) => u.status === 'Bloqué').length} bloqués</span>
+            </div>
           </div>
         </div>
 
@@ -156,12 +178,11 @@ export default function UserModerationManager() {
                 onChange={(e) => setRoleFilter(e.target.value)}
                 className="px-3 py-1.5 text-xs font-semibold rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-800 dark:text-slate-200"
               >
-                <option value="ALL">Tous les rôles</option>
-                <option value="Étudiant">Étudiant</option>
-                <option value="Délégué">Délégué de filière</option>
-                <option value="Modérateur">Modérateur</option>
-                <option value="Enseignant">Enseignant</option>
-                <option value="Administrateur">Administrateur</option>
+                <option value="ALL">Tous les 4 rôles</option>
+                <option value={ROLES.STUDENT}>Étudiant (Sa filière & niveau)</option>
+                <option value={ROLES.DELEGATE}>Délégué (Sa filière & niveau)</option>
+                <option value={ROLES.MODERATOR}>Modérateur (Faculté ou filière)</option>
+                <option value={ROLES.ADMIN}>Administrateur (Faculté & filières)</option>
               </select>
             </div>
 
@@ -186,6 +207,13 @@ export default function UserModerationManager() {
         <div className="p-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800 text-emerald-800 dark:text-emerald-200 text-xs flex items-center gap-2 animate-in fade-in">
           <CheckCircle2 size={16} className="text-emerald-500 flex-shrink-0" />
           <span>{bannerMessage}</span>
+        </div>
+      )}
+
+      {/* Synchronized Roles & Permissions Official Matrix (Collapsible) */}
+      {showMatrix && (
+        <div className="animate-in fade-in zoom-in-95 duration-200">
+          <RolesAndPermissionsMatrix />
         </div>
       )}
 
@@ -236,28 +264,7 @@ export default function UserModerationManager() {
 
                   {/* Role badge */}
                   <td className="py-3.5 px-4">
-                    <span
-                      className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                        user.role === 'Administrateur'
-                          ? 'bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300'
-                          : user.role === 'Enseignant'
-                          ? 'bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300'
-                          : user.role === 'Délégué'
-                          ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
-                          : user.role === 'Modérateur'
-                          ? 'bg-amber-100 dark:bg-amber-950 text-amber-700 dark:text-amber-300'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
-                      }`}
-                    >
-                      {user.role === 'Administrateur' ? (
-                        <Shield size={11} />
-                      ) : user.role === 'Enseignant' ? (
-                        <GraduationCap size={11} />
-                      ) : (
-                        <ShieldCheck size={11} />
-                      )}
-                      <span>{user.role}</span>
-                    </span>
+                    <RoleBadge role={user.role} size="xs" />
                   </td>
 
                   {/* Status badge */}
@@ -334,7 +341,7 @@ export default function UserModerationManager() {
       {/* Modal: Modifier Rôle */}
       {selectedUserToEdit && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-xs animate-in fade-in">
-          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-sm shadow-2xl relative">
+          <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl p-6 w-full max-w-lg shadow-2xl relative">
             <button
               type="button"
               onClick={() => setSelectedUserToEdit(null)}
@@ -345,28 +352,41 @@ export default function UserModerationManager() {
 
             <h3 className="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2 mb-1">
               <ShieldCheck size={18} className="text-indigo-600" />
-              <span>Modifier le rôle académique</span>
+              <span>Attribuer un rôle académique standardisé</span>
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-              Pour {selectedUserToEdit.name} ({selectedUserToEdit.matricule}).
+              Pour <strong>{selectedUserToEdit.name}</strong> ({selectedUserToEdit.matricule}) · {selectedUserToEdit.filiere}.
             </p>
 
-            <div className="space-y-2">
-              {['Étudiant', 'Délégué', 'Modérateur', 'Enseignant', 'Administrateur'].map((r) => (
-                <button
-                  key={r}
-                  type="button"
-                  onClick={() => handleChangeRole(selectedUserToEdit.id, r)}
-                  className={`w-full py-2.5 px-3 rounded-xl text-xs font-bold text-left flex items-center justify-between transition-all ${
-                    selectedUserToEdit.role === r
-                      ? 'bg-indigo-600 text-white shadow-xs'
-                      : 'bg-slate-50 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100'
-                  }`}
-                >
-                  <span>{r}</span>
-                  {selectedUserToEdit.role === r && <CheckCircle2 size={14} />}
-                </button>
-              ))}
+            <div className="space-y-2.5">
+              {ROLE_DEFINITIONS.map((def) => {
+                const isCurrent = normalizeRole(selectedUserToEdit.role) === def.role;
+                return (
+                  <button
+                    key={def.role}
+                    type="button"
+                    onClick={() => handleChangeRole(selectedUserToEdit.id, def.label)}
+                    className={`w-full p-3 rounded-2xl text-xs text-left transition-all border ${
+                      isCurrent
+                        ? 'bg-indigo-50/80 dark:bg-indigo-950/60 border-indigo-500 shadow-xs'
+                        : 'bg-slate-50 dark:bg-slate-800/60 border-slate-200 dark:border-slate-700 hover:border-slate-300'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center gap-2">
+                        <RoleBadge role={def.role} size="xs" />
+                        <span className="text-[11px] font-semibold text-slate-500 dark:text-slate-400">
+                          Portée : {def.scope}
+                        </span>
+                      </div>
+                      {isCurrent && <CheckCircle2 size={16} className="text-indigo-600 shrink-0" />}
+                    </div>
+                    <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-snug">
+                      {def.description}
+                    </p>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>

@@ -24,28 +24,12 @@ import {
 } from './nationalResourcesData';
 
 export default function NationalResourcesSection({ initialProfile }) {
-  // --------------------------------------------------------------------------
-  // SYNCHRONISATION INITIALE PROFIL (React Render-Time State Adjustment)
-  // --------------------------------------------------------------------------
-  const initialKey = `${initialProfile?.universityId || 'UY1'}-${initialProfile?.facultyId || 'FS'}-${initialProfile?.filiereId || 'Informatique'}-${initialProfile?.niveau || 'L2'}`;
-  const [prevInitialKey, setPrevInitialKey] = useState(initialKey);
-
   const [profile, setProfile] = useState(() => ({
     universityId: initialProfile?.universityId || 'UY1',
     facultyId: initialProfile?.facultyId || 'FS',
     filiereId: initialProfile?.filiereId || 'Informatique',
     niveau: initialProfile?.niveau || 'L2',
   }));
-
-  if (prevInitialKey !== initialKey) {
-    setPrevInitialKey(initialKey);
-    setProfile({
-      universityId: initialProfile?.universityId || 'UY1',
-      facultyId: initialProfile?.facultyId || 'FS',
-      filiereId: initialProfile?.filiereId || 'Informatique',
-      niveau: initialProfile?.niveau || 'L2',
-    });
-  }
 
   // Panneau de contrôle interactif ouvert/fermé
   const [isControlPanelOpen, setIsControlPanelOpen] = useState(true);

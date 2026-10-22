@@ -338,7 +338,6 @@ const BIOLOGY_EXAM_PROBLEMS = [
 
 export default function BiologyExamTrainerModule({ onSelectModule, initialCategory = 'all' }) {
   const [selectedCategory, setSelectedCategory] = useState(initialCategory || 'all');
-  const [prevInitialCategory, setPrevInitialCategory] = useState(initialCategory);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [userAnswer, setUserAnswer] = useState('');
   const [hasEvaluated, setHasEvaluated] = useState(false);
@@ -352,15 +351,6 @@ export default function BiologyExamTrainerModule({ onSelectModule, initialCatego
   const [streak, setStreak] = useState(0);
   const [bestStreak, setBestStreak] = useState(0);
 
-  // Synchronisation lors d'un changement de catégorie parente sans effet secondaire
-  if (initialCategory !== prevInitialCategory) {
-    setPrevInitialCategory(initialCategory);
-    setSelectedCategory(initialCategory || 'all');
-    setCurrentProblemIndex(0);
-    setUserAnswer('');
-    setHasEvaluated(false);
-    setShowStepByStep(false);
-  }
 
   // Filtrage des problèmes selon la catégorie
   const filteredProblems = useMemo(() => {

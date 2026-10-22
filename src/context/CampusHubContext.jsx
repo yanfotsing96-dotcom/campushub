@@ -22,14 +22,16 @@ export function CampusHubProvider({ children }) {
   const auth = useAuth();
   const authUser = auth?.user;
 
-  // National University Selection: 'ALL' or specific university ID ('UY1', 'ENSPY', 'UDO', etc.)
-  const [selectedUniversityId, setSelectedUniversityId] = useState(() => {
+  // National University Selection: explicit override or fallback to authUser university or default
+  const [universityOverride, setUniversityOverride] = useState(() => {
     try {
-      return localStorage.getItem(STORAGE_KEY_UNI) || 'UY1';
+      return localStorage.getItem(STORAGE_KEY_UNI) || null;
     } catch {
-      return 'UY1';
+      return null;
     }
   });
+
+  const selectedUniversityId = universityOverride || authUser?.universityId || 'UY1';
 
   // Pro Status State
   const [localIsPro, setLocalIsPro] = useState(() => {
@@ -77,23 +79,16 @@ export function CampusHubProvider({ children }) {
   // Global Toast Notification
   const [toastNotification, setToastNotification] = useState(null);
 
-  // Synchronize state with authUser university during render without cascading renders
-  const [prevAuthUniId, setPrevAuthUniId] = useState(authUser?.universityId);
-  if (authUser?.universityId && authUser.universityId !== prevAuthUniId) {
-    setPrevAuthUniId(authUser.universityId);
-    setSelectedUniversityId(authUser.universityId);
-  }
-
   // Synchronize with global custom events dispatched from Registration or Profile updates
   useEffect(() => {
     const handleAuthChange = (e) => {
       if (e.detail?.universityId) {
-        setSelectedUniversityId(e.detail.universityId);
+        setUniversityOverride(e.detail.universityId);
       }
     };
     const handleUniChange = (e) => {
       if (e.detail?.universityId) {
-        setSelectedUniversityId(e.detail.universityId);
+        setUniversityOverride(e.detail.universityId);
       }
     };
     window.addEventListener('campushub:auth_changed', handleAuthChange);
@@ -152,7 +147,7 @@ export function CampusHubProvider({ children }) {
 
   // Switch University with two-way profile synchronization
   const setUniversity = useCallback((uniId) => {
-    setSelectedUniversityId(uniId);
+    setUniversityOverride(uniId);
     const targetUni =
       uniId === 'ALL'
         ? { id: 'ALL', name: 'Réseau National Universitaire du Cameroun', shortName: 'Toutes les universités' }

@@ -189,6 +189,7 @@ export default function BiologyPlayground() {
 
             {activeModule === 'exam_trainer' && (
               <BiologyExamTrainerModule
+                key={examCategory}
                 onSelectModule={handleSelectModule}
                 initialCategory={examCategory}
               />

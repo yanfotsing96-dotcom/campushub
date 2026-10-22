@@ -30,5 +30,9 @@ export default function ResourceCrud() {
       }
     : undefined;
 
-  return <NationalResourcesSection initialProfile={initialProfile} />;
+  const profileKey = initialProfile
+    ? `${initialProfile.universityId}-${initialProfile.facultyId}-${initialProfile.filiereId}-${initialProfile.niveau}`
+    : 'default';
+
+  return <NationalResourcesSection key={profileKey} initialProfile={initialProfile} />;
 }

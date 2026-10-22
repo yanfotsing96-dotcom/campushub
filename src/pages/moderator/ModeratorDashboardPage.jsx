@@ -117,11 +117,13 @@ export default function ModeratorDashboardPage() {
               <span>Espace Modération & Intégrité Académique</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white flex items-center gap-3">
-              <span>Console de Modération des Ressources</span>
+              <span>Console de Modération</span>
               <RoleBadge role="moderator" size="md" />
             </h1>
             <p className="text-sm md:text-base text-slate-300 leading-relaxed">
-              Supervision de la qualité pédagogique pour <strong>{selectedUniversity.name}</strong> et le réseau national : validation des signalements, audit anti-plagiat et charte d'honnêteté intellectuelle.
+              <strong>Portée :</strong> Une faculté ou une filière ({selectedUniversity.name}).
+              <br />
+              <strong>Attributions officielles :</strong> Valide les ressources publiées, programme les évaluations, signale ou retire les contenus inappropriés.
             </p>
           </div>
 

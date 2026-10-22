@@ -1235,7 +1235,7 @@ class ExamService {
       academicYear: payload.academicYear || '2025-2026',
       professor: payload.professor?.trim() || authorUser?.fullName || authorUser?.nom || 'Département Scientifique',
       university: authorUser?.universityName || 'Université de Yaoundé I (UY1)',
-      status: payload.status || 'actif', // 'brouillon' | 'actif' | 'termine'
+      status: payload.status || (normalizeRole(authorUser?.role) === ROLES.DELEGATE ? 'en_attente_validation' : 'actif'), // 'brouillon' | 'en_attente_validation' | 'actif' | 'termine'
       dateDebut: payload.dateDebut || new Date().toISOString().slice(0, 16),
       dateFin: payload.dateFin || new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString().slice(0, 16),
       instructions: payload.instructions && payload.instructions.length > 0 ? payload.instructions : [

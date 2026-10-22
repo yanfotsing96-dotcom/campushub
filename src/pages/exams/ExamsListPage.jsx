@@ -7,10 +7,19 @@ import {
   ArrowRight,
   ShieldCheck,
   Layers,
+  Info,
+  Clock,
+  PlusCircle,
 } from 'lucide-react';
 import { useAuth } from '../../hooks/useAuth';
 import { examService } from '../../services/examService';
-import { normalizeRole, ROLES } from '../../constants/rbacConstants';
+import {
+  normalizeRole,
+  ROLES,
+  ROLE_LABELS,
+  canPassExams,
+  canScheduleEvaluation,
+} from '../../constants/rbacConstants';
 import RoleBadge from '../../components/common/RoleBadge';
 import RouteLoadingSkeleton from '../../components/common/RouteLoadingSkeleton';
 import { useAcademicFilter } from '../../hooks/useAcademicFilter';
@@ -24,9 +33,12 @@ export default function ExamsListPage() {
   const { activeFiliere, activeNiveau } = useAcademicFilter();
   const currentRole = normalizeRole(user?.role);
   const isAdminOrModerator = currentRole === ROLES.ADMIN || currentRole === ROLES.MODERATOR;
+  const isDelegate = currentRole === ROLES.DELEGATE;
+  const userCanPassExams = canPassExams(currentRole);
+  const userCanScheduleExams = canScheduleEvaluation(currentRole);
 
   const [selectedExam, setSelectedExam] = useState(null);
-  const [activeTab, setActiveTab] = useState(isAdminOrModerator ? 'admin' : 'student'); // 'student' | 'admin' | 'copies'
+  const [activeTab, setActiveTab] = useState(isAdminOrModerator ? 'admin' : 'student'); // 'student' | 'admin' | 'copies' | 'propose'
   const [updateCounter, setUpdateCounter] = useState(0);
 
   // Listen to custom updates from examService
@@ -109,21 +121,38 @@ export default function ExamsListPage() {
       {/* Dynamic Content Guard Certification Banner */}
       <DynamicContentGuard />
 
-      {/* Admin / Moderator Multi-Mode Switcher */}
-      {isAdminOrModerator && (
+      {/* Admin / Moderator / Delegate Multi-Mode Switcher */}
+      {Boolean(userCanScheduleExams) && (
         <div className="flex flex-wrap items-center gap-2 p-1.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl shadow-xs">
-          <button
-            type="button"
-            onClick={() => setActiveTab('admin')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
-              activeTab === 'admin'
-                ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
-                : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            <ShieldCheck size={14} />
-            <span>Gestion & Création Admin</span>
-          </button>
+          {isAdminOrModerator && (
+            <button
+              type="button"
+              onClick={() => setActiveTab('admin')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                activeTab === 'admin'
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+              }`}
+            >
+              <ShieldCheck size={14} />
+              <span>Gestion & Programmation des Épreuves</span>
+            </button>
+          )}
+
+          {isDelegate && (
+            <button
+              type="button"
+              onClick={() => setActiveTab('propose')}
+              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+                activeTab === 'propose'
+                  ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
+                  : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800'
+              }`}
+            >
+              <PlusCircle size={14} />
+              <span>Proposer une Évaluation (sur validation)</span>
+            </button>
+          )}
 
           <button
             type="button"
@@ -135,7 +164,9 @@ export default function ExamsListPage() {
             }`}
           >
             <Layers size={14} />
-            <span>Aperçu Étudiant ({availableExams.length})</span>
+            <span>
+              {isAdminOrModerator ? `Aperçu Étudiant (${availableExams.length})` : `Épreuves Disponibles (${availableExams.length})`}
+            </span>
           </button>
 
           <button
@@ -154,15 +185,33 @@ export default function ExamsListPage() {
       )}
 
       {/* TAB 1: ADMIN CREATOR & MANAGEMENT CONSOLE */}
-      {isAdminOrModerator && activeTab === 'admin' && (
-        <Suspense fallback={<RouteLoadingSkeleton variant="simple" />}>
-          <AdminExamCreator onExamCreated={() => setUpdateCounter((c) => c + 1)} />
-        </Suspense>
-      )}
+      {(isAdminOrModerator && activeTab === 'admin') || (isDelegate && activeTab === 'propose') ? (
+        <div className="space-y-4">
+          {isDelegate && (
+            <div className="p-4 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800/60 text-amber-900 dark:text-amber-200 text-xs flex items-center gap-2.5">
+              <Clock size={16} className="text-amber-600 shrink-0" />
+              <span>
+                <strong>Matrice des Permissions · Délégué :</strong> Vous pouvez proposer des créneaux et sujets d'évaluation pour votre promotion ({user?.filiere} {user?.niveau}). Toute proposition est soumise à la validation officielle du Modérateur ou du Département.
+              </span>
+            </div>
+          )}
+          <Suspense fallback={<RouteLoadingSkeleton variant="simple" />}>
+            <AdminExamCreator onExamCreated={() => setUpdateCounter((c) => c + 1)} />
+          </Suspense>
+        </div>
+      ) : null}
 
       {/* TAB 2: STUDENT AVAILABLE EXAMS */}
-      {(!isAdminOrModerator || activeTab === 'student') && (
+      {(!isAdminOrModerator || activeTab === 'student') && activeTab !== 'admin' && activeTab !== 'propose' && (
         <div className="space-y-6">
+          {!userCanPassExams && (
+            <div className="p-4 rounded-2xl bg-slate-100 dark:bg-slate-850 border border-slate-200 dark:border-slate-800 text-slate-700 dark:text-slate-300 text-xs flex items-center gap-2.5">
+              <Info size={16} className="text-indigo-500 shrink-0" />
+              <span>
+                <strong>Matrice RBAC :</strong> En tant qu'<strong>{ROLE_LABELS[currentRole]}</strong>, vous ne passez pas d'épreuve en tant qu'étudiant. Cet écran vous permet d'inspecter les sujets soumis aux étudiants de la filière.
+              </span>
+            </div>
+          )}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm md:text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
@@ -223,17 +272,25 @@ export default function ExamsListPage() {
                     </div>
 
                     <div className="pt-3 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                        <span>Prêt à composer</span>
+                      <span className={`text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 ${
+                        userCanPassExams
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-indigo-600 dark:text-indigo-400'
+                      }`}>
+                        <span className={`w-1.5 h-1.5 rounded-full ${userCanPassExams ? 'bg-emerald-500 animate-pulse' : 'bg-indigo-500'}`} />
+                        <span>{userCanPassExams ? 'Prêt à composer' : 'Mode Supervision'}</span>
                       </span>
 
                       <button
                         type="button"
                         onClick={() => setSelectedExam(exam)}
-                        className="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs"
+                        className={`px-4 py-2 rounded-xl text-white font-bold text-xs flex items-center gap-1.5 transition-colors shadow-xs ${
+                          userCanPassExams
+                            ? 'bg-indigo-600 hover:bg-indigo-700'
+                            : 'bg-slate-800 hover:bg-slate-700 dark:bg-slate-700 dark:hover:bg-slate-600'
+                        }`}
                       >
-                        <span>Lancer la composition</span>
+                        <span>{userCanPassExams ? 'Lancer la composition' : 'Inspecter le sujet (Aperçu)'}</span>
                         <ArrowRight size={13} />
                       </button>
                     </div>

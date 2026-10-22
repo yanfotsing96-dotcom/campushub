@@ -149,6 +149,7 @@ export default function PhysicsLab() {
 
             {activeModuleId === 'exam_trainer' && (
               <PhysicsExamTrainerModule
+                key={examCategory}
                 initialCategory={examCategory}
                 onNavigateToModule={(modId) => setActiveModuleId(modId)}
               />

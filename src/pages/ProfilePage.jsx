@@ -20,6 +20,7 @@ import { nationalAcademicService } from '../constants/nationalAcademicData';
 import RoleBadge from '../components/common/RoleBadge';
 import Button from '../components/common/Button';
 import Toast from '../components/common/Toast';
+import RolesAndPermissionsMatrix from '../components/common/RolesAndPermissionsMatrix';
 import '../styles/ProfilePage.css';
 
 export default function ProfilePage() {
@@ -170,7 +171,7 @@ export default function ProfilePage() {
             >
               🇨🇲 {student.universityShortName}
             </span>
-            <RoleBadge role={student.role} size="sm" />
+            <RoleBadge role={user?.role || student.role} size="sm" />
           </div>
 
           <p style={{ margin: '6px 0 0 0', color: 'var(--rc-text-secondary, #64748b)', fontSize: '0.9375rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -513,6 +514,11 @@ export default function ProfilePage() {
           </form>
         </div>
       )}
+
+      {/* Official RBAC Matrix & Role Governance Section */}
+      <div style={{ marginTop: '32px' }}>
+        <RolesAndPermissionsMatrix highlightRole={user?.role} />
+      </div>
     </div>
   );
 }

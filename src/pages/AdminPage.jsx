@@ -6,8 +6,10 @@ import {
   Flag,
   BarChart2,
   Lock,
+  TableProperties,
 } from 'lucide-react';
 import RouteLoadingSkeleton from '../components/common/RouteLoadingSkeleton';
+import RolesAndPermissionsMatrix from '../components/common/RolesAndPermissionsMatrix';
 
 const UserModerationManager = lazy(() => import('../components/admin/UserModerationManager'));
 const ContentReportsQueue = lazy(() => import('../components/admin/ContentReportsQueue'));
@@ -35,6 +37,13 @@ const TABS = [
     icon: BarChart2,
     description: 'KPIs d\'engagement et métriques campus UY1',
   },
+  {
+    id: 'matrix',
+    label: '4. Matrice des Rôles & Permissions',
+    shortLabel: 'Rôles & Matrice',
+    icon: TableProperties,
+    description: 'Modèle RBAC standardisé et grille des droits',
+  },
 ];
 
 export default function AdminPage() {
@@ -54,13 +63,15 @@ export default function AdminPage() {
           <div className="space-y-2 max-w-2xl">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
               <ShieldCheck size={14} />
-              <span>Module 09 · Administration & Modération Globale</span>
+              <span>Console d'Administration · Rôle Administrateur</span>
             </div>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-white">
               CampusHub Console d'Administration & Supervision
             </h1>
             <p className="text-sm md:text-base text-slate-300 leading-relaxed">
-              Supervision de l'écosystème académique de l'Université de Yaoundé I : gestion des rôles étudiants et délégués, traitement des signalements de contenu et monitoring en temps réel des statistiques du campus.
+              <strong>Portée :</strong> Une faculté (et ses filières) — Faculté des Sciences UY1.
+              <br />
+              <strong>Attributions officielles :</strong> Gère les comptes et les rôles, suit les statistiques, paramètre les modules de sa faculté.
             </p>
           </div>
 
@@ -91,7 +102,7 @@ export default function AdminPage() {
 
       {/* Tabs Navigation Bar */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-1.5 shadow-sm">
-        <div className="grid grid-cols-3 gap-1.5">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
           {TABS.map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -122,6 +133,7 @@ export default function AdminPage() {
           {activeTab === 'users' && <UserModerationManager />}
           {activeTab === 'reports' && <ContentReportsQueue />}
           {activeTab === 'analytics' && <AnalyticsDashboard />}
+          {activeTab === 'matrix' && <RolesAndPermissionsMatrix />}
         </Suspense>
       </main>
     </div>

@@ -20,6 +20,8 @@ import {
   ROLES,
   ROLE_LABELS,
   ROLE_SECRET_PASSCODES,
+  ROLE_SCOPES,
+  ROLE_DESCRIPTIONS,
 } from '../../constants/rbacConstants';
 import { CAMEROON_UNIVERSITIES } from '../../constants/academicConstants';
 import {
@@ -923,6 +925,17 @@ export default function RegisterForm({ onSubmit, onCancel, showHeaderMotto = tru
                     </button>
                   ))}
                 </div>
+
+                {formData.role && (
+                  <div className="p-2.5 rounded-xl bg-slate-850 border border-slate-700/60 text-[11px] space-y-0.5">
+                    <div className="font-semibold text-indigo-300">
+                      Portée : {ROLE_SCOPES[formData.role]}
+                    </div>
+                    <div className="text-slate-400 leading-snug">
+                      {ROLE_DESCRIPTIONS[formData.role]}
+                    </div>
+                  </div>
+                )}
 
                 <div className="space-y-1">
                   <div className="flex items-center justify-between">

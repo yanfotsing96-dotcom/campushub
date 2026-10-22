@@ -110,9 +110,19 @@ export default function RoleVerificationModal({
           </button>
         </div>
 
-        {/* Informative Explanation */}
-        <p className="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-          {badgeConfig.description} L'attribution du rôle <strong>« {roleLabel} »</strong> requiert la validation d'un <strong>Code d'Accès Secret</strong> délivré par la scolarité ou la DSI universitaire.
+        {/* Informative Explanation & Official Scope */}
+        <div className="p-3 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 text-xs space-y-1">
+          <div className="flex items-center gap-1.5 font-bold text-slate-800 dark:text-slate-200 text-[11px]">
+            <span>Portée officielle :</span>
+            <span className="text-indigo-600 dark:text-indigo-400 font-semibold">{badgeConfig.scope}</span>
+          </div>
+          <p className="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+            {badgeConfig.description}
+          </p>
+        </div>
+
+        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
+          L'attribution du rôle <strong>« {roleLabel} »</strong> requiert la validation d'un <strong>Code d'Accès Secret</strong> délivré par la scolarité ou la DSI universitaire.
         </p>
 
         {/* Verification Form */}

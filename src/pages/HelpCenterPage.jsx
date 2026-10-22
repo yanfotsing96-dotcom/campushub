@@ -3,14 +3,16 @@ import {
   HelpCircle,
   Compass,
   MessageSquare,
+  ShieldCheck,
 } from 'lucide-react';
 import HelpFaqSection from '../components/help/HelpFaqSection';
 import QuickStartGuide from '../components/help/QuickStartGuide';
 import SupportTicketForm from '../components/help/SupportTicketForm';
+import RolesAndPermissionsMatrix from '../components/common/RolesAndPermissionsMatrix';
 import { useCampusHub } from '../hooks/useCampusHub';
 
 export default function HelpCenterPage() {
-  const [activeTab, setActiveTab] = useState('faq'); // 'faq', 'guide', 'ticket'
+  const [activeTab, setActiveTab] = useState('faq'); // 'faq', 'guide', 'ticket', 'roles'
   const { selectedUniversity } = useCampusHub();
 
   return (
@@ -49,7 +51,7 @@ export default function HelpCenterPage() {
 
       {/* Main Tabs Navigation */}
       <div className="bg-slate-800/90 border border-slate-700/60 rounded-2xl p-1.5 shadow-sm">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-1.5">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-1.5">
           <button
             type="button"
             onClick={() => setActiveTab('faq')}
@@ -59,8 +61,8 @@ export default function HelpCenterPage() {
                 : 'text-slate-300 hover:bg-slate-750 hover:text-white'
             }`}
           >
-            <HelpCircle size={16} />
-            <span>1. FAQ & Base de Connaissances</span>
+            <HelpCircle size={15} />
+            <span>1. FAQ & Base</span>
           </button>
 
           <button
@@ -72,8 +74,8 @@ export default function HelpCenterPage() {
                 : 'text-slate-300 hover:bg-slate-750 hover:text-white'
             }`}
           >
-            <Compass size={16} />
-            <span>2. Guide de Démarrage (5 Étapes)</span>
+            <Compass size={15} />
+            <span>2. Guide de Démarrage</span>
           </button>
 
           <button
@@ -85,8 +87,21 @@ export default function HelpCenterPage() {
                 : 'text-slate-300 hover:bg-slate-750 hover:text-white'
             }`}
           >
-            <MessageSquare size={16} />
-            <span>3. Contacter le Support & Signaler un Bug</span>
+            <MessageSquare size={15} />
+            <span>3. Support & Contact</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('roles')}
+            className={`flex items-center justify-center gap-2 p-3 rounded-xl text-xs font-bold transition-all ${
+              activeTab === 'roles'
+                ? 'bg-indigo-600 text-white shadow-md'
+                : 'text-slate-300 hover:bg-slate-750 hover:text-white'
+            }`}
+          >
+            <ShieldCheck size={15} className="text-emerald-400" />
+            <span>4. Rôles & Permissions</span>
           </button>
         </div>
       </div>
@@ -96,6 +111,7 @@ export default function HelpCenterPage() {
         {activeTab === 'faq' && <HelpFaqSection />}
         {activeTab === 'guide' && <QuickStartGuide />}
         {activeTab === 'ticket' && <SupportTicketForm />}
+        {activeTab === 'roles' && <RolesAndPermissionsMatrix />}
       </main>
     </div>
   );
