@@ -1,18 +1,22 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import {
   GraduationCap,
   Award,
-  BookMarked,
   Mail,
   Edit3,
   Check,
   X,
   FileCheck2,
+  Building,
+  ArrowRight,
+  ShieldCheck,
+  UserCheck,
 } from 'lucide-react';
 import { useAuth } from '../hooks/useAuth';
 import { useCampusHub } from '../hooks/useCampusHub';
 import { CAMEROON_UNIVERSITIES } from '../constants/academicConstants';
+import { nationalAcademicService } from '../constants/nationalAcademicData';
 import RoleBadge from '../components/common/RoleBadge';
 import Button from '../components/common/Button';
 import Toast from '../components/common/Toast';
@@ -26,26 +30,59 @@ export default function ProfilePage() {
   const [formData, setFormData] = useState({
     nom: user?.nom || student.name || '',
     email: user?.email || student.email || '',
-    universityId: student.universityId || 'UY1',
-    filiere: user?.filiere || student.filiere || 'Informatique & Génie Logiciel',
+    matricule: user?.matricule || student.matricule || '',
+    universityId: user?.universityId || student.universityId || 'UY1',
+    faculty: user?.faculty || student.faculty || 'Faculté des Sciences (FS)',
+    facultyId: user?.facultyId || student.facultyId || 'FS',
+    filiere: user?.filiereLabel || user?.filiere || student.filiere || 'Informatique',
+    filiereLabel: user?.filiereLabel || user?.filiere || student.filiere || 'Informatique',
     niveau: user?.niveau || student.niveau || 'L2',
     bio: user?.bio || '',
   });
   const [toastMessage, setToastMessage] = useState(null);
 
+  // Available faculties for the current university selection in edit mode
+  const currentFaculties = useMemo(() => {
+    const list = nationalAcademicService.getFacultiesByUniversity(formData.universityId);
+    if (list && list.length > 0) return list;
+    const u = CAMEROON_UNIVERSITIES.find((uni) => uni.id === formData.universityId);
+    return (u?.faculties || []).map((f, idx) => ({ id: `${formData.universityId}_FAC_${idx}`, name: f }));
+  }, [formData.universityId]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => {
+      const next = { ...prev, [name]: value };
+      if (name === 'universityId') {
+        const facs = nationalAcademicService.getFacultiesByUniversity(value);
+        if (facs && facs.length > 0) {
+          next.facultyId = facs[0].id;
+          next.faculty = facs[0].name;
+        } else {
+          const u = CAMEROON_UNIVERSITIES.find((uni) => uni.id === value);
+          next.faculty = u?.faculties?.[0] || 'Faculté des Sciences (FS)';
+          next.facultyId = `${value}_FAC`;
+        }
+      }
+      return next;
+    });
   };
 
   const handleSave = (e) => {
     e.preventDefault();
-    updateProfile(formData);
+    const targetUni = CAMEROON_UNIVERSITIES.find((u) => u.id === formData.universityId) || CAMEROON_UNIVERSITIES[0];
+    const payload = {
+      ...formData,
+      universityName: targetUni.name,
+      universityShortName: targetUni.shortName,
+      filiereLabel: formData.filiere,
+    };
+    updateProfile(payload);
     if (formData.universityId) {
       setUniversity(formData.universityId);
     }
     setIsEditing(false);
-    setToastMessage('Profil national actualisé avec succès !');
+    setToastMessage('Profil national actualisé & synchronisé avec succès !');
     setTimeout(() => setToastMessage(null), 3000);
   };
 
@@ -148,10 +185,14 @@ export default function ProfilePage() {
               icon={Edit3}
               onClick={() => {
                 setFormData({
-                  nom: user?.nom || '',
-                  email: user?.email || '',
-                  filiere: user?.filiere || 'Informatique',
-                  niveau: user?.niveau || 'L2',
+                  nom: user?.nom || student.name || '',
+                  email: user?.email || student.email || '',
+                  matricule: user?.matricule || student.matricule || '',
+                  universityId: user?.universityId || student.universityId || 'UY1',
+                  faculty: user?.faculty || student.faculty || 'Faculté des Sciences (FS)',
+                  facultyId: user?.facultyId || student.facultyId || 'FS',
+                  filiere: user?.filiereLabel || user?.filiere || student.filiere || 'Informatique',
+                  niveau: user?.niveau || student.niveau || 'L2',
                   bio: user?.bio || '',
                 });
                 setIsEditing(true);
@@ -175,23 +216,62 @@ export default function ProfilePage() {
               boxShadow: '0 2px 4px rgba(0, 0, 0, 0.02)',
             }}
           >
-            <h3 style={{ margin: '0 0 16px 0', fontSize: '1.125rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--rc-text-primary, #1e293b)' }}>
-              <GraduationCap size={20} color="#6366f1" /> Cursus Académique
-            </h3>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+              <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--rc-text-primary, #1e293b)' }}>
+                <GraduationCap size={20} color="#6366f1" /> Cursus & Identité Académique
+              </h3>
+              <span style={{ fontSize: '0.75rem', fontWeight: 700, padding: '3px 8px', borderRadius: '6px', background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <ShieldCheck size={12} /> MINESUP Certifié
+              </span>
+            </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', fontSize: '0.9375rem' }}>
               <div>
                 <span style={{ color: 'var(--rc-text-secondary, #64748b)', display: 'block', fontSize: '0.8125rem' }}>
-                  Filière / Département
+                  Établissement Universitaire
                 </span>
-                <strong style={{ color: 'var(--rc-text-primary, #1e293b)' }}>{user?.filiere}</strong>
+                <strong style={{ color: 'var(--rc-text-primary, #1e293b)', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <Building size={14} color="#744a2b" />
+                  {student.universityName} ({student.universityShortName})
+                </strong>
               </div>
 
               <div>
                 <span style={{ color: 'var(--rc-text-secondary, #64748b)', display: 'block', fontSize: '0.8125rem' }}>
-                  Niveau d'études actuel
+                  Faculté / Grande École
                 </span>
-                <strong style={{ color: 'var(--rc-text-primary, #1e293b)' }}>{user?.niveau}</strong>
+                <strong style={{ color: 'var(--rc-text-primary, #1e293b)' }}>
+                  {user?.faculty || student.faculty}
+                </strong>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <div>
+                  <span style={{ color: 'var(--rc-text-secondary, #64748b)', display: 'block', fontSize: '0.8125rem' }}>
+                    Filière
+                  </span>
+                  <strong style={{ color: 'var(--rc-text-primary, #1e293b)' }}>
+                    {user?.filiereLabel || user?.filiere || student.filiere}
+                  </strong>
+                </div>
+
+                <div>
+                  <span style={{ color: 'var(--rc-text-secondary, #64748b)', display: 'block', fontSize: '0.8125rem' }}>
+                    Niveau d'études
+                  </span>
+                  <strong style={{ color: 'var(--rc-text-primary, #1e293b)' }}>
+                    {user?.niveau || student.niveau}
+                  </strong>
+                </div>
+              </div>
+
+              <div>
+                <span style={{ color: 'var(--rc-text-secondary, #64748b)', display: 'block', fontSize: '0.8125rem' }}>
+                  Matricule National
+                </span>
+                <code style={{ background: 'var(--rc-bg-subtle, #f1f5f9)', padding: '2px 8px', borderRadius: '4px', fontWeight: 700, color: '#6366f1' }}>
+                  {user?.matricule || student.matricule}
+                </code>
               </div>
 
               <div>
@@ -246,17 +326,24 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            {/* Shortcut to Notebook */}
+            {/* Quick Link to National Registration Portal */}
             <div
               style={{
                 borderTop: '1px solid var(--rc-border, #e2e8f0)',
                 paddingTop: '16px',
-                textAlign: 'center',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px',
               }}
             >
-              <Link to="/notebook" style={{ textDecoration: 'none' }}>
-                <Button variant="secondary" icon={BookMarked} style={{ width: '100%' }}>
-                  Accéder à mon Carnet Privé
+              <Link to="/register" style={{ textDecoration: 'none' }}>
+                <Button variant="outline" icon={UserCheck} style={{ width: '100%', fontSize: '0.8125rem' }}>
+                  Réaccéder au Portail d'Inscription
+                </Button>
+              </Link>
+              <Link to="/dashboard" style={{ textDecoration: 'none' }}>
+                <Button variant="secondary" icon={ArrowRight} style={{ width: '100%', fontSize: '0.8125rem' }}>
+                  Aller au Tableau de Bord
                 </Button>
               </Link>
             </div>
@@ -274,7 +361,7 @@ export default function ProfilePage() {
           }}
         >
           <h3 style={{ margin: '0 0 20px 0', fontSize: '1.25rem', fontWeight: 700, color: 'var(--rc-text-primary, #1e293b)' }}>
-            Modifier mes informations personnelles
+            Modifier mes informations académiques
           </h3>
 
           <form onSubmit={handleSave}>
@@ -308,25 +395,52 @@ export default function ProfilePage() {
               </div>
             </div>
 
-            <div style={{ marginBottom: '16px' }}>
-              <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600 }}>
-                Université ou École d'Ingénieurs au Cameroun :
-              </label>
-              <select
-                name="universityId"
-                value={formData.universityId}
-                onChange={handleChange}
-                style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--rc-border, #cbd5e1)', fontFamily: 'inherit' }}
-              >
-                {CAMEROON_UNIVERSITIES.map((uni) => (
-                  <option key={uni.id} value={uni.id}>
-                    [{uni.code}] {uni.name} ({uni.city})
-                  </option>
-                ))}
-              </select>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600 }}>
+                  Université au Cameroun :
+                </label>
+                <select
+                  name="universityId"
+                  value={formData.universityId}
+                  onChange={handleChange}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--rc-border, #cbd5e1)', fontFamily: 'inherit' }}
+                >
+                  {CAMEROON_UNIVERSITIES.map((uni) => (
+                    <option key={uni.id} value={uni.id}>
+                      [{uni.code}] {uni.name} ({uni.city})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600 }}>
+                  Faculté / Grande École :
+                </label>
+                <select
+                  name="faculty"
+                  value={formData.faculty}
+                  onChange={(e) => {
+                    const sel = currentFaculties.find((f) => f.name === e.target.value);
+                    setFormData((prev) => ({
+                      ...prev,
+                      faculty: e.target.value,
+                      facultyId: sel?.id || prev.facultyId,
+                    }));
+                  }}
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--rc-border, #cbd5e1)', fontFamily: 'inherit' }}
+                >
+                  {currentFaculties.map((fac) => (
+                    <option key={fac.id} value={fac.name}>
+                      {fac.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px', marginBottom: '16px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '16px' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600 }}>
                   Filière :
@@ -343,7 +457,7 @@ export default function ProfilePage() {
 
               <div>
                 <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600 }}>
-                  Niveau :
+                  Niveau d'études :
                 </label>
                 <select
                   name="niveau"
@@ -356,7 +470,22 @@ export default function ProfilePage() {
                   <option value="L3">Licence 3 (L3)</option>
                   <option value="M1">Master 1 (M1)</option>
                   <option value="M2">Master 2 (M2)</option>
+                  <option value="Doctorat">Doctorat / PhD</option>
                 </select>
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.875rem', fontWeight: 600 }}>
+                  Matricule :
+                </label>
+                <input
+                  type="text"
+                  name="matricule"
+                  value={formData.matricule}
+                  onChange={handleChange}
+                  required
+                  style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', border: '1px solid var(--rc-border, #cbd5e1)', fontFamily: 'inherit' }}
+                />
               </div>
             </div>
 
@@ -378,7 +507,7 @@ export default function ProfilePage() {
                 Annuler
               </Button>
               <Button type="submit" variant="primary" icon={Check}>
-                Enregistrer les modifications
+                Enregistrer & Synchroniser
               </Button>
             </div>
           </form>

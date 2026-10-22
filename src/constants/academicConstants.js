@@ -53,7 +53,12 @@ export const DEFAULT_USER = {
   email: 'yanfotsing96@gmail.com',
   universityId: 'UY1',
   universityName: 'Université de Yaoundé I',
+  universityShortName: 'UY1 Ngoa-Ekellé',
+  faculty: 'Faculté des Sciences (FS)',
+  facultyId: 'UY1_FS',
   filiere: 'Informatique',
+  filiereId: 'inf',
+  filiereLabel: 'Informatique',
   niveau: 'L2',
   matricule: '23S40192',
   status: 'Étudiant Pro',
@@ -68,6 +73,7 @@ export const DEFAULT_USER = {
     downloads: 48,
   },
 };
+
 
 export const DEFAULT_RESOURCES = [
   ...INITIAL_NATIONAL_RESOURCES.map((r) => ({

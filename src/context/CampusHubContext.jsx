@@ -77,6 +77,33 @@ export function CampusHubProvider({ children }) {
   // Global Toast Notification
   const [toastNotification, setToastNotification] = useState(null);
 
+  // Synchronize state with authUser university during render without cascading renders
+  const [prevAuthUniId, setPrevAuthUniId] = useState(authUser?.universityId);
+  if (authUser?.universityId && authUser.universityId !== prevAuthUniId) {
+    setPrevAuthUniId(authUser.universityId);
+    setSelectedUniversityId(authUser.universityId);
+  }
+
+  // Synchronize with global custom events dispatched from Registration or Profile updates
+  useEffect(() => {
+    const handleAuthChange = (e) => {
+      if (e.detail?.universityId) {
+        setSelectedUniversityId(e.detail.universityId);
+      }
+    };
+    const handleUniChange = (e) => {
+      if (e.detail?.universityId) {
+        setSelectedUniversityId(e.detail.universityId);
+      }
+    };
+    window.addEventListener('campushub:auth_changed', handleAuthChange);
+    window.addEventListener('campushub:university_changed', handleUniChange);
+    return () => {
+      window.removeEventListener('campushub:auth_changed', handleAuthChange);
+      window.removeEventListener('campushub:university_changed', handleUniChange);
+    };
+  }, []);
+
   // Synchronize localStorage
   useEffect(() => {
     try {
@@ -123,13 +150,21 @@ export function CampusHubProvider({ children }) {
     }, 4500);
   }, []);
 
-  // Switch University
+  // Switch University with two-way profile synchronization
   const setUniversity = useCallback((uniId) => {
     setSelectedUniversityId(uniId);
     const targetUni =
       uniId === 'ALL'
-        ? { shortName: 'Toutes les universités du Cameroun' }
+        ? { id: 'ALL', name: 'Réseau National Universitaire du Cameroun', shortName: 'Toutes les universités' }
         : CAMEROON_UNIVERSITIES.find((u) => u.id === uniId);
+
+    if (auth?.updateProfile && uniId !== 'ALL' && authUser?.universityId !== uniId) {
+      auth.updateProfile({
+        universityId: uniId,
+        universityName: targetUni?.name,
+        universityShortName: targetUni?.shortName,
+      });
+    }
 
     triggerToast({
       title: 'Établissement actualisé 🇨🇲',
@@ -138,7 +173,7 @@ export function CampusHubProvider({ children }) {
       }.`,
       type: 'info',
     });
-  }, [triggerToast]);
+  }, [auth, authUser?.universityId, triggerToast]);
 
   // Activate Pro Membership
   const activatePro = useCallback((planDetails) => {
@@ -222,23 +257,37 @@ export function CampusHubProvider({ children }) {
   const studentName = authUser?.fullName || authUser?.nom || authUser?.name || 'Étudiant';
   const studentMatricule = authUser?.matricule || '';
   const studentStatus = authUser?.status || (isPro ? 'Étudiant Pro' : effectiveRole);
-  const userFiliere = authUser?.filiere || authUser?.filiereId || 'Informatique';
+  const userFiliere = authUser?.filiereLabel || authUser?.filiere || 'Informatique';
+  const userFiliereId = authUser?.filiereId || 'inf';
+  const userFaculty = authUser?.faculty || selectedUniversity.faculties?.[0] || 'Faculté des Sciences (FS)';
+  const userFacultyId = authUser?.facultyId || 'UY1_FS';
+  const userNiveau = authUser?.niveau || 'L2';
 
   const student = useMemo(() => {
+    const uniId = selectedUniversity.id;
+    const uniName = selectedUniversity.name;
+    const uniShort = selectedUniversity.shortName;
+
     return {
       fullName: studentName,
       name: studentName,
+      nom: studentName,
       matricule: studentMatricule,
       status: studentStatus,
-      nationalId: authUser?.nationalId || `CM-${selectedUniversity.id}-${studentMatricule || '0000'}`,
+      nationalId: authUser?.nationalId || `CM-${uniId}-${studentMatricule || '0000'}`,
       filiere: userFiliere,
-      niveau: authUser?.niveau || 'L2',
-      universityId: selectedUniversity.id,
-      universityName: selectedUniversity.name,
-      universityShortName: selectedUniversity.shortName,
+      filiereId: userFiliereId,
+      filiereLabel: userFiliere,
+      niveau: userNiveau,
+      faculty: userFaculty,
+      facultyId: userFacultyId,
+      universityId: uniId,
+      universityName: uniName,
+      universityShortName: uniShort,
       universityCity: selectedUniversity.city,
-      department: `${selectedUniversity.shortName} · Département ${userFiliere}`,
+      department: `${uniShort} · ${userFaculty} · ${userFiliere}`,
       email: authUser?.email || '',
+      avatar: authUser?.avatar || null,
       role: effectiveRole,
       isPro,
       xp,
@@ -252,10 +301,14 @@ export function CampusHubProvider({ children }) {
     studentMatricule,
     studentStatus,
     authUser?.nationalId,
-    authUser?.niveau,
+    authUser?.avatar,
+    userNiveau,
+    userFaculty,
+    userFacultyId,
+    userFiliere,
+    userFiliereId,
     authUser?.email,
     selectedUniversity,
-    userFiliere,
     effectiveRole,
     isPro,
     xp,

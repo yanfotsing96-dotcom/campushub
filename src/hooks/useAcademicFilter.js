@@ -60,8 +60,8 @@ export function useAcademicFilter() {
 
   // 1. Profil Étudiant Structuré (Université -> Faculté -> Filière -> Niveau Exact)
   const activeFiliere = useMemo(() => {
-    return normalizeFiliere(user?.filiereId || user?.filiere || 'Informatique');
-  }, [user?.filiereId, user?.filiere]);
+    return normalizeFiliere(user?.filiereLabel || user?.filiere || user?.filiereId || 'Informatique');
+  }, [user?.filiereLabel, user?.filiere, user?.filiereId]);
 
   const rawNiveau = user?.niveau || 'L2';
   const activeNiveau = useMemo(() => {
@@ -82,8 +82,8 @@ export function useAcademicFilter() {
 
   // Faculté de rattachement
   const facultyName = useMemo(() => {
-    if (user?.facultyName) return user.facultyName;
     if (user?.faculty) return user.faculty;
+    if (user?.facultyName) return user.facultyName;
     if (['Informatique', 'Chimie', 'Physique', 'Biologie', 'Mathématiques', 'IA-Data', 'Cyber-Reseaux'].includes(activeFiliere)) {
       return 'Faculté des Sciences (FS)';
     }

@@ -33,7 +33,11 @@ const NATIONAL_PRESETS = [
   {
     label: 'Étudiant UY1 · Informatique L2',
     universityId: 'UY1',
-    filiere: 'Informatique',
+    facultyId: 'UY1_FS',
+    faculty: 'Faculté des Sciences (FS)',
+    filiere: 'inf',
+    filiereId: 'inf',
+    filiereLabel: 'Informatique',
     niveau: 'L2',
     matricule: '24S1084',
     nom: 'Fotsing',
@@ -44,7 +48,11 @@ const NATIONAL_PRESETS = [
   {
     label: 'Élève-Ingénieur ENSPY · L3',
     universityId: 'ENSPY',
-    filiere: 'Informatique',
+    facultyId: 'ENSPY_GENIE',
+    faculty: 'École Nationale Supérieure Polytechnique de Yaoundé (ENSPY)',
+    filiere: 'inf',
+    filiereId: 'inf',
+    filiereLabel: 'Génie Informatique',
     niveau: 'L3',
     matricule: '23P4092',
     nom: 'Kamga',
@@ -55,7 +63,11 @@ const NATIONAL_PRESETS = [
   {
     label: 'Étudiant Univ. Douala · IA-Data',
     universityId: 'UDLA',
-    filiere: 'IA-Data',
+    facultyId: 'UDLA_FS',
+    faculty: 'Faculté des Sciences (FS)',
+    filiere: 'inf',
+    filiereId: 'inf',
+    filiereLabel: 'IA-Data',
     niveau: 'L2',
     matricule: '24D8921',
     nom: 'Bilong',
@@ -66,7 +78,11 @@ const NATIONAL_PRESETS = [
   {
     label: 'Délégué Officiel · INF201 UY1',
     universityId: 'UY1',
-    filiere: 'Informatique',
+    facultyId: 'UY1_FS',
+    faculty: 'Faculté des Sciences (FS)',
+    filiere: 'inf',
+    filiereId: 'inf',
+    filiereLabel: 'Informatique',
     niveau: 'L2',
     matricule: '23U1084',
     nom: 'Kamga',
@@ -260,12 +276,15 @@ export default function RegisterForm({ onSubmit, onCancel, showHeaderMotto = tru
   // Apply Quick Preset
   const handleApplyPreset = (preset) => {
     const univ = CAMEROON_UNIVERSITIES.find((u) => u.id === preset.universityId) || CAMEROON_UNIVERSITIES[0];
-    const defaultFac = univ?.faculties?.[0] || 'Faculté des Sciences (FS)';
+    const defaultFac = preset.faculty || univ?.faculties?.[0] || 'Faculté des Sciences (FS)';
+    const facId = preset.facultyId || (preset.universityId === 'UY1' ? 'UY1_FS' : (preset.universityId + '_FAC'));
     setFormData((prev) => ({
       ...prev,
       universityId: preset.universityId,
+      facultyId: facId,
       faculty: defaultFac,
-      filiere: preset.filiere,
+      filiere: preset.filiere || 'inf',
+      filiereLabel: preset.filiereLabel || 'Informatique',
       niveau: preset.niveau,
       matricule: preset.matricule,
       nom: preset.nom,
@@ -400,9 +419,16 @@ export default function RegisterForm({ onSubmit, onCancel, showHeaderMotto = tru
     setLoading(true);
 
     try {
+      const selectedFacObj = INSTITUTIONS_REGISTRY.find((i) => i.id === formData.facultyId) || availableInstitutions[0];
       const payload = {
         ...formData,
         universityName: selectedUnivObj.name,
+        universityShortName: selectedUnivObj.shortName,
+        faculty: selectedFacObj?.name || formData.faculty,
+        facultyId: selectedFacObj?.id || formData.facultyId,
+        filiere: formData.filiereLabel || formData.filiere,
+        filiereId: formData.filiere,
+        filiereLabel: formData.filiereLabel || formData.filiere,
       };
 
       if (onSubmit) {

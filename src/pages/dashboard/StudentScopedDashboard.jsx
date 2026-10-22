@@ -24,13 +24,13 @@ import DynamicContentGuard from '../../components/auth/DynamicContentGuard';
 
 export default function StudentScopedDashboard() {
   const { user } = useAuth();
-  const { selectedUniversity } = useCampusHub();
+  const { student, selectedUniversity } = useCampusHub();
   const [activeTab, setActiveTab] = useState('courses'); // 'courses' | 'exams' | 'announcements'
 
-  const filiereId = user?.filiereId || user?.filiere || 'Informatique';
-  const niveau = user?.niveau || 'L2';
-  const matricule = user?.matricule || '';
-  const displayName = user?.fullName || user?.nom || 'Étudiant';
+  const filiereId = user?.filiereLabel || user?.filiere || student.filiere || 'Informatique';
+  const niveau = user?.niveau || student.niveau || 'L2';
+  const matricule = user?.matricule || student.matricule || '';
+  const displayName = user?.fullName || user?.nom || student.name || 'Étudiant';
 
   const department = useMemo(() => {
     return departmentScopeService.getDepartment(filiereId);
@@ -116,7 +116,7 @@ export default function StudentScopedDashboard() {
                 <span>Bonjour, {displayName} !</span>
               </h1>
               <p className="text-xs md:text-sm text-indigo-200/90 font-medium mt-1">
-                Portail réservé : <strong>{department.label}</strong> ({department.code}) · {selectedUniversity.name}
+                Portail réservé : <strong>{department.label}</strong> ({department.code}) · {user?.faculty ? `${user.faculty} · ` : ''}{selectedUniversity.name}
               </p>
             </div>
 
@@ -126,7 +126,7 @@ export default function StudentScopedDashboard() {
                 Matricule : {matricule}
               </span>
               <span className="px-3 py-1 rounded-xl bg-white/10 border border-white/10 text-slate-300">
-                {user?.email}
+                🇨🇲 {student.universityShortName || selectedUniversity.shortName}
               </span>
               <span className="px-3 py-1 rounded-xl bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30 flex items-center gap-1">
                 <CheckCircle2 size={12} />

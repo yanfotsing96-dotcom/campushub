@@ -1121,8 +1121,23 @@ class ExamService {
   getAvailableExams(user) {
     if (!user) return [];
     const role = normalizeRole(user.role);
-    const userFiliere = (user.filiereId || user.filiere || 'Informatique').toLowerCase();
+    const userFiliere = (user.filiereLabel || user.filiereId || user.filiere || 'Informatique').toLowerCase();
     const userNiveau = String(user.niveau || 'L2').toUpperCase();
+
+    const matchFiliereHelper = (examFil, userFil) => {
+      if (!examFil || !userFil) return false;
+      const ef = examFil.toLowerCase().trim();
+      const uf = userFil.toLowerCase().trim();
+      if (ef === uf) return true;
+      if ((ef.includes('info') || ef === 'inf' || ef.includes('log') || ef.includes('code')) &&
+          (uf.includes('info') || uf === 'inf' || uf.includes('log') || uf.includes('code'))) return true;
+      if ((ef.includes('math') || ef === 'mat') && (uf.includes('math') || uf === 'mat')) return true;
+      if ((ef.includes('phys') || ef === 'phy') && (uf.includes('phys') || uf === 'phy')) return true;
+      if ((ef.includes('chim') || ef.includes('chem') || ef === 'chm') && (uf.includes('chim') || uf.includes('chem') || uf === 'chm')) return true;
+      if (ef.includes('bio') && uf.includes('bio')) return true;
+      if ((ef.includes('data') || ef.includes('ia')) && (uf.includes('data') || uf.includes('ia'))) return true;
+      return false;
+    };
 
     return this.exams.filter((exam) => {
       // Admin ou Modérateur : accès complet
@@ -1133,13 +1148,7 @@ class ExamService {
       // Pour l'étudiant : doit être ACTIF, même filière, même niveau
       const isActive = exam.status === 'actif' || exam.status === 'active';
       const examFiliere = (exam.filiereId || '').toLowerCase();
-      const matchFiliere =
-        examFiliere === userFiliere ||
-        (userFiliere.includes('info') && examFiliere.includes('info')) ||
-        (userFiliere.includes('math') && examFiliere.includes('math')) ||
-        (userFiliere.includes('phys') && examFiliere.includes('phys')) ||
-        (userFiliere.includes('chim') && examFiliere.includes('chim')) ||
-        (userFiliere.includes('bio') && examFiliere.includes('bio'));
+      const matchFiliere = matchFiliereHelper(examFiliere, userFiliere);
 
       const examNiveau = String(exam.niveau || '').toUpperCase();
       const matchNiveau =
@@ -1170,16 +1179,27 @@ class ExamService {
 
     if (user) {
       const role = normalizeRole(user.role);
-      const userFiliere = (user.filiereId || user.filiere || 'Informatique').toLowerCase();
-      const userNiveau = user.niveau || 'L2';
+      const userFiliere = (user.filiereLabel || user.filiereId || user.filiere || 'Informatique').toLowerCase();
+      const userNiveau = String(user.niveau || 'L2').toUpperCase();
 
       if (role !== ROLES.ADMIN && role !== ROLES.MODERATOR) {
-        if ((exam.filiereId || '').toLowerCase() !== userFiliere) {
+        const ef = (exam.filiereId || '').toLowerCase().trim();
+        const uf = userFiliere.trim();
+        const matches =
+          ef === uf ||
+          ((ef.includes('info') || ef === 'inf' || ef.includes('log')) && (uf.includes('info') || uf === 'inf' || uf.includes('log'))) ||
+          ((ef.includes('math') || ef === 'mat') && (uf.includes('math') || uf === 'mat')) ||
+          ((ef.includes('phys') || ef === 'phy') && (uf.includes('phys') || uf === 'phy')) ||
+          ((ef.includes('chim') || ef.includes('chem')) && (uf.includes('chim') || uf.includes('chem'))) ||
+          (ef.includes('bio') && uf.includes('bio'));
+
+        if (!matches) {
           throw new Error(
-            `Violation de cloisonnement : Cet examen est réservé aux étudiants de la filière ${exam.filiereId}. Votre profil est assigné à ${user.filiere}.`
+            `Violation de cloisonnement : Cet examen est réservé aux étudiants de la filière ${exam.filiereId}. Votre profil est assigné à ${user.filiere || user.filiereLabel}.`
           );
         }
-        if (exam.niveau !== userNiveau) {
+        const examNiv = String(exam.niveau || '').toUpperCase();
+        if (examNiv !== userNiveau && !examNiv.includes(userNiveau)) {
           throw new Error(
             `Violation de niveau : Cet examen est réservé au niveau ${exam.niveau}. Votre niveau actuel est ${userNiveau}.`
           );

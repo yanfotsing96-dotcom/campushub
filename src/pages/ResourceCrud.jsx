@@ -25,7 +25,7 @@ export default function ResourceCrud() {
             : user.filiere === 'English'
             ? 'FA'
             : 'FS'),
-        filiereId: user.filiereId || user.filiere || 'Informatique',
+        filiereId: user.filiereLabel || user.filiere || user.filiereId || 'Informatique',
         niveau: user.niveau || 'L2',
       }
     : undefined;

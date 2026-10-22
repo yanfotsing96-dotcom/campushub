@@ -21,9 +21,14 @@ export function AuthProvider({ children }) {
     const saved = storageService.get(STORAGE_KEYS.AUTH_USER, DEFAULT_USER);
     const norm = normalizeRole(saved?.role || ROLES.STUDENT);
     const filiereId = saved?.filiereId || saved?.filiere || 'Informatique';
+    const filiereLabel = saved?.filiereLabel || saved?.filiere || 'Informatique';
     const niveau = saved?.niveau || 'L2';
     const matricule = saved?.matricule || DEFAULT_USER?.matricule || '26U1001';
-    const universityId = saved?.universityId || 'UY1';
+    const universityId = saved?.universityId || DEFAULT_USER?.universityId || 'UY1';
+    const universityName = saved?.universityName || DEFAULT_USER?.universityName || 'Université de Yaoundé I';
+    const universityShortName = saved?.universityShortName || DEFAULT_USER?.universityShortName || 'UY1';
+    const faculty = saved?.faculty || DEFAULT_USER?.faculty || 'Faculté des Sciences (FS)';
+    const facultyId = saved?.facultyId || DEFAULT_USER?.facultyId || 'UY1_FS';
     
     // Purify dynamic name: clean up any legacy hardcoded strings
     const rawName = saved?.fullName || saved?.nom || saved?.name || DEFAULT_USER?.fullName || 'Étudiant';
@@ -40,19 +45,30 @@ export function AuthProvider({ children }) {
       name: fullName,
       status,
       matricule,
-      filiere: saved?.filiere || filiereId,
+      filiere: filiereLabel,
       filiereId,
+      filiereLabel,
       niveau,
       universityId,
+      universityName,
+      universityShortName,
+      faculty,
+      facultyId,
       isPro,
       role: norm,
       roleNormalized: norm,
       roleLabel,
       scope: {
         filiereId,
+        filiere: filiereLabel,
+        filiereLabel,
         niveau,
         matricule,
         universityId,
+        universityName,
+        universityShortName,
+        faculty,
+        facultyId,
         isFullAccess: norm === ROLES.ADMIN,
       },
     };
@@ -252,12 +268,17 @@ export function AuthProvider({ children }) {
       }
     }
 
-    const filiereId = formData?.filiere || formData?.filiereId || 'Informatique';
+    const filiereId = formData?.filiereId || formData?.filiere || 'inf';
+    const filiereLabel = formData?.filiereLabel || formData?.filiere || 'Informatique';
     const niveau = formData?.niveau || 'L1';
     const matricule = formData?.matricule?.trim() || ('26U' + Math.floor(1000 + Math.random() * 9000));
     const universityId = formData?.universityId || 'UY1';
+    const universityName = formData?.universityName || 'Université de Yaoundé I';
+    const universityShortName = formData?.universityShortName || universityId;
+    const faculty = formData?.faculty || 'Faculté des Sciences (FS)';
+    const facultyId = formData?.facultyId || 'FS';
     const prenom = formData?.prenom?.trim() || '';
-    const nomFamille = formData?.nom?.trim() || 'Étudiant UY1';
+    const nomFamille = formData?.nom?.trim() || 'Étudiant';
     const nomComplet = prenom ? `${prenom} ${nomFamille}` : nomFamille;
     const username = formData?.username?.trim() || formData?.email?.split('@')[0] || `etudiant_${Date.now()}`;
     const roleLabel = ROLE_LABELS[targetRole] || 'Étudiant';
@@ -273,22 +294,34 @@ export function AuthProvider({ children }) {
       username,
       email: formData.email,
       matricule,
-      filiere: filiereId,
+      filiere: filiereLabel,
       filiereId,
+      filiereLabel,
       niveau,
       universityId,
-      bio: formData.bio || `Étudiant inscrit en ${filiereId} (${niveau}) sur la plateforme CampusHub Cameroun.`,
+      universityName,
+      universityShortName,
+      faculty,
+      facultyId,
+      bio: formData.bio || `Étudiant inscrit en ${filiereLabel} (${niveau}) à l'${universityName}.`,
       avatar: formData.avatar || (formData.photo instanceof Blob ? URL.createObjectURL(formData.photo) : formData.photo) || null,
       adminJustification: formData.justification || null,
-      badges: ['🚀 Nouvel Arrivant', '📚 CampusHub Cameroun', `🎓 Filière ${filiereId}`],
+      badges: ['🇨🇲 CampusHub Cameroun', '🚀 Inscription Certifiée MINESUP', `🎓 ${filiereLabel} · ${niveau}`],
       role: targetRole,
       roleNormalized: targetRole,
       roleLabel,
+      isPro: true,
       scope: {
         filiereId,
+        filiere: filiereLabel,
+        filiereLabel,
         niveau,
         matricule,
         universityId,
+        universityName,
+        universityShortName,
+        faculty,
+        facultyId,
         isFullAccess: targetRole === ROLES.ADMIN,
       },
       stats: {
@@ -316,10 +349,17 @@ export function AuthProvider({ children }) {
     setIsAuthenticated(true);
     storageService.set(STORAGE_KEYS.AUTH_USER, newUser);
     try {
-      localStorage.setItem('campushub_user_filiere', filiereId);
+      localStorage.setItem('campushub_selected_university', universityId);
+      localStorage.setItem('campushub_user_filiere', filiereLabel);
       localStorage.setItem('campushub_user_niveau', niveau);
+      localStorage.setItem('campushub_user_faculty', faculty);
+      localStorage.setItem('campushub_user_matricule', matricule);
       localStorage.setItem('campushub_user_role', roleLabel);
+      localStorage.setItem('campushub_user_is_pro', 'true');
       window.dispatchEvent(new CustomEvent('campushub:auth_changed', { detail: newUser }));
+      window.dispatchEvent(new CustomEvent('campushub:scope_updated', { detail: newUser.scope }));
+      window.dispatchEvent(new CustomEvent('campushub:university_changed', { detail: { universityId, universityName, universityShortName } }));
+      window.dispatchEvent(new CustomEvent('campushub:exams_updated'));
     } catch (e) {
       console.warn('Storage notification error:', e);
     }
@@ -335,9 +375,14 @@ export function AuthProvider({ children }) {
       const isPro = partialUpdates.isPro !== undefined ? partialUpdates.isPro : prev.isPro;
       const status = partialUpdates.status || (targetRole === ROLES.STUDENT && isPro ? 'Étudiant Pro' : roleLabel);
       const matricule = partialUpdates.matricule || prev.matricule;
-      const filiereId = partialUpdates.filiere || partialUpdates.filiereId || prev.filiereId || 'Informatique';
+      const filiereId = partialUpdates.filiereId || partialUpdates.filiere || prev.filiereId || 'inf';
+      const filiereLabel = partialUpdates.filiereLabel || partialUpdates.filiere || prev.filiereLabel || 'Informatique';
       const niveau = partialUpdates.niveau || prev.niveau || 'L2';
       const universityId = partialUpdates.universityId || prev.universityId || 'UY1';
+      const universityName = partialUpdates.universityName || prev.universityName || 'Université de Yaoundé I';
+      const universityShortName = partialUpdates.universityShortName || prev.universityShortName || universityId;
+      const faculty = partialUpdates.faculty || prev.faculty || 'Faculté des Sciences (FS)';
+      const facultyId = partialUpdates.facultyId || prev.facultyId || 'FS';
 
       const updated = {
         ...prev,
@@ -347,10 +392,15 @@ export function AuthProvider({ children }) {
         name: fullName,
         status,
         matricule,
-        filiere: filiereId,
+        filiere: filiereLabel,
         filiereId,
+        filiereLabel,
         niveau,
         universityId,
+        universityName,
+        universityShortName,
+        faculty,
+        facultyId,
         isPro,
         role: targetRole,
         roleNormalized: targetRole,
@@ -358,16 +408,31 @@ export function AuthProvider({ children }) {
         scope: {
           ...prev.scope,
           filiereId,
+          filiere: filiereLabel,
+          filiereLabel,
           niveau,
           matricule,
           universityId,
+          universityName,
+          universityShortName,
+          faculty,
+          facultyId,
           isFullAccess: targetRole === ROLES.ADMIN,
         },
       };
       storageService.set(STORAGE_KEYS.AUTH_USER, updated);
       try {
+        localStorage.setItem('campushub_selected_university', universityId);
+        localStorage.setItem('campushub_user_filiere', filiereLabel);
+        localStorage.setItem('campushub_user_niveau', niveau);
+        localStorage.setItem('campushub_user_faculty', faculty);
+        localStorage.setItem('campushub_user_matricule', matricule);
         localStorage.setItem('campushub_user_role', roleLabel);
         localStorage.setItem('campushub_user_is_pro', isPro ? 'true' : 'false');
+        window.dispatchEvent(new CustomEvent('campushub:auth_changed', { detail: updated }));
+        window.dispatchEvent(new CustomEvent('campushub:scope_updated', { detail: updated.scope }));
+        window.dispatchEvent(new CustomEvent('campushub:university_changed', { detail: { universityId, universityName, universityShortName } }));
+        window.dispatchEvent(new CustomEvent('campushub:exams_updated'));
       } catch (err) {
         console.warn('Erreur stockage profil :', err);
       }
